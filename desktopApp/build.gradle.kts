@@ -21,8 +21,13 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.yoke.gainful"
+            packageName = "Gainful"
             packageVersion = "1.0.0"
+            description = "Gainful Desktop Application"
+            macOS {
+                bundleID = "com.yoke.gainful"
+                iconFile.set(project.file("src/main/resources/icon.icns"))
+            }
         }
     }
 }

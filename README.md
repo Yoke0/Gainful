@@ -91,7 +91,12 @@ Gainful/
 
 # 热重载（开发推荐）
 ./gradlew :desktopApp:hotRun --auto
+
+# 构建 macOS 安装包（DMG）
+./gradlew :desktopApp:packageDmg
 ```
+
+> macOS DMG 输出路径: `desktopApp/build/compose/binaries/main/dmg/`
 
 ### iOS
 

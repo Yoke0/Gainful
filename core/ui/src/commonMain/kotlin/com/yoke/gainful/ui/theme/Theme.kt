@@ -2,30 +2,29 @@ package com.yoke.gainful.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GainGreen,
+    primary = Gold,
     secondary = NeutralGray,
     error = GainRed,
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = GainGreen,
-    secondary = NeutralGray,
-    error = GainRed,
+    background = Background,
+    surface = Surface,
+    surfaceVariant = Surface2,
+    onPrimary = Background,
+    onSecondary = TextPrimary,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
+    outline = Border,
 )
 
 @Composable
 fun GainfulTheme(
-    darkTheme: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = DarkColorScheme,
         content = content,
     )
 }

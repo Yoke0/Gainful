@@ -91,7 +91,12 @@ Gainful/
 
 # Hot reload (recommended for development)
 ./gradlew :desktopApp:hotRun --auto
+
+# Build macOS installer (DMG)
+./gradlew :desktopApp:packageDmg
 ```
+
+> macOS DMG output path: `desktopApp/build/compose/binaries/main/dmg/`
 
 ### iOS
 
