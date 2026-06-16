@@ -8,6 +8,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,22 +28,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import gainful.shared.generated.resources.Res
+import gainful.shared.generated.resources.app_icon
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun SplashScreen(onSplashFinished: () -> Unit) {
@@ -71,7 +68,13 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             verticalArrangement = Arrangement.Center,
         ) {
             // App icon
-            AppIcon(modifier = Modifier.size(88.dp))
+            Image(
+                painter = painterResource(Res.drawable.app_icon),
+                contentDescription = "Gainful",
+                modifier = Modifier
+                    .size(88.dp)
+                    .clip(RoundedCornerShape(22.dp)),
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -100,101 +103,6 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             // Loading dots
             LoadingDots()
         }
-    }
-}
-
-@Composable
-private fun AppIcon(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        val s = size.width
-        val bgRadius = s * 0.22f
-
-        // Background with gradient
-        drawRoundRect(
-            brush = Brush.linearGradient(
-                colors = listOf(Color(0xFF0A1120), Color(0xFF070B15)),
-                start = Offset(0f, 0f),
-                end = Offset(s, s),
-            ),
-            cornerRadius = CornerRadius(bgRadius),
-            size = Size(s, s),
-        )
-
-        // Border
-        drawRoundRect(
-            color = Color(0xFF1C2640),
-            cornerRadius = CornerRadius(bgRadius),
-            size = Size(s, s),
-            style = Stroke(width = s * 0.016f),
-        )
-
-        // Scale factor from 512 viewBox
-        val scale = s / 512f
-
-        // Gold letter G
-        val gPath = Path().apply {
-            // M 175 170 H 330 C 355 170 370 185 370 210 V 260 H 300 V 220 H 240 V 300 H 330 V 280 H 370 V 320 C 370 345 355 360 330 360 H 175 C 150 360 135 345 135 320 V 210 C 135 185 150 170 175 170 Z
-            moveTo(175f * scale, 170f * scale)
-            lineTo(330f * scale, 170f * scale)
-            cubicTo(355f * scale, 170f * scale, 370f * scale, 185f * scale, 370f * scale, 210f * scale)
-            lineTo(370f * scale, 260f * scale)
-            lineTo(300f * scale, 260f * scale)
-            lineTo(300f * scale, 220f * scale)
-            lineTo(240f * scale, 220f * scale)
-            lineTo(240f * scale, 300f * scale)
-            lineTo(330f * scale, 300f * scale)
-            lineTo(330f * scale, 280f * scale)
-            lineTo(370f * scale, 280f * scale)
-            lineTo(370f * scale, 320f * scale)
-            cubicTo(370f * scale, 345f * scale, 355f * scale, 360f * scale, 330f * scale, 360f * scale)
-            lineTo(175f * scale, 360f * scale)
-            cubicTo(150f * scale, 360f * scale, 135f * scale, 345f * scale, 135f * scale, 320f * scale)
-            lineTo(135f * scale, 210f * scale)
-            cubicTo(135f * scale, 185f * scale, 150f * scale, 170f * scale, 175f * scale, 170f * scale)
-            close()
-        }
-        drawPath(gPath, color = Gold)
-
-        // Green growth arrow
-        val arrowPath = Path().apply {
-            // M 380 340 L 420 300 L 405 300 L 420 285 L 435 300 L 420 315 L 420 300 L 380 340 Z
-            moveTo(380f * scale, 340f * scale)
-            lineTo(420f * scale, 300f * scale)
-            lineTo(405f * scale, 300f * scale)
-            lineTo(420f * scale, 285f * scale)
-            lineTo(435f * scale, 300f * scale)
-            lineTo(420f * scale, 315f * scale)
-            lineTo(420f * scale, 300f * scale)
-            lineTo(380f * scale, 340f * scale)
-            close()
-        }
-        drawPath(arrowPath, color = GainGreen)
-
-        // Arrow tail decoration line (rotated rect at (412, 284) by -45deg)
-        val cx = 412f * scale
-        val cy = 284f * scale
-        val hw = 2f * scale  // half width
-        val hh = 9f * scale  // half height
-        val angle = Math.toRadians(-45.0).toFloat()
-        val cosA = kotlin.math.cos(angle)
-        val sinA = kotlin.math.sin(angle)
-
-        fun rotPoint(lx: Float, ly: Float): Offset {
-            return Offset(cx + lx * cosA - ly * sinA, cy + lx * sinA + ly * cosA)
-        }
-
-        val tailPath = Path().apply {
-            val p1 = rotPoint(-hw, -hh)
-            val p2 = rotPoint(hw, -hh)
-            val p3 = rotPoint(hw, hh)
-            val p4 = rotPoint(-hw, hh)
-            moveTo(p1.x, p1.y)
-            lineTo(p2.x, p2.y)
-            lineTo(p3.x, p3.y)
-            lineTo(p4.x, p4.y)
-            close()
-        }
-        drawPath(tailPath, color = GainGreen)
     }
 }
 

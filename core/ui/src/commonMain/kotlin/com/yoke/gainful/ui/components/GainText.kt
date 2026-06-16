@@ -4,6 +4,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
 
@@ -25,7 +26,7 @@ fun GainText(
     }
 
     Text(
-        text = "$sign${"%.2f".format(value)}%",
+        text = "$sign${value.formatTwoDecimals()}%",
         color = color,
         modifier = modifier,
     )

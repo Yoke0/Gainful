@@ -47,6 +47,8 @@ kotlin {
             implementation(projects.core.domain)
             implementation(projects.core.ui)
             implementation(projects.core.navigation)
+            implementation(projects.core.database)
+            implementation(projects.core.network)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.holdings)
             implementation(projects.feature.transactions)
@@ -60,6 +62,9 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

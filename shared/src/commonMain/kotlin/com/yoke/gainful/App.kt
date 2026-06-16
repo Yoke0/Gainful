@@ -29,9 +29,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yoke.gainful.di.initKoin
 import com.yoke.gainful.feature.dashboard.DashboardScreen
 import com.yoke.gainful.feature.holdings.HoldingsScreen
 import com.yoke.gainful.feature.settings.SettingsScreen
+import com.yoke.gainful.feature.transactions.AddTransactionScreen
+import com.yoke.gainful.feature.transactions.AddTransactionViewModel
 import com.yoke.gainful.feature.transactions.TransactionsScreen
 import com.yoke.gainful.ui.components.DashboardIcon
 import com.yoke.gainful.ui.components.HoldingsIcon
@@ -43,18 +46,12 @@ import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
-
-private enum class BottomNavItem(
-    val label: String,
-) {
-    Dashboard("仪表盘"),
-    Records("记录"),
-    Holdings("持仓"),
-    Settings("设置"),
-}
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App() {
+    initKoin()
+
     GainfulTheme {
         var showSplash by remember { mutableStateOf(true) }
 
@@ -75,6 +72,7 @@ fun App() {
 @Composable
 private fun MainContent() {
     var selectedTab by remember { mutableIntStateOf(0) }
+    var showAddTransaction by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -94,50 +92,70 @@ private fun MainContent() {
             ) { tab ->
                 when (tab) {
                     0 -> DashboardScreen()
-                    1 -> TransactionsScreen()
+                    1 -> TransactionsScreen(onAddTransaction = { showAddTransaction = true })
                     2 -> HoldingsScreen()
                     3 -> SettingsScreen()
                 }
             }
+
+            if (showAddTransaction) {
+                val viewModel = koinViewModel<AddTransactionViewModel>()
+                AddTransactionScreen(
+                    viewModel = viewModel,
+                    todayDate = viewModel.todayDateString(),
+                    onBack = { showAddTransaction = false },
+                )
+            }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(Surface.copy(alpha = 0.88f))
-                .padding(horizontal = 4.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BottomNavItem.entries.forEachIndexed { index, item ->
-                val selected = selectedTab == index
-                Column(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .clickable { selectedTab = index }
-                        .then(
-                            if (selected) Modifier.background(GoldDim) else Modifier
+        if (!showAddTransaction) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Surface.copy(alpha = 0.88f))
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BottomNavItem.entries.forEachIndexed { index, item ->
+                    val selected = selectedTab == index
+                    Column(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable { selectedTab = index }
+                            .then(
+                                if (selected) Modifier.background(GoldDim) else Modifier
+                            )
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        when (index) {
+                            0 -> DashboardIcon(isSelected = selected)
+                            1 -> RecordsIcon(isSelected = selected)
+                            2 -> HoldingsIcon(isSelected = selected)
+                            3 -> SettingsIcon(isSelected = selected)
+                        }
+                        Text(
+                            text = item.label,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if (selected) Gold else TextMuted,
                         )
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    when (index) {
-                        0 -> DashboardIcon(isSelected = selected)
-                        1 -> RecordsIcon(isSelected = selected)
-                        2 -> HoldingsIcon(isSelected = selected)
-                        3 -> SettingsIcon(isSelected = selected)
                     }
-                    Text(
-                        text = item.label,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = if (selected) Gold else TextMuted,
-                    )
                 }
             }
         }
     }
+}
+
+private enum class BottomNavItem(
+    val label: String,
+) {
+    Dashboard("仪表盘"),
+    Records("记录"),
+    Holdings("持仓"),
+    Settings("设置"),
 }

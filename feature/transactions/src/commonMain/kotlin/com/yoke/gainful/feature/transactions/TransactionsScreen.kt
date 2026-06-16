@@ -49,7 +49,9 @@ private data class TradeItem(
 )
 
 @Composable
-fun TransactionsScreen() {
+fun TransactionsScreen(
+    onAddTransaction: () -> Unit = {},
+) {
     var selectedFilter by remember { mutableStateOf("all") }
     var expandedIndex by remember { mutableStateOf(-1) }
 
@@ -88,10 +90,25 @@ fun TransactionsScreen() {
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 FilterButton("全部", selectedFilter == "all") { selectedFilter = "all" }
                 FilterButton("盈利", selectedFilter == "profit") { selectedFilter = "profit" }
                 FilterButton("亏损", selectedFilter == "loss") { selectedFilter = "loss" }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(Gold)
+                        .clickable(onClick = onAddTransaction)
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                ) {
+                    Text(
+                        text = "+",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Background,
+                    )
+                }
             }
         }
 

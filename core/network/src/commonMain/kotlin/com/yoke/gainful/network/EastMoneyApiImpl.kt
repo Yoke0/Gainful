@@ -58,13 +58,16 @@ internal class EastMoneyApiImpl(
     }
 
     override suspend fun search(query: String, count: Int): List<SearchItemDto> {
+        println("[EastMoneyApi] search query=$query, url=$SEARCH_URL")
         val resp: SearchResponse = client.get(SEARCH_URL) {
             parameter("input", query)
             parameter("type", 14)
             parameter("token", SEARCH_TOKEN)
             parameter("count", count)
         }.body()
-        return resp.codeTable?.data ?: emptyList()
+        val data = resp.codeTable?.data
+        println("[EastMoneyApi] search results=${data?.size ?: 0}")
+        return data ?: emptyList()
     }
 
     private fun HttpRequestBuilder.quoteParams(secId: String? = null, secIds: List<String>? = null) {

@@ -9,8 +9,7 @@ import com.yoke.gainful.database.model.TransactionEntity
 
 @Database(
     entities = [AssetEntity::class, TransactionEntity::class],
-    version = 1,
-    exportSchema = false,
+    version = 1
 )
 abstract class GainfulDatabase : RoomDatabase() {
     abstract fun assetDao(): AssetDao
