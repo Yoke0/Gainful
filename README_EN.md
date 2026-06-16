@@ -11,7 +11,7 @@ Gainful is a revenue tracking and financial analysis tool for personal users, bu
 **MVI (Model-View-Intent)** pattern with unidirectional data flow.
 
 ```
-User Action → Intent → Reducer → State → UI
+User Action → Intent → ViewModel → State → UI
      ↑                                    │
      └────────────────────────────────────┘
 ```
@@ -31,7 +31,7 @@ Gainful/
 ├── core/                      # Core modules
 │   ├── common/                # Utilities, extensions, constants
 │   ├── data/                  # Data layer interfaces (Repository contracts)
-│   ├── database/              # Local data source (SQLDelight)
+│   ├── database/              # Local data source (Room)
 │   ├── network/               # Remote data source (Ktor)
 │   ├── domain/                # Domain layer (UseCases)
 │   ├── model/                 # Data models (DTOs, Entities)
@@ -53,10 +53,11 @@ Gainful/
 | Category | Technology | Purpose |
 |----------|------------|---------|
 | Network | Ktor | HTTP client, multi-platform support |
-| Storage | SQLDelight | Cross-platform database, type-safe SQL |
+| Storage | Room | Cross-platform database, type-safe ORM |
 | DI | Koin | Lightweight dependency injection |
 | Navigation | Navigation3 | Compose cross-platform navigation |
 | Image | Coil | Native image loading for Compose |
+| DateTime | kotlinx-datetime | Cross-platform date/time handling |
 | UI | Compose Multiplatform | Declarative cross-platform UI |
 
 ### Key Versions

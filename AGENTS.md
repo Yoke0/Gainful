@@ -3,6 +3,7 @@
 ## Project
 
 Kotlin Multiplatform + Compose Multiplatform app targeting Android, iOS, and Desktop (JVM).
+Architecture: **MVI** (Model-View-Intent), Clean Architecture layering.
 
 ## Modules
 
@@ -12,9 +13,10 @@ Kotlin Multiplatform + Compose Multiplatform app targeting Android, iOS, and Des
 - `core/` — Core modules (Clean Architecture)
   - `common/` — Utilities, extensions, constants
   - `data/` — Repository interfaces (contracts)
-  - `data-local/` — Local data source (SQLDelight)
-  - `data-remote/` — Remote data source (Ktor)
+  - `database/` — Local data source (Room, BundledSQLiteDriver)
+  - `network/` — Remote data source (Ktor)
   - `domain/` — UseCases
+  - `model/` — Data models (DTOs, Entities)
   - `ui/` — Common UI components, theme
   - `navigation/` — Navigation config (Navigation3)
   - `testing/` — Test utilities, Fake implementations
@@ -54,6 +56,7 @@ Run tests after making changes to `shared/`. There is no CI; local verification 
 - Kotlin 2.4.0, Gradle 9.1.0, AGP 9.0.1
 - Compose Multiplatform 1.11.1, Material3 1.11.0-alpha07
 - JVM target: 11
+- kotlinx-datetime
 
 ## Conventions
 
@@ -66,8 +69,9 @@ Run tests after making changes to `shared/`. There is no CI; local verification 
 
 ## Dependency Rules
 
-- `feature/` depends only on `core/domain/` and `core/ui/`, never on `core/data/`
-- `core/data/` defines interfaces; `core/data-local/` and `core/data-remote/` provide implementations
+- `feature/` depends only on `core/domain/`, `core/model/`, and `core/ui/`
+- `core/domain/` depends on `core/data/` and `core/model/`
+- `core/data/` defines interfaces; `core/database/` and `core/network/` provide implementations
 - `core/testing/` provides Fake implementations for testing only
 
 ## Git Commit Convention

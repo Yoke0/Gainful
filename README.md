@@ -11,7 +11,7 @@ Gainful 是一款面向个人用户的收益追踪与财务分析工具，基于
 采用 **MVI (Model-View-Intent)** 架构，单向数据流驱动 UI 更新。
 
 ```
-User Action → Intent → Reducer → State → UI
+User Action → Intent → ViewModel → State → UI
      ↑                                    │
      └────────────────────────────────────┘
 ```
@@ -31,7 +31,7 @@ Gainful/
 ├── core/                      # 核心模块
 │   ├── common/                # 通用工具、扩展函数、常量
 │   ├── data/                  # 数据层接口定义（Repository 接口）
-│   ├── database/              # 本地数据源（SQLDelight）
+│   ├── database/              # 本地数据源（Room）
 │   ├── network/               # 远程数据源（Ktor）
 │   ├── domain/                # 领域层（UseCase）
 │   ├── model/                 # 数据模型（DTO、Entity）
@@ -53,10 +53,11 @@ Gainful/
 | 类别 | 技术 | 用途 |
 |------|------|------|
 | 网络请求 | Ktor | HTTP 客户端，支持多平台 |
-| 本地存储 | SQLDelight | 跨平台数据库，类型安全 SQL |
+| 本地存储 | Room | 跨平台数据库，类型安全 ORM |
 | 依赖注入 | Koin | 轻量级 DI 框架 |
 | 导航 | Navigation3 | Compose 跨平台导航 |
 | 图片加载 | Coil | Compose 原生图片加载 |
+| 日期时间 | kotlinx-datetime | 跨平台日期时间处理 |
 | UI 框架 | Compose Multiplatform | 跨平台声明式 UI |
 
 ### 关键版本
