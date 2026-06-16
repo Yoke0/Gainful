@@ -5,5 +5,4 @@ data class Holding(
     val assetId: String,
     val quantity: Double,
     val averageCost: Double,
-    val currency: String,
 )

@@ -1,20 +1,28 @@
 package com.yoke.gainful.data.model
 
-import com.yoke.gainful.model.SearchResult
+import com.yoke.gainful.model.Asset
 import com.yoke.gainful.network.model.SearchItemDto
 
-fun SearchItemDto.toSearchResult(): SearchResult? {
+fun SearchItemDto.toAsset(): Asset? {
     val code = code ?: return null
     val name = name ?: return null
     val market = market?.toIntOrNull() ?: return null
     val quoteId = quoteId ?: return null
-    return SearchResult(
+    val innerCode = innerCode ?: return null
+    return Asset(
+        innerCode = innerCode,
         code = code,
         name = name,
         pinYin = pinYin.orEmpty(),
-        market = market,
-        type = typeName.orEmpty(),
-        quoteId = quoteId,
+        id = id.orEmpty(),
+        jys = jys.orEmpty(),
         classify = classify.orEmpty(),
+        marketType = marketType.orEmpty(),
+        typeName = typeName.orEmpty(),
+        securityType = securityType.orEmpty(),
+        market = market,
+        typeUS = typeUS.orEmpty(),
+        quoteId = quoteId,
+        unifiedCode = unifiedCode.orEmpty(),
     )
 }

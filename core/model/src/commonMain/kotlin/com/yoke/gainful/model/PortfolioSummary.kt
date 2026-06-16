@@ -5,5 +5,4 @@ data class PortfolioSummary(
     val totalCost: Double,
     val totalGain: Double,
     val totalGainPercent: Double,
-    val currency: String,
 )

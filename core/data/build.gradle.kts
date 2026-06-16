@@ -15,6 +15,7 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.common)
             implementation(projects.core.network)
+            implementation(projects.core.database)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
         }
