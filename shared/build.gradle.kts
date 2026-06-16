@@ -41,6 +41,17 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
         }
         commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(projects.core.model)
+            implementation(projects.core.data)
+            implementation(projects.core.domain)
+            implementation(projects.core.ui)
+            implementation(projects.core.navigation)
+            implementation(projects.feature.dashboard)
+            implementation(projects.feature.holdings)
+            implementation(projects.feature.transactions)
+            implementation(projects.feature.settings)
+
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -52,6 +63,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(projects.core.testing)
         }
     }
 }
