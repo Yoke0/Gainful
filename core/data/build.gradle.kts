@@ -14,6 +14,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.model)
             implementation(projects.core.common)
+            implementation(projects.core.network)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
         }

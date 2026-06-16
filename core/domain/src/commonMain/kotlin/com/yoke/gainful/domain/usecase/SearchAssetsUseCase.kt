@@ -1,12 +1,12 @@
 package com.yoke.gainful.domain.usecase
 
-import com.yoke.gainful.data.remote.MarketDataSource
-import com.yoke.gainful.model.Asset
+import com.yoke.gainful.data.repository.MarketRepository
+import com.yoke.gainful.model.SearchResult
 
 class SearchAssetsUseCase(
-    private val marketDataSource: MarketDataSource,
+    private val marketRepository: MarketRepository,
 ) {
-    suspend operator fun invoke(query: String): List<Asset> {
-        return marketDataSource.searchAssets(query)
+    suspend operator fun invoke(query: String): List<SearchResult> {
+        return marketRepository.search(query)
     }
 }
