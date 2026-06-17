@@ -20,3 +20,6 @@ data object Settings : Screen
 
 @Serializable
 data object AddTransaction : Screen
+
+@Serializable
+data class StockDetail(val code: String) : Screen

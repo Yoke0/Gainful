@@ -2,6 +2,7 @@ package com.yoke.gainful.feature.holdings
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,9 @@ private data class Holding(
 )
 
 @Composable
-fun HoldingsScreen() {
+fun HoldingsScreen(
+    onStockClick: (String) -> Unit = {},
+) {
     val holdings = remember {
         listOf(
             Holding("NVDA", "英伟达", 100, 128.50, 158.20, 2970.0, 23.1, "up"),
@@ -105,7 +108,7 @@ fun HoldingsScreen() {
             modifier = Modifier.padding(bottom = 12.dp),
         )
 
-        HoldingList(holdings)
+        HoldingList(holdings, onStockClick)
 
         Spacer(modifier = Modifier.height(80.dp))
     }
@@ -323,18 +326,24 @@ private fun HeatmapItem(
 }
 
 @Composable
-private fun HoldingList(holdings: List<Holding>) {
+private fun HoldingList(
+    holdings: List<Holding>,
+    onStockClick: (String) -> Unit,
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         holdings.forEach { holding ->
-            HoldingCard(holding)
+            HoldingCard(holding, onStockClick)
         }
     }
 }
 
 @Composable
-private fun HoldingCard(holding: Holding) {
+private fun HoldingCard(
+    holding: Holding,
+    onStockClick: (String) -> Unit,
+) {
     val isPositive = holding.pnl >= 0
     val change = holding.currentPrice - holding.avgCost
     val strokeColor = if (holding.direction == "up") GainGreen else GainRed
@@ -344,6 +353,7 @@ private fun HoldingCard(holding: Holding) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(Card)
+            .clickable { onStockClick(holding.code) }
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,

@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import com.yoke.gainful.di.initKoin
 import com.yoke.gainful.feature.dashboard.DashboardScreen
 import com.yoke.gainful.feature.holdings.HoldingsScreen
+import com.yoke.gainful.feature.holdings.StockDetailScreen
 import com.yoke.gainful.feature.settings.SettingsScreen
 import com.yoke.gainful.feature.transactions.AddTransactionScreen
 import com.yoke.gainful.feature.transactions.AddTransactionViewModel
@@ -20,8 +21,8 @@ import com.yoke.gainful.navigation.AddTransaction
 import com.yoke.gainful.navigation.Dashboard
 import com.yoke.gainful.navigation.GainfulNavGraph
 import com.yoke.gainful.navigation.Holdings
-import com.yoke.gainful.navigation.Screen
 import com.yoke.gainful.navigation.Settings
+import com.yoke.gainful.navigation.StockDetail
 import com.yoke.gainful.navigation.Transactions
 import com.yoke.gainful.ui.theme.GainfulTheme
 import org.koin.compose.viewmodel.koinViewModel
@@ -41,22 +42,28 @@ fun App() {
             if (isSplash) {
                 SplashScreen(onSplashFinished = { showSplash = false })
             } else {
-                GainfulNavGraph { screen, onNavigate ->
+                GainfulNavGraph { screen, onNavigate, onBack ->
                     when (screen) {
                         Dashboard -> DashboardScreen()
                         Transactions -> TransactionsScreen(
                             onAddTransaction = { onNavigate(AddTransaction) },
                         )
-                        Holdings -> HoldingsScreen()
+                        Holdings -> HoldingsScreen(
+                            onStockClick = { code -> onNavigate(StockDetail(code)) },
+                        )
                         Settings -> SettingsScreen()
                         AddTransaction -> {
                             val viewModel = koinViewModel<AddTransactionViewModel>()
                             AddTransactionScreen(
                                 viewModel = viewModel,
                                 todayDate = viewModel.todayDateString(),
-                                onBack = { onNavigate(Dashboard) },
+                                onBack = onBack,
                             )
                         }
+                        is StockDetail -> StockDetailScreen(
+                            code = screen.code,
+                            onBack = onBack,
+                        )
                     }
                 }
             }

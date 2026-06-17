@@ -1,5 +1,8 @@
 package com.yoke.gainful.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,10 +22,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.yoke.gainful.ui.components.DashboardIcon
 import com.yoke.gainful.ui.components.HoldingsIcon
@@ -49,6 +52,8 @@ private val tabs = listOf(
     TabItem(Settings, "设置") { SettingsIcon(isSelected = it) },
 )
 
+private val tabScreens = tabs.map { it.screen }
+
 private val navConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
@@ -57,32 +62,25 @@ private val navConfig = SavedStateConfiguration {
             subclass(Holdings::class, Holdings.serializer())
             subclass(Settings::class, Settings.serializer())
             subclass(AddTransaction::class, AddTransaction.serializer())
+            subclass(StockDetail::class, StockDetail.serializer())
         }
     }
 }
 
 @Composable
 fun GainfulNavGraph(
-    screenContent: @Composable (Screen, onNavigate: (Screen) -> Unit) -> Unit,
+    screenContent: @Composable (Screen, onNavigate: (Screen) -> Unit, onBack: () -> Unit) -> Unit,
 ) {
     val backStack = rememberNavBackStack(navConfig, Dashboard)
-    val currentScreen = (backStack.lastOrNull() ?: Dashboard) as Screen
-    val isBottomBarVisible = tabs.any { it.screen == currentScreen }
+    val isBottomBarVisible = (backStack.lastOrNull() ?: Dashboard) in tabScreens
 
-    val onNavigate: (Screen) -> Unit = { target ->
-        if (target == currentScreen) {
-            // Already on this screen — do nothing
-        } else if (tabs.any { it.screen == target } && isBottomBarVisible) {
-            // Tab-to-tab: replace current tab
-            val idx = backStack.indexOfLast { it == target }
-            if (idx >= 0) {
-                repeat(backStack.size - 1 - idx) { backStack.removeAt(backStack.lastIndex) }
-            } else {
-                backStack.removeAt(backStack.lastIndex)
-                backStack.add(target)
-            }
+    val onNavigate: (Screen) -> Unit = lambda@{ target ->
+        val top = backStack.lastOrNull() ?: Dashboard
+        if (target == top) return@lambda
+
+        if (target in tabScreens) {
+            backStack[backStack.lastIndex] = target
         } else {
-            // Push a new destination (e.g., AddTransaction)
             backStack.add(target)
         }
     }
@@ -103,29 +101,28 @@ fun GainfulNavGraph(
             backStack = backStack,
             onBack = onBack,
             entryProvider = entryProvider {
-                entry<Dashboard> { screenContent(Dashboard, onNavigate) }
-                entry<Transactions> { screenContent(Transactions, onNavigate) }
-                entry<Holdings> { screenContent(Holdings, onNavigate) }
-                entry<Settings> { screenContent(Settings, onNavigate) }
-                entry<AddTransaction> { screenContent(AddTransaction, onNavigate) }
+                entry<Dashboard> { screenContent(Dashboard, onNavigate, onBack) }
+                entry<Transactions> { screenContent(Transactions, onNavigate, onBack) }
+                entry<Holdings> { screenContent(Holdings, onNavigate, onBack) }
+                entry<Settings> { screenContent(Settings, onNavigate, onBack) }
+                entry<AddTransaction> { screenContent(AddTransaction, onNavigate, onBack) }
+                entry<StockDetail> { key -> screenContent(StockDetail(key.code), onNavigate, onBack) }
             },
             modifier = Modifier.weight(1f),
         )
 
         if (isBottomBarVisible) {
-            BottomBar(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate,
-            )
+            BottomBar(backStack, onNavigate)
         }
     }
 }
 
 @Composable
 private fun BottomBar(
-    currentScreen: Screen,
+    backStack: MutableList<NavKey>,
     onNavigate: (Screen) -> Unit,
 ) {
+    val currentScreen = (backStack.lastOrNull() ?: Dashboard) as Screen
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -143,9 +140,7 @@ private fun BottomBar(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
                     .clickable { onNavigate(tab.screen) }
-                    .then(
-                        if (selected) Modifier.background(GoldDim) else Modifier
-                    )
+                    .then(if (selected) Modifier.background(GoldDim) else Modifier)
                     .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
