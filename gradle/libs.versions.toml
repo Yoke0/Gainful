@@ -22,6 +22,7 @@ kotlinx-serialization = "1.11.0"
 room = "2.8.4"
 sqlite-bundled = "3.53.2.0"
 androidx-sqlite = "2.6.2"
+multiplatform-nav3-ui = "1.1.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -62,6 +63,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 sqlite-bundled = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-bundled" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
+jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "multiplatform-nav3-ui" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

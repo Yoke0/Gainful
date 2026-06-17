@@ -21,7 +21,7 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
   - `database/` — Room with BundledSQLiteDriver (cross-platform)
   - `network/` — Ktor HTTP client (expect/actual per platform)
   - `domain/` — UseCases
-  - `navigation/` — Screen definitions (currently manual tab nav, not Navigation3)
+  - `navigation/` — Navigation config (Navigation3)
   - `testing/` — Test utilities, Fake implementations
 - `feature/` — Feature modules (per business)
   - `dashboard/`, `holdings/`, `transactions/`, `settings/`
