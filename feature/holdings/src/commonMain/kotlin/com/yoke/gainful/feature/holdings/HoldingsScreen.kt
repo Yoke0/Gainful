@@ -1,5 +1,6 @@
 package com.yoke.gainful.feature.holdings
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,42 +23,59 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yoke.gainful.common.extensions.formatCompact
+import com.yoke.gainful.common.extensions.formatDecimal
+import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import kotlin.math.PI
+import kotlin.math.sin
 
-private data class Position(
+private data class Holding(
+    val code: String,
     val name: String,
-    val tag: String,
-    val profit: Int,
-    val returnPercent: Double,
+    val shares: Int,
+    val avgCost: Double,
+    val currentPrice: Double,
+    val pnl: Double,
+    val pnlPct: Double,
+    val direction: String,
 )
 
 @Composable
 fun HoldingsScreen() {
-    val positions = remember {
+    val holdings = remember {
         listOf(
-            Position("NVDA 英伟达", "科技", 21892, 18.2),
-            Position("META 元宇宙", "科技", 29705, 15.6),
-            Position("AMD 超威", "半导体", 11440, 12.4),
-            Position("AAPL 苹果", "消费电子", 9360, 11.8),
-            Position("VTI 全市场ETF", "指数", 9425, 10.5),
-            Position("JPM 摩根大通", "金融", 3744, 9.2),
-            Position("LLY 礼来", "医疗", 2496, 8.0),
-            Position("XOM 埃克森美孚", "能源", 1248, 6.8),
-            Position("INTC 英特尔", "芯片", -3224, -4.8),
+            Holding("NVDA", "英伟达", 100, 128.50, 158.20, 2970.0, 23.1, "up"),
+            Holding("AAPL", "苹果", 50, 175.30, 192.40, 855.0, 9.8, "up"),
+            Holding("META", "Meta", 35, 352.80, 398.50, 1600.0, 13.0, "up"),
+            Holding("AMD", "超威", 80, 95.20, 112.80, 1408.0, 18.5, "up"),
         )
+    }
+
+    val totalValue = remember(holdings) {
+        holdings.sumOf { it.shares * it.currentPrice }
+    }
+    val totalPnl = remember(holdings) { holdings.sumOf { it.pnl } }
+    val totalPnlPct = remember(holdings, totalValue) {
+        val totalCost = holdings.sumOf { it.shares * it.avgCost }
+        if (totalCost > 0) (totalPnl / totalCost) * 100 else 0.0
     }
 
     Column(
@@ -66,69 +85,66 @@ fun HoldingsScreen() {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "持仓",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = TextPrimary,
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(GainGreen),
-                )
-                Text(
-                    text = "已同步",
-                    fontSize = 12.sp,
-                    color = TextSecondary,
-                )
-            }
-        }
+        PortfolioHeader()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Allocation Card
-        AllocationCard()
+        TotalCard(totalValue, totalPnl, totalPnlPct)
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Holdings Detail Card
-        HoldingsDetailCard(positions)
+        HeatmapCard(holdings, totalValue)
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Text(
+            text = "持仓明细",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextSecondary,
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
+
+        HoldingList(holdings)
 
         Spacer(modifier = Modifier.height(80.dp))
     }
 }
 
 @Composable
-private fun AllocationCard() {
-    val segments = listOf(
-        "科技" to 38f,
-        "金融" to 18f,
-        "消费" to 20f,
-        "医疗" to 10f,
-        "能源" to 8f,
-        "其他" to 6f,
-    )
-    val segmentColors = listOf(
-        Gold,
-        GainGreen,
-        Color(0xFF4285F4),
-        Color(0xFFAB47BC),
-        Color(0xFFF57C00),
-        Color(0xFF546E7A),
-    )
+private fun PortfolioHeader() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "持仓",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = TextPrimary,
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(GainGreen),
+            )
+            Text(
+                text = "已同步",
+                fontSize = 12.sp,
+                color = TextSecondary,
+            )
+        }
+    }
+}
 
+@Composable
+private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,69 +153,61 @@ private fun AllocationCard() {
             .padding(20.dp),
     ) {
         Text(
-            text = "资产配置",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextPrimary,
-            modifier = Modifier.padding(bottom = 12.dp),
+            text = "总资产",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = TextMuted,
+            letterSpacing = 0.5.sp,
         )
-
-        // Allocation bar
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = totalValue.formatDecimal(2),
+            fontSize = 28.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = TextPrimary,
+            fontFamily = FontFamily.Monospace,
+            letterSpacing = (-0.5).sp,
+        )
+        Spacer(modifier = Modifier.height(6.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp)
-                .clip(RoundedCornerShape(6.dp)),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            segments.forEachIndexed { index, (label, percentage) ->
-                Box(
-                    modifier = Modifier
-                        .weight(percentage)
-                        .height(32.dp)
-                        .background(segmentColors[index]),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "$label ${percentage.toInt()}%",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Legend
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            segments.forEachIndexed { index, (label, percentage) ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(segmentColors[index]),
-                    )
-                    Text(
-                        text = "$label $percentage%",
-                        fontSize = 12.sp,
-                        color = TextSecondary,
-                    )
-                }
-            }
+            Text(
+                text = if (totalPnl >= 0) "+${totalPnl.formatDecimal(2)}" else totalPnl.formatDecimal(2),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Monospace,
+                color = if (totalPnl >= 0) GainGreen else GainRed,
+            )
+            Text(
+                text = totalPnlPct.formatSigned() + "%",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Monospace,
+                color = if (totalPnlPct >= 0) GainGreen else GainRed,
+            )
+            Text(
+                text = "今日",
+                fontSize = 14.sp,
+                color = TextMuted,
+            )
         }
     }
 }
 
 @Composable
-private fun HoldingsDetailCard(positions: List<Position>) {
+private fun HeatmapCard(holdings: List<Holding>, totalValue: Double) {
+    val gradientColors = listOf(
+        listOf(Color(0xFFC8A34E), Color(0xFFA8862E)),
+        listOf(Color(0xFF4285F4), Color(0xFF2A5FC1)),
+        listOf(Color(0xFF1DB954), Color(0xFF148A3E)),
+        listOf(Color(0xFFAB47BC), Color(0xFF7B2D8B)),
+    )
+
+    val sorted = remember(holdings) {
+        holdings.sortedByDescending { it.shares * it.currentPrice }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,98 +217,273 @@ private fun HoldingsDetailCard(positions: List<Position>) {
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
         ) {
             Text(
-                text = "持仓明细",
-                fontSize = 14.sp,
+                text = "投资比重",
+                fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
+                color = TextMuted,
+                letterSpacing = 0.6.sp,
             )
+            Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(GoldDim)
-                    .padding(horizontal = 10.dp, vertical = 2.dp),
-            ) {
-                Text(
-                    text = "${positions.size} 个标的",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Gold,
-                )
-            }
+                    .weight(1f)
+                    .height(1.dp)
+                    .background(Border),
+            )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            sorted.chunked(2).forEach { row ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    row.forEachIndexed { idx, holding ->
+                        val mktVal = holding.shares * holding.currentPrice
+                        val pct = (mktVal / totalValue) * 100
+                        val colors = gradientColors[(sorted.indexOf(holding)) % gradientColors.size]
 
-        positions.forEach { position ->
-            PositionRow(position)
-            if (position != positions.last()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(Border.copy(alpha = 0.03f)),
-                )
+                        HeatmapItem(
+                            name = holding.name,
+                            code = holding.code,
+                            pct = pct,
+                            amount = mktVal,
+                            gradientColors = colors,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    // Fill empty slot if odd number
+                    if (row.size < 2) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun PositionRow(position: Position) {
-    val isPositive = position.profit >= 0
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+private fun HeatmapItem(
+    name: String,
+    code: String,
+    pct: Double,
+    amount: Double,
+    gradientColors: List<Color>,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .height(80.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(Brush.linearGradient(gradientColors)),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = position.name,
+                text = name,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
             )
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(GoldDim)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-            ) {
+            Column {
                 Text(
-                    text = position.tag,
-                    fontSize = 10.sp,
-                    color = Gold,
+                    text = "${pct.formatDecimal(1)}%",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color.White,
+                )
+                Text(
+                    text = amount.formatCompact(),
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color.White.copy(alpha = 0.7f),
                 )
             }
         }
+        Text(
+            text = code,
+            fontSize = 11.sp,
+            fontFamily = FontFamily.Monospace,
+            color = Color.White.copy(alpha = 0.5f),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(8.dp),
+        )
+    }
+}
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = if (isPositive) "+${position.profit}" else "${position.profit}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = if (isPositive) GainGreen else GainRed,
-            )
-            Text(
-                text = "${if (isPositive) "+" else ""}${position.returnPercent}%",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = if (isPositive) GainGreen else GainRed,
-            )
+@Composable
+private fun HoldingList(holdings: List<Holding>) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        holdings.forEach { holding ->
+            HoldingCard(holding)
         }
     }
 }
 
+@Composable
+private fun HoldingCard(holding: Holding) {
+    val isPositive = holding.pnl >= 0
+    val change = holding.currentPrice - holding.avgCost
+    val strokeColor = if (holding.direction == "up") GainGreen else GainRed
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(Card)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = holding.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                )
+                Text(
+                    text = holding.code,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextMuted,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = holding.currentPrice.formatDecimal(2),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextPrimary,
+                )
+                Text(
+                    text = change.formatSigned(),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = FontFamily.Monospace,
+                    color = if (isPositive) GainGreen else GainRed,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                MetaText("市值", (holding.shares * holding.currentPrice).formatCompact())
+                MetaText(
+                    "盈亏",
+                    "${if (isPositive) "+" else ""}${holding.pnl.formatCompact()}",
+                    if (isPositive) GainGreen else GainRed,
+                )
+                MetaText("股数", "${holding.shares}")
+            }
+        }
+
+        Sparkline(
+            direction = holding.direction,
+            modifier = Modifier
+                .width(80.dp)
+                .height(48.dp),
+            strokeColor = strokeColor,
+        )
+    }
+}
+
+@Composable
+private fun MetaText(label: String, value: String, valueColor: Color = TextPrimary) {
+    Row {
+        Text(
+            text = "$label ",
+            fontSize = 10.sp,
+            color = TextMuted,
+        )
+        Text(
+            text = value,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = FontFamily.Monospace,
+            color = valueColor,
+        )
+    }
+}
+
+@Composable
+private fun Sparkline(
+    direction: String,
+    modifier: Modifier = Modifier,
+    strokeColor: Color = GainGreen,
+) {
+    val points = remember(direction) {
+        generateSparkline(direction)
+    }
+
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val stepX = w / (points.size - 1).toFloat()
+
+        val linePath = Path()
+        points.forEachIndexed { index, value ->
+            val x = index * stepX
+            val y = h * value.toFloat()
+            if (index == 0) {
+                linePath.moveTo(x, y)
+            } else {
+                linePath.lineTo(x, y)
+            }
+        }
+
+        drawPath(
+            path = linePath,
+            color = strokeColor,
+            style = Stroke(
+                width = 2f,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round,
+            ),
+        )
+    }
+}
+
+private fun generateSparkline(direction: String): List<Double> {
+    val points = mutableListOf<Double>()
+    val seed = direction.hashCode().toLong()
+    var y = 0.5
+    for (i in 0..20) {
+        val t = i / 20.0
+        val wave = sin(t * PI * 3) * 0.08 + (((seed + i * 7) % 100) / 100.0 - 0.5) * 0.06
+        y = if (direction == "up") {
+            0.8 - t * 0.5 + wave
+        } else {
+            0.2 + t * 0.5 + wave
+        }
+        y = y.coerceIn(0.05, 0.95)
+        points.add(y)
+    }
+    return points
+}
