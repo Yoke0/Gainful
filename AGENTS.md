@@ -4,25 +4,27 @@
 
 Kotlin Multiplatform + Compose Multiplatform app targeting Android, iOS, and Desktop (JVM).
 Architecture: **MVI** (Model-View-Intent), Clean Architecture layering.
+UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
 
 ## Modules
 
 - `shared/` — KMP library. Shared UI and logic live here.
   - `commonMain/` — platform-agnostic code (all targets)
-  - `androidMain/`, `iosMain/`, `jvmMain/` — platform-specific `expect`/`actual` implementations
+  - `androidMain/` — Android platform implementation
+  - `iosMain/` — iOS platform implementation
+  - `jvmMain/` — Desktop platform implementation
 - `core/` — Core modules (Clean Architecture)
   - `common/` — Utilities, extensions, constants
-  - `data/` — Repository interfaces (contracts)
-  - `database/` — Local data source (Room, BundledSQLiteDriver)
-  - `network/` — Remote data source (Ktor)
-  - `domain/` — UseCases
   - `model/` — Data models (DTOs, Entities)
-  - `ui/` — Common UI components, theme
-  - `navigation/` — Navigation config (Navigation3)
+  - `ui/` — Common UI components, theme colors
+  - `data/` — Repository interfaces + offline implementations
+  - `database/` — Room with BundledSQLiteDriver (cross-platform)
+  - `network/` — Ktor HTTP client (expect/actual per platform)
+  - `domain/` — UseCases
+  - `navigation/` — Screen definitions (currently manual tab nav, not Navigation3)
   - `testing/` — Test utilities, Fake implementations
 - `feature/` — Feature modules (per business)
   - `dashboard/`, `holdings/`, `transactions/`, `settings/`
-- `build-logic/` — Convention plugins
 - `androidApp/` — Android entry point (`MainActivity`)
 - `desktopApp/` — Desktop entry point (`main.kt`, main class `com.yoke.gainful.MainKt`)
 - `iosApp/` — iOS project (Xcode, Swift). Uses `MainViewController.kt` from `shared/iosMain`
@@ -37,7 +39,7 @@ Architecture: **MVI** (Model-View-Intent), Clean Architecture layering.
 ./gradlew :desktopApp:run                  # standard
 ./gradlew :desktopApp:hotRun --auto        # hot reload
 
-# iOS — open in Xcode
+# iOS — open in Xcode (requires TEAM_ID in iosApp/Configuration/Config.xcconfig)
 open iosApp/iosApp.xcodeproj
 ```
 
@@ -53,10 +55,16 @@ Run tests after making changes to `shared/`. There is no CI; local verification 
 
 ## Key Versions
 
-- Kotlin 2.4.0, Gradle 9.1.0, AGP 9.0.1
-- Compose Multiplatform 1.11.1, Material3 1.11.0-alpha07
+- Kotlin 2.4.0
+- Gradle 9.1.0
+- AGP 9.2.1
+- Compose Multiplatform 1.11.1
+- Material3 1.12.0-alpha01
 - JVM target: 11
-- kotlinx-datetime
+- compileSdk/targetSdk: 37, minSdk: 24
+- Ktor 3.5.0
+- Room 2.8.4
+- Koin 4.2.2
 
 ## Conventions
 
@@ -73,6 +81,7 @@ Run tests after making changes to `shared/`. There is no CI; local verification 
 - `core/domain/` depends on `core/data/` and `core/model/`
 - `core/data/` defines interfaces; `core/database/` and `core/network/` provide implementations
 - `core/testing/` provides Fake implementations for testing only
+- `shared/` is the aggregator — depends on all `core/` and `feature/` modules
 
 ## Git Commit Convention
 
@@ -83,7 +92,8 @@ Strictly adhere to the **Conventional Commits** format for all code diffs or tas
 
 ### 2. Allowed Types & Scopes
 - **Types**: `feat` (feature), `fix` (bug fix), `refactor` (code rewrite), `chore` (build/deps), `test`, `docs`, `perf`, `style`.
-- **Android Scopes**: `ui`, `compose`, `auth`, `network`, `database`, `viewmodel`, `gradle`, `deps`, `navigation`, `di`.
+- **Scopes**: `ui`, `compose`, `auth`, `network`, `database`, `viewmodel`, `gradle`, `deps`, `navigation`, `di`
+  - `dashboard`, `holdings`, `transactions`, `settings`, `shared`, `core`, `feature`
 
 ### 3. Rules
 - **Imperative Mood**: Use present tense (e.g., "add", not "added").
@@ -92,12 +102,15 @@ Strictly adhere to the **Conventional Commits** format for all code diffs or tas
 - **Output Only**: Return **only** the raw commit message text. No explanations, no markdown blocks.
 
 ### 4. Quick Examples
-- `feat(auth): add Google Sign-In button to LoginActivity`
-- `fix(network): resolve NullPointerException in OkHttpClient callback`
-- `chore(deps): bump AGP version to 8.2.0`
+- `feat(dashboard): add portfolio summary card`
+- `fix(network): handle timeout on East Money API`
+- `chore(deps): bump AGP version to 9.2.1`
 
 ## Gotchas
 
 - `local.properties` is gitignored — SDK path must be set per machine
 - Android tests use `androidHostTest` source set (not the usual `androidTest`)
 - Configuration cache is enabled — Gradle will re-run if scripts change
+- Room schemas stored in `core/database/schemas/` — checked in for migration tracking
+- Ktor HTTP client uses `expect`/`actual` — platform engines: OkHttp (Android), Darwin (iOS), Java (JVM)
+- `initKoin()` is called in both `App.kt` (Compose) and `MainActivity.kt` (Android) — don't double-init
