@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,10 +27,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.CardHover
 import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
@@ -38,35 +38,19 @@ import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
 
-private data class TradeItem(
-    val code: String,
-    val name: String,
-    val type: String,
-    val price: Double,
-    val volume: Int,
-    val amount: Double,
-    val commission: Double,
-)
-
 @Composable
 fun TransactionsScreen(
+    viewModel: TransactionsViewModel,
     onAddTransaction: () -> Unit = {},
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var selectedFilter by remember { mutableStateOf("all") }
     var expandedIndex by remember { mutableStateOf(-1) }
 
-    val trades = remember {
-        listOf(
-            TradeItem("NVDA", "英伟达 (NVIDIA)", "买入", 128.50, 100, 12900.0, 50.0),
-            TradeItem("AAPL", "苹果 (Apple)", "卖出", 175.30, 50, 8700.0, 25.0),
-            TradeItem("600519", "贵州茅台", "买入", 155.00, 40, 6250.0, 10.0),
-        )
-    }
-
     val filteredTrades = when (selectedFilter) {
-        "profit" -> trades.filter { it.type == "卖出" }
-        "loss" -> trades.filter { it.type == "买入" }
-        else -> trades
+        "buy" -> uiState.transactions.filter { it.type == TransactionType.BUY }
+        "sell" -> uiState.transactions.filter { it.type == TransactionType.SELL }
+        else -> uiState.transactions
     }
 
     Column(
@@ -76,7 +60,6 @@ fun TransactionsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -93,8 +76,8 @@ fun TransactionsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 FilterButton("全部", selectedFilter == "all") { selectedFilter = "all" }
-                FilterButton("盈利", selectedFilter == "profit") { selectedFilter = "profit" }
-                FilterButton("亏损", selectedFilter == "loss") { selectedFilter = "loss" }
+                FilterButton("买入", selectedFilter == "buy") { selectedFilter = "buy" }
+                FilterButton("卖出", selectedFilter == "sell") { selectedFilter = "sell" }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(18.dp))
@@ -114,7 +97,6 @@ fun TransactionsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Trade count
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -142,7 +124,6 @@ fun TransactionsScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Trade list
         filteredTrades.forEachIndexed { index, trade ->
             TradeCard(
                 trade = trade,
@@ -178,12 +159,13 @@ private fun FilterButton(text: String, isActive: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun TradeCard(
-    trade: TradeItem,
+    trade: TransactionItem,
     isExpanded: Boolean,
     onClick: () -> Unit,
 ) {
-    val profit = if (trade.type == "买入") -trade.amount else trade.amount
-    val isPositive = profit >= 0
+    val isSell = trade.type == TransactionType.SELL
+    val isDividend = trade.type == TransactionType.DIVIDEND
+    val isPositive = isSell || isDividend
 
     Column(
         modifier = Modifier
@@ -192,7 +174,6 @@ private fun TradeCard(
             .background(Card)
             .clickable(onClick = onClick),
     ) {
-        // Main row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -225,14 +206,13 @@ private fun TradeCard(
                     color = if (isPositive) GainGreen else GainRed,
                 )
                 Text(
-                    text = "\u00A5${trade.amount.toInt()} | \u00A5${trade.commission.toInt()}",
+                    text = "\u00A5${trade.amount.toInt()} | \u00A5${trade.fee.toInt()}",
                     fontSize = 11.sp,
                     color = TextMuted,
                 )
             }
         }
 
-        // Expanded details
         if (isExpanded) {
             Column(
                 modifier = Modifier
@@ -240,19 +220,18 @@ private fun TradeCard(
                     .background(Background.copy(alpha = 0.4f))
                     .padding(16.dp),
             ) {
-                DetailRow("类型", trade.type)
+                DetailRow("类型", trade.typeLabel)
                 DetailRow("成交价", "\u00A5${trade.price}")
-                DetailRow("成交量", "${trade.volume} 股")
+                DetailRow("数量", "${trade.quantity.toInt()} 股")
                 DetailRow("金额", "\u00A5${trade.amount.toInt()}")
-                DetailRow("手续费", "\u00A5${trade.commission.toInt()}")
-                DetailRow("盈亏", if (isPositive) "+${trade.amount.toInt()}" else "-${trade.amount.toInt()}")
+                DetailRow("手续费", "\u00A5${trade.fee.toInt()}")
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TagChip(
-                        text = trade.type,
-                        isGreen = trade.type == "买入",
+                        text = trade.typeLabel,
+                        isGreen = trade.type == TransactionType.BUY,
                     )
                     TagChip(
                         text = trade.code,

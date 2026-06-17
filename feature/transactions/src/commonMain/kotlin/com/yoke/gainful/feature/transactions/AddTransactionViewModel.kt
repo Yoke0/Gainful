@@ -128,7 +128,7 @@ class AddTransactionViewModel(
                     fee = 0.0,
                     timestamp = timestamp,
                 )
-                addTransactionUseCase(transaction)
+                addTransactionUseCase(transaction, asset)
             } else {
                 val amount = state.amount.toDoubleOrNull() ?: return false
                 if (amount <= 0) return false
@@ -144,7 +144,7 @@ class AddTransactionViewModel(
                     fee = fee,
                     timestamp = timestamp,
                 )
-                addTransactionUseCase(transaction)
+                addTransactionUseCase(transaction, asset)
             }
             _uiState.update { it.copy(saved = true) }
             true

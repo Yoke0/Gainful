@@ -17,6 +17,7 @@ import com.yoke.gainful.feature.settings.SettingsScreen
 import com.yoke.gainful.feature.transactions.AddTransactionScreen
 import com.yoke.gainful.feature.transactions.AddTransactionViewModel
 import com.yoke.gainful.feature.transactions.TransactionsScreen
+import com.yoke.gainful.feature.transactions.TransactionsViewModel
 import com.yoke.gainful.navigation.AddTransaction
 import com.yoke.gainful.navigation.Dashboard
 import com.yoke.gainful.navigation.GainfulNavGraph
@@ -45,9 +46,13 @@ fun App() {
                 GainfulNavGraph { screen, onNavigate, onBack ->
                     when (screen) {
                         Dashboard -> DashboardScreen()
-                        Transactions -> TransactionsScreen(
-                            onAddTransaction = { onNavigate(AddTransaction) },
-                        )
+                        Transactions -> {
+                            val viewModel = koinViewModel<TransactionsViewModel>()
+                            TransactionsScreen(
+                                viewModel = viewModel,
+                                onAddTransaction = { onNavigate(AddTransaction) },
+                            )
+                        }
                         Holdings -> HoldingsScreen(
                             onStockClick = { code -> onNavigate(StockDetail(code)) },
                         )
