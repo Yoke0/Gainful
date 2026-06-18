@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 class AddTransactionViewModel(
     private val searchAssetsUseCase: SearchAssetsUseCase,
@@ -63,17 +65,6 @@ class AddTransactionViewModel(
         _uiState.update {
             it.copy(
                 showSearch = !it.showSearch,
-                searchQuery = "",
-                suggestions = emptyList(),
-                showSuggestions = false,
-            )
-        }
-    }
-
-    fun onCollapseSearch() {
-        _uiState.update {
-            it.copy(
-                showSearch = false,
                 searchQuery = "",
                 suggestions = emptyList(),
                 showSuggestions = false,
@@ -192,7 +183,6 @@ class AddTransactionViewModel(
                 val fee = when (state.type) {
                     TransactionType.BUY -> amount - marketValue
                     TransactionType.SELL -> marketValue - amount
-                    else -> 0.0
                 }
                 if (fee < 0) FieldError.FEE else null
             }
@@ -226,15 +216,12 @@ class AddTransactionViewModel(
         if (state.fieldError != null) return false
 
         val asset = state.selectedAsset ?: return false
+        val tradeDateMs = state.date.toTradeDateMs()
 
         if (state.type == TransactionType.DIVIDEND) {
             val amount = state.amount.toDoubleOrNull() ?: return false
-            val timestamp = kotlin.time.Clock.System.now().toEpochMilliseconds()
-            val id = buildString {
-                append(timestamp)
-                append('-')
-                repeat(8) { append(('a'..'z').random()) }
-            }
+            val timestamp = Clock.System.now().toEpochMilliseconds()
+            val id = Uuid.random().toString()
             val transaction = Transaction(
                 id = id,
                 assetId = asset.unifiedCode.ifBlank { asset.code },
@@ -242,6 +229,7 @@ class AddTransactionViewModel(
                 quantity = 0.0,
                 price = 0.0,
                 amount = amount,
+                tradeDate = tradeDateMs,
                 timestamp = timestamp,
             )
             addTransactionUseCase(transaction)
@@ -252,12 +240,8 @@ class AddTransactionViewModel(
         val price = state.price.toDoubleOrNull() ?: return false
         val qty = state.quantity.toDoubleOrNull() ?: return false
 
-        val timestamp = kotlin.time.Clock.System.now().toEpochMilliseconds()
-        val id = buildString {
-            append(timestamp)
-            append('-')
-            repeat(8) { append(('a'..'z').random()) }
-        }
+        val timestamp = Clock.System.now().toEpochMilliseconds()
+        val id = Uuid.random().toString()
         val transaction = Transaction(
             id = id,
             assetId = asset.unifiedCode.ifBlank { asset.code },
@@ -265,14 +249,26 @@ class AddTransactionViewModel(
             quantity = qty,
             price = price,
             amount = amount,
+            tradeDate = tradeDateMs,
             timestamp = timestamp,
         )
         addTransactionUseCase(transaction)
         return true
     }
 
+    private fun String.toTradeDateMs(): Long {
+        return try {
+            val parts = split("-")
+            val date = kotlinx.datetime.LocalDate(parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
+            val epochDays = date.toEpochDays()
+            epochDays * 86_400_000L
+        } catch (_: Exception) {
+            Clock.System.now().toEpochMilliseconds()
+        }
+    }
+
     private fun todayDateString(): String {
-        val now = kotlin.time.Clock.System.now()
+        val now = Clock.System.now()
         val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
         return today.toString()
     }

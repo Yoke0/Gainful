@@ -78,21 +78,25 @@ fun TransactionsScreen(
     val divCount = uiState.transactions.count { it.type == TransactionType.DIVIDEND }
 
     val groups = remember(filteredTrades) {
-        filteredTrades.groupBy { getTimeGroup(it.timestamp) }
+        filteredTrades.groupBy { getTimeGroup(it.tradeDate) }
     }
     val groupOrder = listOf("今天", "最近7天", "本月", "更早")
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var deleteTarget by remember { mutableStateOf<TransactionItem?>(null) }
+    val showDeleteDialog = remember { mutableStateOf(false) }
+    val deleteTarget = remember { mutableStateOf<TransactionItem?>(null) }
 
-    if (showDeleteDialog && deleteTarget != null) {
+    if (showDeleteDialog.value && deleteTarget.value != null) {
         DeleteConfirmDialog(
-            transaction = deleteTarget!!,
+            transaction = deleteTarget.value!!,
             onConfirm = {
-                viewModel.deleteTransaction(deleteTarget!!.id)
-                deleteTarget = null
+                viewModel.deleteTransaction(deleteTarget.value!!.id)
+                deleteTarget.value = null
+                showDeleteDialog.value = false
             },
-            onDismiss = {},
+            onDismiss = {
+                showDeleteDialog.value = false
+                deleteTarget.value = null
+            },
         )
     }
 
@@ -166,7 +170,8 @@ fun TransactionsScreen(
                         TradeCard(
                             trade = trade,
                             onLongPress = {
-                                deleteTarget = trade
+                                deleteTarget.value = trade
+                                showDeleteDialog.value = true
                             },
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -269,8 +274,8 @@ private fun TradeCard(
     val isBuy = trade.type == TransactionType.BUY
     val isSell = trade.type == TransactionType.SELL
 
-    var isPressed by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isPressed) 0.97f else 1f, label = "scale")
+    val isPressed = remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (isPressed.value) 0.97f else 1f, label = "scale")
 
     val typeColor = when {
         isBuy -> GainGreen
@@ -288,7 +293,7 @@ private fun TradeCard(
         else -> "股息"
     }
     val amountPrefix = if (isBuy) "-" else "+"
-    val dateStr = Instant.fromEpochMilliseconds(trade.timestamp)
+    val dateStr = Instant.fromEpochMilliseconds(trade.tradeDate)
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .date
         .toString()
@@ -298,14 +303,17 @@ private fun TradeCard(
             .fillMaxWidth()
             .scale(scale)
             .clip(RoundedCornerShape(10.dp))
-            .background(if (isPressed) Card.copy(alpha = 0.8f) else Card)
-            .border(1.dp, if (isPressed) GainRed.copy(alpha = 0.5f) else Border, RoundedCornerShape(10.dp))
+            .background(if (isPressed.value) Card.copy(alpha = 0.8f) else Card)
+            .border(1.dp, if (isPressed.value) GainRed.copy(alpha = 0.5f) else Border, RoundedCornerShape(10.dp))
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
+                        isPressed.value = true
                         tryAwaitRelease()
+                        isPressed.value = false
                     },
                     onLongPress = {
+                        isPressed.value = false
                         onLongPress()
                     },
                 )

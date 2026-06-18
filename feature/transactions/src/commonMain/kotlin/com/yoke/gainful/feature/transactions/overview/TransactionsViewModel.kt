@@ -40,6 +40,7 @@ class TransactionsViewModel(
                             quantity = tx.quantity,
                             amount = tx.amount,
                             fee = tx.fee,
+                            tradeDate = tx.tradeDate,
                             timestamp = tx.timestamp,
                         )
                     }
@@ -74,6 +75,7 @@ data class TransactionItem(
     val quantity: Double,
     val amount: Double,
     val fee: Double,
+    val tradeDate: Long,
     val timestamp: Long,
 ) {
     val displayAmount: Double get() = when (type) {

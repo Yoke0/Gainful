@@ -173,13 +173,13 @@ private fun AddTransactionHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "\u2039",
+                text = "‹",
                 fontSize = 22.sp,
                 color = TextSecondary,
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "\u8FD4\u56DE",
+                text = "返回",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextSecondary,
@@ -187,7 +187,7 @@ private fun AddTransactionHeader(
         }
 
         Text(
-            text = "\u65B0\u589E\u4EA4\u6613",
+            text = "新增交易",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = TextPrimary,
@@ -201,7 +201,7 @@ private fun AddTransactionHeader(
                 .padding(horizontal = 18.dp, vertical = 6.dp),
         ) {
             Text(
-                text = "\u4FDD\u5B58",
+                text = "保存",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = Background,
@@ -220,8 +220,8 @@ private fun TypeSelector(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         TypeButton(
-            label = "\u4E70\u5165",
-            icon = "\uD83D\uDCC8",
+            label = "买入",
+            icon = "📈",
             isSelected = selectedType == TransactionType.BUY,
             activeColor = GainGreen,
             activeBackground = GreenDim,
@@ -229,8 +229,8 @@ private fun TypeSelector(
             onClick = { onTypeSelected(TransactionType.BUY) },
         )
         TypeButton(
-            label = "\u5356\u51FA",
-            icon = "\uD83D\uDCC9",
+            label = "卖出",
+            icon = "📉",
             isSelected = selectedType == TransactionType.SELL,
             activeColor = GainRed,
             activeBackground = RedDim,
@@ -238,8 +238,8 @@ private fun TypeSelector(
             onClick = { onTypeSelected(TransactionType.SELL) },
         )
         TypeButton(
-            label = "\u80A1\u606F",
-            icon = "\uD83D\uDCB5",
+            label = "股息",
+            icon = "💵",
             isSelected = selectedType == TransactionType.DIVIDEND,
             activeColor = Gold,
             activeBackground = GoldDim,
@@ -298,7 +298,7 @@ private fun AssetSelectorSection(
     onAssetSelectedFromHolding: (HoldingDisplay) -> Unit,
     onAssetCleared: () -> Unit,
 ) {
-    SectionLabel("\u6807\u7684\u8D44\u4EA7")
+    SectionLabel("标的资产")
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -359,7 +359,7 @@ private fun StockPlaceholder(
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
-            text = "\u5DF2\u9009\uFF1A\u65E0",
+            text = "已选：无",
             fontSize = 15.sp,
             color = TextMuted,
         )
@@ -404,7 +404,7 @@ private fun SelectedStockInfo(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "\u2715",
+                text = "✕",
                 fontSize = 12.sp,
                 color = TextMuted,
             )
@@ -428,7 +428,7 @@ private fun SearchToggleButton(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = if (isExpanded) "\u2715" else "\uD83D\uDD0D",
+            text = if (isExpanded) "✕" else "🔍",
             fontSize = 20.sp,
             color = TextSecondary,
         )
@@ -455,7 +455,7 @@ private fun AssetSearchExpandable(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "\uD83D\uDD0D",
+                text = "🔍",
                 fontSize = 18.sp,
                 color = TextMuted,
             )
@@ -473,7 +473,7 @@ private fun AssetSearchExpandable(
                 decorationBox = { innerTextField ->
                     if (query.isBlank()) {
                         Text(
-                            text = "\u641C\u7D22\u80A1\u7968\u540D\u79F0\u6216\u4EE3\u7801\u2026",
+                            text = "搜索股票名称或代码…",
                             fontSize = 15.sp,
                             color = TextMuted,
                         )
@@ -491,7 +491,7 @@ private fun AssetSearchExpandable(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "\u2715",
+                        text = "✕",
                         fontSize = 12.sp,
                         color = TextMuted,
                     )
@@ -530,7 +530,7 @@ private fun AssetSearchExpandable(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "\u672A\u627E\u5230\u5339\u914D\u7684\u80A1\u7968",
+                    text = "未找到匹配的股票",
                     fontSize = 15.sp,
                     color = TextMuted,
                 )
@@ -591,7 +591,7 @@ private fun SuggestionItem(
                     if (isHolding) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "\u6301\u4ED3",
+                            text = "持仓",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
                             color = Gold,
@@ -627,7 +627,7 @@ private fun HoldingsQuickSelect(
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "\u5DF2\u6709\u6301\u4ED3",
+                text = "已有持仓",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextMuted,
@@ -689,7 +689,7 @@ private fun HoldingChip(
             color = TextSecondary,
         )
         Text(
-            text = "${holding.quantity.formatQuantity()} \u80A1",
+            text = "${holding.quantity.formatQuantity()} 股",
             fontSize = 10.sp,
             color = TextMuted,
             fontFamily = FontFamily.Monospace,
@@ -730,28 +730,28 @@ private fun TradeFields(
         keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
     )
 
-    SectionLabel("\u4EA4\u6613\u8BE6\u60C5")
+    SectionLabel("交易详情")
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FormField(
-            label = "\u6210\u4EA4\u91D1\u989D",
+            label = "成交金额",
             value = amount,
             onValueChange = onAmountChanged,
-            prefix = "\u00A5",
-            placeholder = "\u8F93\u5165\u5B9E\u9645\u6210\u4EA4\u603B\u91D1\u989D",
+            prefix = "¥",
+            placeholder = "输入实际成交总金额",
             modifier = Modifier.weight(1f),
             hint = amountHint,
             isError = amountError,
             keyboardOptions = decimalKeyboard,
         )
         FormField(
-            label = "\u624B\u7EED\u8D39\uFF08\u81EA\u52A8\u8BA1\u7B97\uFF09",
+            label = "手续费（自动计算）",
             value = fee,
             onValueChange = {},
-            prefix = "\u00A5",
+            prefix = "¥",
             placeholder = feePlaceholder,
             readOnly = true,
             modifier = Modifier.weight(1f),
@@ -767,20 +767,20 @@ private fun TradeFields(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FormField(
-            label = "\u6210\u4EA4\u4EF7",
+            label = "成交价",
             value = price,
             onValueChange = onPriceChanged,
-            prefix = "\u00A5",
+            prefix = "¥",
             placeholder = "0.00",
             modifier = Modifier.weight(1f),
             isError = priceError,
             keyboardOptions = decimalKeyboard,
         )
         FormField(
-            label = "\u6210\u4EA4\u91CF",
+            label = "成交量",
             value = quantity,
             onValueChange = onQuantityChanged,
-            suffix = "\u80A1",
+            suffix = "股",
             placeholder = "0",
             modifier = Modifier.weight(1f),
             isError = quantityError,
@@ -791,7 +791,7 @@ private fun TradeFields(
     Spacer(modifier = Modifier.height(12.dp))
 
     FormField(
-        label = "\u4EA4\u6613\u65E5\u671F",
+        label = "交易日期",
         value = date,
         onValueChange = onDateChanged,
         placeholder = "YYYY-MM-DD",
@@ -811,16 +811,16 @@ private fun DividendFields(
         keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
     )
 
-    SectionLabel("\u80A1\u006F\u606F\u8BE6\u60C5")
+    SectionLabel("股息详情")
 
     FormField(
-        label = "\u80A1\u006F\u606F\u91D1\u989D",
+        label = "股息金额",
         value = amount,
         onValueChange = onAmountChanged,
-        prefix = "\u00A5",
-        placeholder = "\u8F93\u5165\u80A1\u006F\u606F\u91D1\u989D",
+        prefix = "¥",
+        placeholder = "输入股息金额",
         modifier = Modifier.fillMaxWidth(),
-        hint = "\u5B9E\u9645\u5230\u8D26\u91D1\u989D",
+        hint = "实际到账金额",
         isError = amountError,
         keyboardOptions = decimalKeyboard,
     )
@@ -828,7 +828,7 @@ private fun DividendFields(
     Spacer(modifier = Modifier.height(12.dp))
 
     FormField(
-        label = "\u5230\u8D26\u65E5\u671F",
+        label = "到账日期",
         value = date,
         onValueChange = onDateChanged,
         placeholder = "YYYY-MM-DD",
@@ -932,17 +932,17 @@ private fun TransactionSummary(
     if (!hasContent) return
 
     val typeLabel = when (type) {
-        TransactionType.BUY -> "\u4E70\u5165"
-        TransactionType.SELL -> "\u5356\u51FA"
-        TransactionType.DIVIDEND -> "\u80A1\u606F"
+        TransactionType.BUY -> "买入"
+        TransactionType.SELL -> "卖出"
+        TransactionType.DIVIDEND -> "股息"
     }
 
     val amountVal = amount.toDoubleOrNull() ?: 0.0
     val pnlText = when {
-        amountVal <= 0 -> "\u2014"
-        type == TransactionType.SELL -> "+\u00A5${amountVal.formatTwoDecimals()}"
-        type == TransactionType.DIVIDEND -> "+\u00A5${amountVal.formatTwoDecimals()}"
-        else -> "-\u00A5${amountVal.formatTwoDecimals()}"
+        amountVal <= 0 -> "—"
+        type == TransactionType.SELL -> "+¥${amountVal.formatTwoDecimals()}"
+        type == TransactionType.DIVIDEND -> "+¥${amountVal.formatTwoDecimals()}"
+        else -> "-¥${amountVal.formatTwoDecimals()}"
     }
     val pnlColor = when {
         amountVal <= 0 -> TextPrimary
@@ -960,7 +960,7 @@ private fun TransactionSummary(
             .padding(16.dp),
     ) {
         Text(
-            text = "\u4EA4\u6613\u6982\u89C8",
+            text = "交易概览",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = TextMuted,
@@ -970,30 +970,30 @@ private fun TransactionSummary(
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryItem("\u7C7B\u578B", typeLabel, Modifier.weight(1f))
+                SummaryItem("类型", typeLabel, Modifier.weight(1f))
                 SummaryItem(
-                    "\u6807\u7684",
-                    asset?.let { "${it.pinYin.ifBlank { it.code }} ${it.name}" } ?: "\u2014",
+                    "标的",
+                    asset?.let { "${it.pinYin.ifBlank { it.code }} ${it.name}" } ?: "—",
                     Modifier.weight(1f),
                 )
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 SummaryItem(
-                    "\u91D1\u989D",
-                    if (amountVal > 0) "\u00A5${amountVal.formatTwoDecimals()}" else "\u2014",
+                    "金额",
+                    if (amountVal > 0) "¥${amountVal.formatTwoDecimals()}" else "—",
                     Modifier.weight(1f),
                 )
                 SummaryItem(
-                    "\u624B\u7EED\u8D39",
-                    if (fee.isNotBlank() && fee != "0.00") "\u00A5$fee" else "\u2014",
+                    "手续费",
+                    if (fee.isNotBlank() && fee != "0.00") "¥$fee" else "—",
                     Modifier.weight(1f),
                 )
             }
             Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryItem("\u76C8\u4E8F", pnlText, Modifier.weight(1f), valueColor = pnlColor)
+                SummaryItem("盈亏", pnlText, Modifier.weight(1f), valueColor = pnlColor)
                 SummaryItem(
-                    "\u65E5\u671F",
-                    date.ifBlank { "\u2014" },
+                    "日期",
+                    date.ifBlank { "—" },
                     Modifier.weight(1f),
                 )
             }

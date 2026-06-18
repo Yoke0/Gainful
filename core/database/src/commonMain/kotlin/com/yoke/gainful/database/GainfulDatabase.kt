@@ -12,7 +12,7 @@ import com.yoke.gainful.database.model.TransactionEntity
 
 @Database(
     entities = [AssetEntity::class, TransactionEntity::class],
-    version = 2
+    version = 3
 )
 abstract class GainfulDatabase : RoomDatabase() {
     abstract fun assetDao(): AssetDao
@@ -46,6 +46,13 @@ abstract class GainfulDatabase : RoomDatabase() {
                 """.trimIndent())
                 connection.execSQL("DROP TABLE `transactions`")
                 connection.execSQL("ALTER TABLE `transactions_new` RENAME TO `transactions`")
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE `transactions` ADD COLUMN `trade_date` INTEGER NOT NULL DEFAULT 0")
+                connection.execSQL("UPDATE `transactions` SET `trade_date` = `timestamp` WHERE `trade_date` = 0")
             }
         }
     }

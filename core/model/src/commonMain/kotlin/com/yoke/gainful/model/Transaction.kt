@@ -7,6 +7,7 @@ data class Transaction(
     val quantity: Double = 0.0,
     val price: Double = 0.0,
     val amount: Double = 0.0,
+    val tradeDate: Long,
     val timestamp: Long,
 ) {
     val fee: Double get() = when (type) {
