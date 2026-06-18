@@ -1,4 +1,4 @@
-package com.yoke.gainful.feature.holdings
+package com.yoke.gainful.feature.holdings.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

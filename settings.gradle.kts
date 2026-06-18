@@ -44,7 +44,8 @@ include(":core:network")
 include(":core:domain")
 include(":core:ui")
 include(":core:navigation")
-include(":core:testing")
+
+
 
 include(":feature:dashboard")
 include(":feature:holdings")

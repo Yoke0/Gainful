@@ -2,7 +2,7 @@
 
 > Track every growth, trace every gain.
 
-[中文版](README.md)
+[中文版](../README.md)
 
 Gainful is a revenue tracking and financial analysis tool for personal users, built with Kotlin Multiplatform + Compose Multiplatform, targeting Android, iOS, and Desktop (JVM).
 
@@ -30,18 +30,21 @@ Gainful/
 │       └── jvmMain/           # Desktop platform implementation
 ├── core/                      # Core modules
 │   ├── common/                # Utilities, extensions, constants
-│   ├── data/                  # Data layer interfaces (Repository contracts)
-│   ├── database/              # Local data source (Room)
-│   ├── network/               # Remote data source (Ktor)
-│   ├── domain/                # Domain layer (UseCases)
 │   ├── model/                 # Data models (DTOs, Entities)
 │   ├── ui/                    # Common UI components, theme
-│   ├── navigation/            # Navigation config (Navigation3)
-│   └── testing/               # Test utilities, Fake implementations
+│   ├── data/                  # Repository interfaces
+│   ├── database/              # Local data source (Room + BundledSQLiteDriver)
+│   ├── network/               # Remote data source (Ktor)
+│   ├── domain/                # UseCases (organized by business domain)
+│   │   ├── transaction/       # Transaction-related
+│   │   ├── holding/           # Holding-related
+│   │   ├── portfolio/         # Portfolio summary
+│   │   └── asset/             # Asset search
+│   └── navigation/            # Navigation config (Navigation3)
 ├── feature/                   # Feature modules (per business)
 │   ├── dashboard/             # Dashboard
-│   ├── holdings/              # Holdings
-│   ├── transactions/          # Transactions
+│   ├── holdings/              # Holdings (overview/ + detail/ + di/)
+│   ├── transactions/          # Transactions (overview/ + add/ + di/)
 │   └── settings/              # Settings
 ├── androidApp/                # Android application entry
 ├── desktopApp/                # Desktop application entry
@@ -56,7 +59,6 @@ Gainful/
 | Storage | Room | Cross-platform database, type-safe ORM |
 | DI | Koin | Lightweight dependency injection |
 | Navigation | Navigation3 | Compose cross-platform navigation |
-| Image | Coil | Native image loading for Compose |
 | DateTime | kotlinx-datetime | Cross-platform date/time handling |
 | UI | Compose Multiplatform | Declarative cross-platform UI |
 
@@ -66,13 +68,16 @@ Gainful/
 |-----------|---------|
 | Kotlin | 2.4.0 |
 | Compose Multiplatform | 1.11.1 |
-| Material3 | 1.11.0-alpha07 |
-| Gradle | 9.1.0 |
-| AGP | 9.0.1 |
+| Material3 | 1.12.0-alpha01 |
+| Gradle | 9.4.1 |
+| AGP | 9.2.1 |
+| Ktor | 3.5.0 |
+| Room | 2.8.4 |
+| Koin | 4.2.2 |
 
 ### Platform Support
 
-- **Android**: minSdk 24, targetSdk 36, compileSdk 36
+- **Android**: minSdk 24, targetSdk 37, compileSdk 37
 - **iOS**: iOS 18.2+, arm64 (device + Apple Silicon simulator)
 - **Desktop**: JVM 11+, supports macOS/Windows/Linux
 
@@ -92,12 +97,7 @@ Gainful/
 
 # Hot reload (recommended for development)
 ./gradlew :desktopApp:hotRun --auto
-
-# Build macOS installer (DMG)
-./gradlew :desktopApp:packageDmg
 ```
-
-> macOS DMG output path: `desktopApp/build/compose/binaries/main/dmg/`
 
 ### iOS
 
@@ -118,13 +118,6 @@ Gainful/
 - **Compose resources**: Place in `shared/src/commonMain/composeResources/`
 - **Generated resource IDs**: `gainful.shared.generated.resources.*`
 
-### Code Standards
-
-1. **Platform-specific code**: Place in corresponding `androidMain/`, `iosMain/`, `jvmMain/` directories
-2. **Shared logic**: Prefer `commonMain`, use `expect`/`actual` for platform differences
-3. **UI components**: Use Compose Multiplatform, place in `commonMain`
-4. **Testing**: Each platform has independent test source sets
-
 ### Testing
 
 ```bash
@@ -138,8 +131,6 @@ Gainful/
 ./gradlew :shared:iosSimulatorArm64Test
 ```
 
-> ℹ️ Android tests use `androidHostTest` source set (not `androidTest`)
-
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE).
+This project is licensed under the [Apache License 2.0](../LICENSE).

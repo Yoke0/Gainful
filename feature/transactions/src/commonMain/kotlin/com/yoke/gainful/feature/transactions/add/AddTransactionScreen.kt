@@ -1,4 +1,4 @@
-package com.yoke.gainful.feature.transactions
+package com.yoke.gainful.feature.transactions.add
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

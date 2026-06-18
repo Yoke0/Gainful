@@ -22,9 +22,10 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
   - `network/` — Ktor HTTP client (expect/actual per platform)
   - `domain/` — UseCases
   - `navigation/` — Navigation config (Navigation3)
-  - `testing/` — Test utilities, Fake implementations
+
 - `feature/` — Feature modules (per business)
   - `dashboard/`, `holdings/`, `transactions/`, `settings/`
+  - Sub-packages: `overview/` (main list), `add/` or `detail/` (secondary screens), `di/` (Koin modules)
 - `androidApp/` — Android entry point (`MainActivity`)
 - `desktopApp/` — Desktop entry point (`main.kt`, main class `com.yoke.gainful.MainKt`)
 - `iosApp/` — iOS project (Xcode, Swift). Uses `MainViewController.kt` from `shared/iosMain`
@@ -80,7 +81,7 @@ Run tests after making changes to `shared/`. There is no CI; local verification 
 - `feature/` depends only on `core/domain/`, `core/model/`, and `core/ui/`
 - `core/domain/` depends on `core/data/` and `core/model/`
 - `core/data/` defines interfaces; `core/database/` and `core/network/` provide implementations
-- `core/testing/` provides Fake implementations for testing only
+
 - `shared/` is the aggregator — depends on all `core/` and `feature/` modules
 
 ## Git Commit Convention

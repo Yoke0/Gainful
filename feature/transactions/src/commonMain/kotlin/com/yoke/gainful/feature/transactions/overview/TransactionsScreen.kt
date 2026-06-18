@@ -1,4 +1,4 @@
-package com.yoke.gainful.feature.transactions
+package com.yoke.gainful.feature.transactions.overview
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background

@@ -2,7 +2,7 @@
 
 > 让每一次增长，都有迹可循。
 
-[English](README_EN.md)
+[English](docs/README_EN.md)
 
 Gainful 是一款面向个人用户的收益追踪与财务分析工具，基于 Kotlin Multiplatform + Compose Multiplatform 构建，支持 Android、iOS 和 Desktop (JVM) 三端。
 
@@ -30,18 +30,21 @@ Gainful/
 │       └── jvmMain/           # Desktop 平台实现
 ├── core/                      # 核心模块
 │   ├── common/                # 通用工具、扩展函数、常量
-│   ├── data/                  # 数据层接口定义（Repository 接口）
-│   ├── database/              # 本地数据源（Room）
-│   ├── network/               # 远程数据源（Ktor）
-│   ├── domain/                # 领域层（UseCase）
 │   ├── model/                 # 数据模型（DTO、Entity）
 │   ├── ui/                    # 通用 UI 组件、主题
-│   ├── navigation/            # 导航配置（Navigation3）
-│   └── testing/               # 测试工具、Fake 实现
+│   ├── data/                  # Repository 接口
+│   ├── database/              # 本地数据源（Room + BundledSQLiteDriver）
+│   ├── network/               # 远程数据源（Ktor）
+│   ├── domain/                # UseCase（按业务分包）
+│   │   ├── transaction/       # 交易相关
+│   │   ├── holding/           # 持仓相关
+│   │   ├── portfolio/         # 组合概览
+│   │   └── asset/             # 资产搜索
+│   └── navigation/            # 导航配置（Navigation3）
 ├── feature/                   # 功能模块（按业务拆分）
 │   ├── dashboard/             # 仪表盘
-│   ├── holdings/              # 持仓
-│   ├── transactions/          # 交易记录
+│   ├── holdings/              # 持仓（overview/ + detail/ + di/）
+│   ├── transactions/          # 交易记录（overview/ + add/ + di/）
 │   └── settings/              # 设置
 ├── androidApp/                # Android 应用入口
 ├── desktopApp/                # Desktop 应用入口
@@ -56,7 +59,6 @@ Gainful/
 | 本地存储 | Room | 跨平台数据库，类型安全 ORM |
 | 依赖注入 | Koin | 轻量级 DI 框架 |
 | 导航 | Navigation3 | Compose 跨平台导航 |
-| 图片加载 | Coil | Compose 原生图片加载 |
 | 日期时间 | kotlinx-datetime | 跨平台日期时间处理 |
 | UI 框架 | Compose Multiplatform | 跨平台声明式 UI |
 
@@ -66,13 +68,16 @@ Gainful/
 |------|------|
 | Kotlin | 2.4.0 |
 | Compose Multiplatform | 1.11.1 |
-| Material3 | 1.11.0-alpha07 |
-| Gradle | 9.1.0 |
-| AGP | 9.0.1 |
+| Material3 | 1.12.0-alpha01 |
+| Gradle | 9.4.1 |
+| AGP | 9.2.1 |
+| Ktor | 3.5.0 |
+| Room | 2.8.4 |
+| Koin | 4.2.2 |
 
 ### 平台支持
 
-- **Android**: minSdk 24, targetSdk 36, compileSdk 36
+- **Android**: minSdk 24, targetSdk 37, compileSdk 37
 - **iOS**: iOS 18.2+, arm64 (真机 + Apple Silicon 模拟器)
 - **Desktop**: JVM 11+, 支持 macOS/Windows/Linux
 
@@ -92,12 +97,7 @@ Gainful/
 
 # 热重载（开发推荐）
 ./gradlew :desktopApp:hotRun --auto
-
-# 构建 macOS 安装包（DMG）
-./gradlew :desktopApp:packageDmg
 ```
-
-> macOS DMG 输出路径: `desktopApp/build/compose/binaries/main/dmg/`
 
 ### iOS
 
@@ -118,13 +118,6 @@ Gainful/
 - **Compose 资源**: 放在 `shared/src/commonMain/composeResources/`
 - **生成的资源 ID**: `gainful.shared.generated.resources.*`
 
-### 代码规范
-
-1. **平台特定代码**: 放在对应的 `androidMain/`、`iosMain/`、`jvmMain/` 目录
-2. **共享逻辑**: 优先放在 `commonMain`，使用 `expect`/`actual` 处理平台差异
-3. **UI 组件**: 使用 Compose Multiplatform，放在 `commonMain`
-4. **测试**: 每个平台有独立的测试源集
-
 ### 测试
 
 ```bash
@@ -137,8 +130,6 @@ Gainful/
 # iOS 测试
 ./gradlew :shared:iosSimulatorArm64Test
 ```
-
-> ℹ️ Android 测试使用 `androidHostTest` 源集（非 `androidTest`）
 
 ## 许可证
 

@@ -1,4 +1,4 @@
-package com.yoke.gainful.feature.holdings
+package com.yoke.gainful.feature.holdings.overview
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
