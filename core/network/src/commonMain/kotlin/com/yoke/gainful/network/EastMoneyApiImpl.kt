@@ -7,6 +7,7 @@ import com.yoke.gainful.network.model.QuoteData
 import com.yoke.gainful.network.model.SearchItemDto
 import com.yoke.gainful.network.model.SearchResponse
 import com.yoke.gainful.network.model.TrendData
+import com.yoke.gainful.network.model.TrendItem
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
@@ -32,16 +33,14 @@ internal class EastMoneyApiImpl(
     }
 
     override suspend fun getTrends(secId: String, ndays: Int): TrendData? {
-        val resp: ApiResponse<TrendData> = client.get(TREND_URL) {
+        val resp: ApiResponse<List<TrendItem>> = client.get(TREND_URL) {
             parameter("secid", secId)
-            parameter("fields1", COMMON_FIELDS1)
-            parameter("fields2", TREND_FIELDS2)
             parameter("iscr", 0)
             parameter("iscca", 0)
             parameter("ndays", ndays)
             parameter("forcect", 1)
         }.body()
-        return resp.data
+        return TrendData(data = resp.data ?: emptyList())
     }
 
     override suspend fun getKLines(secId: String, klt: Int, fqt: Int, limit: Int): KLineData? {
@@ -53,6 +52,7 @@ internal class EastMoneyApiImpl(
             parameter("fqt", fqt)
             parameter("lmt", limit)
             parameter("end", "20500101")
+            parameter("fltt", 2)
         }.body()
         return resp.data
     }
@@ -73,18 +73,24 @@ internal class EastMoneyApiImpl(
     private fun HttpRequestBuilder.quoteParams(secId: String? = null, secIds: List<String>? = null) {
         secId?.let { parameter("secid", it) }
         secIds?.let { parameter("secids", it.joinToString(",")) }
-        parameter("fields", QUOTE_FIELDS)
         parameter("fltt", 2)
+        if (secId != null) {
+            parameter("fields", SINGLE_QUOTE_FIELDS)
+        } else {
+            parameter("fields", BATCH_QUOTE_FIELDS)
+        }
     }
 
     companion object {
         private const val QUOTE_URL = "https://push2.eastmoney.com/api/qt/stock/get"
         private const val BATCH_URL = "https://push2.eastmoney.com/api/qt/ulist.np/get"
-        private const val TREND_URL = "https://push2.eastmoney.com/api/qt/stock/trends2/get"
+        private const val TREND_URL = "https://push2.eastmoney.com/api/qt/stock/trends/get"
         private const val KLINE_URL = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
         private const val SEARCH_URL = "https://searchapi.eastmoney.com/api/suggest/get"
         private const val SEARCH_TOKEN = "D43BF722C8E33BDC906FB84D85E326E8"
-        private const val QUOTE_FIELDS =
+        private const val SINGLE_QUOTE_FIELDS =
+            "f43,f44,f45,f46,f47,f48,f50,f55,f57,f58,f59,f60,f84,f85,f92,f116,f117,f162,f167,f168,f169,f170,f171"
+        private const val BATCH_QUOTE_FIELDS =
             "f2,f3,f4,f5,f6,f7,f8,f9,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f100"
         private const val COMMON_FIELDS1 = "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"
         private const val TREND_FIELDS2 = "f51,f53,f56,f58"

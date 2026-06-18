@@ -9,5 +9,12 @@ data class TrendData(
     val market: Int? = null,
     val name: String? = null,
     @SerialName("preClose") val preClose: Double? = null,
-    val trends: List<String> = emptyList(),
+    val data: List<TrendItem> = emptyList(),
+)
+
+@Serializable
+data class TrendItem(
+    @SerialName("f1") val market: Int? = null,
+    @SerialName("f2") val timestamp: Long? = null,
+    @SerialName("f3") val price: Int? = null,
 )

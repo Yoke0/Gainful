@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.common.extensions.formatSigned
+import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -48,36 +51,21 @@ import com.yoke.gainful.ui.theme.TextSecondary
 import kotlin.math.PI
 import kotlin.math.sin
 
-private data class Holding(
-    val code: String,
-    val name: String,
-    val shares: Int,
-    val avgCost: Double,
-    val currentPrice: Double,
-    val pnl: Double,
-    val pnlPct: Double,
-    val direction: String,
-)
-
 @Composable
 fun HoldingsScreen(
+    viewModel: HoldingsViewModel,
     onStockClick: (String) -> Unit = {},
 ) {
-    val holdings = remember {
-        listOf(
-            Holding("NVDA", "英伟达", 100, 128.50, 158.20, 2970.0, 23.1, "up"),
-            Holding("AAPL", "苹果", 50, 175.30, 192.40, 855.0, 9.8, "up"),
-            Holding("META", "Meta", 35, 352.80, 398.50, 1600.0, 13.0, "up"),
-            Holding("AMD", "超威", 80, 95.20, 112.80, 1408.0, 18.5, "up"),
-        )
-    }
+    val uiState by viewModel.uiState.collectAsState()
 
-    val totalValue = remember(holdings) {
-        holdings.sumOf { it.shares * it.currentPrice }
+    val totalValue = remember(uiState.holdings) {
+        uiState.holdings.sumOf { it.totalMarketValue }
     }
-    val totalPnl = remember(holdings) { holdings.sumOf { it.pnl } }
-    val totalPnlPct = remember(holdings, totalValue) {
-        val totalCost = holdings.sumOf { it.shares * it.avgCost }
+    val totalPnl = remember(uiState.holdings) {
+        uiState.holdings.sumOf { it.totalGain }
+    }
+    val totalPnlPct = remember(uiState.holdings, totalValue) {
+        val totalCost = uiState.holdings.sumOf { it.totalCost }
         if (totalCost > 0) (totalPnl / totalCost) * 100 else 0.0
     }
 
@@ -96,7 +84,7 @@ fun HoldingsScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        HeatmapCard(holdings, totalValue)
+        HeatmapCard(uiState.holdings, totalValue)
 
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -108,7 +96,7 @@ fun HoldingsScreen(
             modifier = Modifier.padding(bottom = 12.dp),
         )
 
-        HoldingList(holdings, onStockClick)
+        HoldingList(uiState.holdings, onStockClick)
 
         Spacer(modifier = Modifier.height(80.dp))
     }
@@ -116,34 +104,12 @@ fun HoldingsScreen(
 
 @Composable
 private fun PortfolioHeader() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = "持仓",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = TextPrimary,
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(6.dp)
-                    .clip(CircleShape)
-                    .background(GainGreen),
-            )
-            Text(
-                text = "已同步",
-                fontSize = 12.sp,
-                color = TextSecondary,
-            )
-        }
-    }
+    Text(
+        text = "持仓",
+        fontSize = 28.sp,
+        fontWeight = FontWeight.ExtraBold,
+        color = TextPrimary,
+    )
 }
 
 @Composable
@@ -199,7 +165,7 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
 }
 
 @Composable
-private fun HeatmapCard(holdings: List<Holding>, totalValue: Double) {
+private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
     val gradientColors = listOf(
         listOf(Color(0xFFC8A34E), Color(0xFFA8862E)),
         listOf(Color(0xFF4285F4), Color(0xFF2A5FC1)),
@@ -208,7 +174,7 @@ private fun HeatmapCard(holdings: List<Holding>, totalValue: Double) {
     )
 
     val sorted = remember(holdings) {
-        holdings.sortedByDescending { it.shares * it.currentPrice }
+        holdings.sortedByDescending { it.totalMarketValue }
     }
 
     Column(
@@ -247,20 +213,18 @@ private fun HeatmapCard(holdings: List<Holding>, totalValue: Double) {
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     row.forEachIndexed { idx, holding ->
-                        val mktVal = holding.shares * holding.currentPrice
-                        val pct = (mktVal / totalValue) * 100
+                        val pct = if (totalValue > 0) (holding.totalMarketValue / totalValue) * 100 else 0.0
                         val colors = gradientColors[(sorted.indexOf(holding)) % gradientColors.size]
 
                         HeatmapItem(
                             name = holding.name,
                             code = holding.code,
                             pct = pct,
-                            amount = mktVal,
+                            amount = holding.totalMarketValue,
                             gradientColors = colors,
                             modifier = Modifier.weight(1f),
                         )
                     }
-                    // Fill empty slot if odd number
                     if (row.size < 2) {
                         Spacer(modifier = Modifier.weight(1f))
                     }
@@ -327,7 +291,7 @@ private fun HeatmapItem(
 
 @Composable
 private fun HoldingList(
-    holdings: List<Holding>,
+    holdings: List<HoldingDisplay>,
     onStockClick: (String) -> Unit,
 ) {
     Column(
@@ -341,12 +305,12 @@ private fun HoldingList(
 
 @Composable
 private fun HoldingCard(
-    holding: Holding,
+    holding: HoldingDisplay,
     onStockClick: (String) -> Unit,
 ) {
-    val isPositive = holding.pnl >= 0
-    val change = holding.currentPrice - holding.avgCost
-    val strokeColor = if (holding.direction == "up") GainGreen else GainRed
+    val isPositive = holding.totalGain >= 0
+    val change = holding.currentPrice - holding.averageCost
+    val strokeColor = if (holding.changeAmount >= 0) GainGreen else GainRed
 
     Row(
         modifier = Modifier
@@ -355,29 +319,31 @@ private fun HoldingCard(
             .background(Card)
             .clickable { onStockClick(holding.code) }
             .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
                     text = holding.name,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary,
+                    modifier = Modifier.alignByBaseline(),
                 )
                 Text(
                     text = holding.code,
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     color = TextMuted,
+                    modifier = Modifier.alignByBaseline(),
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Row(
                 verticalAlignment = Alignment.Bottom,
@@ -385,48 +351,57 @@ private fun HoldingCard(
             ) {
                 Text(
                     text = holding.currentPrice.formatDecimal(2),
-                    fontSize = 20.sp,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     color = TextPrimary,
+                    letterSpacing = (-0.5).sp,
                 )
                 Text(
                     text = change.formatSigned(),
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = FontFamily.Monospace,
                     color = if (isPositive) GainGreen else GainRed,
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                MetaText("市值", (holding.shares * holding.currentPrice).formatCompact())
+                MetaText("市值", holding.totalMarketValue.formatCompact(), Modifier.weight(1f))
+                MetaText("成本", holding.averageCost.formatDecimal(2), Modifier.weight(1f))
+                MetaText("股数", "${holding.quantity.toInt()}", Modifier.weight(1f))
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 MetaText(
                     "盈亏",
-                    "${if (isPositive) "+" else ""}${holding.pnl.formatCompact()}",
-                    if (isPositive) GainGreen else GainRed,
+                    "${if (isPositive) "+" else ""}${holding.totalGain.formatDecimal(2)}",
+                    valueColor = if (isPositive) GainGreen else GainRed,
                 )
-                MetaText("股数", "${holding.shares}")
             }
         }
 
         Sparkline(
-            direction = holding.direction,
+            trendPrices = holding.trendPrices,
+            changeAmount = holding.changeAmount,
             modifier = Modifier
-                .width(80.dp)
-                .height(48.dp),
+                .width(72.dp)
+                .height(44.dp),
             strokeColor = strokeColor,
         )
     }
 }
 
 @Composable
-private fun MetaText(label: String, value: String, valueColor: Color = TextPrimary) {
-    Row {
+private fun MetaText(label: String, value: String, modifier: Modifier = Modifier, valueColor: Color = TextPrimary) {
+    Row(modifier = modifier) {
         Text(
             text = "$label ",
             fontSize = 10.sp,
@@ -444,18 +419,29 @@ private fun MetaText(label: String, value: String, valueColor: Color = TextPrima
 
 @Composable
 private fun Sparkline(
-    direction: String,
+    trendPrices: List<Double>,
+    changeAmount: Double,
     modifier: Modifier = Modifier,
     strokeColor: Color = GainGreen,
 ) {
-    val points = remember(direction) {
-        generateSparkline(direction)
+    val points = remember(trendPrices, changeAmount) {
+        if (trendPrices.size >= 2) {
+            val min = trendPrices.min()
+            val max = trendPrices.max()
+            val range = max - min
+            trendPrices.map { price ->
+                if (range > 0) (price - min) / range else 0.5
+            }
+        } else {
+            val direction = if (changeAmount >= 0) "up" else "down"
+            generateSparkline(direction)
+        }
     }
 
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
-        val stepX = w / (points.size - 1).toFloat()
+        val stepX = w / (points.size - 1).coerceAtLeast(1).toFloat()
 
         val linePath = Path()
         points.forEachIndexed { index, value ->

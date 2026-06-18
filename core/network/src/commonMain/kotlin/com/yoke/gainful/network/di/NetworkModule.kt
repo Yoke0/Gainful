@@ -4,7 +4,6 @@ import com.yoke.gainful.network.EastMoneyApi
 import com.yoke.gainful.network.EastMoneyApiImpl
 import com.yoke.gainful.network.createPlatformHttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -22,7 +21,11 @@ val networkModule = module {
                 })
             }
             install(Logging) {
-                logger = Logger.DEFAULT
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        println("[Ktor] $message")
+                    }
+                }
                 level = LogLevel.BODY
             }
         }

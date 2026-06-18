@@ -108,6 +108,7 @@ Strictly adhere to the **Conventional Commits** format for all code diffs or tas
 
 ## Gotchas
 
+- **NEVER use `java.time.*` in commonMain** — use `kotlin.time.Instant`/`Clock` + `kotlinx.datetime.toLocalDateTime()` + `kotlinx.datetime.TimeZone` instead. Add `libs.kotlinx.datetime` dependency if needed.
 - `local.properties` is gitignored — SDK path must be set per machine
 - Android tests use `androidHostTest` source set (not the usual `androidTest`)
 - Configuration cache is enabled — Gradle will re-run if scripts change

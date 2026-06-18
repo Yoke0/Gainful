@@ -4,13 +4,12 @@ import com.yoke.gainful.model.StockTrend
 import com.yoke.gainful.network.model.TrendData
 
 fun TrendData.toStockTrendList(): List<StockTrend> {
-    return trends.map { line ->
-        val parts = line.split(",")
+    return data.map { item ->
         StockTrend(
-            time = parts[0],
-            price = parts.getOrElse(1) { "0" }.toDouble(),
-            volume = parts.getOrElse(2) { "0" }.toInt(),
-            averagePrice = parts.getOrElse(3) { "0" }.toDouble(),
+            time = item.timestamp?.toString() ?: "",
+            price = (item.price ?: 0) / 100.0,
+            volume = 0,
+            averagePrice = 0.0,
         )
     }
 }

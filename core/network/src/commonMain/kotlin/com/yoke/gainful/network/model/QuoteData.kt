@@ -23,8 +23,50 @@ data class QuoteData(
     @SerialName("f20") val totalMarketCap: Double? = null,
     @SerialName("f21") val circulatingMarketCap: Double? = null,
     @SerialName("f23") val pb: Double? = null,
+    @SerialName("f43") val latestPriceSingle: Double? = null,
+    @SerialName("f44") val highSingle: Double? = null,
+    @SerialName("f45") val lowSingle: Double? = null,
+    @SerialName("f46") val openSingle: Double? = null,
+    @SerialName("f47") val volumeSingle: Long? = null,
+    @SerialName("f48") val turnoverSingle: Double? = null,
+    @SerialName("f50") val volumeRatio: Double? = null,
+    @SerialName("f55") val eps: Double? = null,
+    @SerialName("f57") val codeSingle: String? = null,
+    @SerialName("f58") val nameSingle: String? = null,
+    @SerialName("f59") val marketSingle: Int? = null,
+    @SerialName("f60") val preCloseSingle: Double? = null,
+    @SerialName("f84") val totalShares: Double? = null,
+    @SerialName("f85") val circulatingShares: Double? = null,
+    @SerialName("f92") val bps: Double? = null,
     @SerialName("f100") val industry: String? = null,
-)
+    @SerialName("f116") val totalMarketCapSingle: Double? = null,
+    @SerialName("f117") val circulatingMarketCapSingle: Double? = null,
+    @SerialName("f162") val peStatic: Double? = null,
+    @SerialName("f167") val pbSingle: Double? = null,
+    @SerialName("f168") val turnoverRateSingle: Double? = null,
+    @SerialName("f169") val changeAmountSingle: Double? = null,
+    @SerialName("f170") val changePercentSingle: Double? = null,
+    @SerialName("f171") val amplitudeSingle: Double? = null,
+) {
+    val resolvedLatestPrice: Double get() = latestPriceSingle ?: latestPrice ?: 0.0
+    val resolvedChangePercent: Double get() = changePercentSingle ?: changePercent ?: 0.0
+    val resolvedChangeAmount: Double get() = changeAmountSingle ?: changeAmount ?: 0.0
+    val resolvedVolume: Long get() = volumeSingle ?: volume ?: 0L
+    val resolvedTurnover: Double get() = turnoverSingle ?: turnover ?: 0.0
+    val resolvedAmplitude: Double get() = amplitudeSingle ?: amplitude ?: 0.0
+    val resolvedTurnoverRate: Double get() = turnoverRateSingle ?: turnoverRate ?: 0.0
+    val resolvedPeDynamic: Double get() = peDynamic ?: 0.0
+    val resolvedCode: String get() = codeSingle ?: code ?: ""
+    val resolvedMarket: Int get() = marketSingle ?: market ?: 0
+    val resolvedName: String get() = nameSingle ?: name ?: ""
+    val resolvedHigh: Double get() = highSingle ?: high ?: 0.0
+    val resolvedLow: Double get() = lowSingle ?: low ?: 0.0
+    val resolvedOpen: Double get() = openSingle ?: open ?: 0.0
+    val resolvedPreClose: Double get() = preCloseSingle ?: preClose ?: 0.0
+    val resolvedTotalMarketCap: Double get() = totalMarketCapSingle ?: totalMarketCap ?: 0.0
+    val resolvedCirculatingMarketCap: Double get() = circulatingMarketCapSingle ?: circulatingMarketCap ?: 0.0
+    val resolvedPb: Double get() = pbSingle ?: pb ?: 0.0
+}
 
 @Serializable
 data class BatchQuoteData(

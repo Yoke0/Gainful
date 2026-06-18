@@ -1,5 +1,6 @@
 package com.yoke.gainful.feature.holdings
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,15 +18,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -39,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatDecimal
+import com.yoke.gainful.common.extensions.formatTurnover
+import com.yoke.gainful.model.ChartPeriod
+import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -50,73 +58,20 @@ import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
-import kotlin.math.sin
-
-private data class StockInfo(
-    val code: String,
-    val name: String,
-    val fullName: String,
-    val price: Double,
-    val avgCost: Double,
-    val open: Double,
-    val high: Double,
-    val low: Double,
-    val volume: Long,
-    val mktCap: Double,
-    val pe: Double?,
-    val yieldPct: Double?,
-    val high52: Double,
-    val low52: Double,
-    val shares: Int,
-)
-
-private data class TradeRecord(
-    val type: String,
-    val shares: Int,
-    val price: Double,
-    val date: String,
-)
-
-private val stockDB = mapOf(
-    "NVDA" to StockInfo("NVDA", "英伟达", "NVIDIA Corp.", 158.20, 128.50, 155.80, 159.40, 154.90, 320_000_000, 2_850_000_000_000.0, 42.5, 0.04, 165.30, 95.20, 100),
-    "AAPL" to StockInfo("AAPL", "苹果", "Apple Inc.", 192.40, 175.30, 190.20, 193.10, 189.50, 180_000_000, 3_020_000_000_000.0, 31.2, 0.52, 199.80, 148.50, 50),
-    "META" to StockInfo("META", "Meta", "Meta Platforms", 398.50, 352.80, 395.00, 401.20, 393.10, 90_000_000, 1_020_000_000_000.0, 27.8, 0.11, 420.50, 280.30, 35),
-    "AMD" to StockInfo("AMD", "超威", "AMD Inc.", 112.80, 95.20, 110.50, 113.90, 109.80, 210_000_000, 182_000_000_000.0, 38.4, null, 125.60, 72.80, 80),
-)
-
-private val tradeDB = mapOf(
-    "NVDA" to listOf(
-        TradeRecord("买入", 50, 120.30, "2025-02-10"),
-        TradeRecord("买入", 30, 135.80, "2025-01-22"),
-        TradeRecord("卖出", 20, 158.00, "2025-03-05"),
-    ),
-    "AAPL" to listOf(
-        TradeRecord("买入", 30, 170.00, "2025-01-15"),
-        TradeRecord("买入", 20, 183.50, "2025-02-28"),
-    ),
-    "META" to listOf(
-        TradeRecord("买入", 20, 340.00, "2025-01-05"),
-        TradeRecord("买入", 15, 370.00, "2025-02-18"),
-    ),
-    "AMD" to listOf(
-        TradeRecord("买入", 50, 88.50, "2025-02-01"),
-        TradeRecord("买入", 30, 106.20, "2025-03-01"),
-    ),
-)
-
-private val periodLabels = listOf("1周", "1月", "3月", "1年")
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 @Composable
 fun StockDetailScreen(
-    code: String,
+    viewModel: StockDetailViewModel,
     onBack: () -> Unit,
 ) {
-    val stock = remember(code) { stockDB[code] ?: stockDB.values.first() }
-    val trades = remember(code) { tradeDB[code] ?: emptyList() }
-    var selectedPeriod by remember { mutableIntStateOf(0) }
+    val uiState by viewModel.uiState.collectAsState()
+    var selectedPeriod by remember { mutableStateOf(ChartPeriod.DAILY) }
 
-    val change = stock.price - stock.avgCost
-    val changePct = (change / stock.avgCost) * 100
+    val change = uiState.changeAmount
+    val changePct = uiState.changePercent
     val isPositive = change >= 0
     val changeColor = if (isPositive) GainGreen else GainRed
 
@@ -127,61 +82,61 @@ fun StockDetailScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Card)
+                .clickable(onClick = onBack),
+            contentAlignment = Alignment.Center,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(Card)
-                    .clickable(onClick = onBack),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "\u2039",
-                    fontSize = 20.sp,
-                    color = TextSecondary,
-                )
-            }
-            Column {
-                Text(
-                    text = stock.name,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                )
-                Text(
-                    text = "${stock.fullName} \u00B7 ${stock.code}",
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = TextMuted,
-                )
-            }
+            Text(
+                text = "\u2039",
+                fontSize = 20.sp,
+                color = TextSecondary,
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = uiState.name,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                modifier = Modifier.alignByBaseline(),
+            )
+            Text(
+                text = uiState.code,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                color = TextMuted,
+                modifier = Modifier.alignByBaseline(),
+            )
+        }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Price Hero
-        PriceHeroCard(stock, change, changePct, changeColor)
+        PriceHeroCard(uiState, change, changePct, changeColor)
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Chart
-        ChartCard(selectedPeriod) { selectedPeriod = it }
+        ChartCard(selectedPeriod, uiState.kLines.map { it.close }) { selectedPeriod = it; viewModel.loadChart(selectedPeriod) }
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Metrics Grid
-        MetricsGrid(stock)
+        MetricsGrid(uiState)
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Recent Trades
-        TradesCard(trades)
+        TradesCard(uiState)
 
         Spacer(modifier = Modifier.height(80.dp))
     }
@@ -189,7 +144,7 @@ fun StockDetailScreen(
 
 @Composable
 private fun PriceHeroCard(
-    stock: StockInfo,
+    uiState: StockDetailUiState,
     change: Double,
     changePct: Double,
     changeColor: Color,
@@ -201,42 +156,31 @@ private fun PriceHeroCard(
             .background(Card)
             .padding(20.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        if (uiState.industry.isNotEmpty()) {
             Text(
-                text = stock.fullName,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = TextSecondary,
-            )
-            Text(
-                text = stock.code,
+                text = uiState.industry,
                 fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace,
                 color = TextMuted,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(Surface)
-                    .padding(horizontal = 12.dp, vertical = 2.dp),
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
             )
+            Spacer(modifier = Modifier.height(4.dp))
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = stock.price.formatDecimal(2),
+                text = uiState.price.formatDecimal(2),
                 fontSize = 34.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.Monospace,
                 color = TextPrimary,
-                letterSpacing = (-0.5).sp,
+                modifier = Modifier.alignByBaseline(),
             )
             Text(
                 text = "${if (change >= 0) "+" else ""}${change.formatDecimal(2)}",
@@ -244,6 +188,7 @@ private fun PriceHeroCard(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
                 color = changeColor,
+                modifier = Modifier.alignByBaseline(),
             )
             Text(
                 text = "${if (changePct >= 0) "+" else ""}${changePct.formatDecimal(2)}%",
@@ -251,18 +196,29 @@ private fun PriceHeroCard(
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
                 color = changeColor,
+                modifier = Modifier.alignByBaseline(),
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            ExtraItem("开盘", stock.open.formatDecimal(2))
-            ExtraItem("最高", stock.high.formatDecimal(2))
-            ExtraItem("最低", stock.low.formatDecimal(2))
-            ExtraItem("成交量", "${formatVolume(stock.volume)} 股")
+            ExtraItem("开盘", uiState.open.formatDecimal(2))
+            ExtraItem("最高", uiState.high.formatDecimal(2))
+            ExtraItem("最低", uiState.low.formatDecimal(2))
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            ExtraItem("成交量", formatVolume(uiState.volume))
+            ExtraItem("成交额", uiState.turnover.formatTurnover())
         }
     }
 }
@@ -287,9 +243,13 @@ private fun ExtraItem(label: String, value: String) {
 
 @Composable
 private fun ChartCard(
-    selectedPeriod: Int,
-    onPeriodSelected: (Int) -> Unit,
+    selectedPeriod: ChartPeriod,
+    chartData: List<Double>,
+    onPeriodSelected: (ChartPeriod) -> Unit,
 ) {
+    var minutesExpanded by remember { mutableStateOf(false) }
+    val isMinuteSelected = selectedPeriod.klt != null && selectedPeriod.klt in 1..60
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,21 +268,107 @@ private fun ChartCard(
                 fontWeight = FontWeight.SemiBold,
                 color = TextPrimary,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                periodLabels.forEachIndexed { index, label ->
-                    val isActive = index == selectedPeriod
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1f, fill = false),
+            ) {
+                listOf(ChartPeriod.TRENDS, ChartPeriod.TRENDS_5D, ChartPeriod.DAILY, ChartPeriod.WEEKLY, ChartPeriod.MONTHLY).forEach { period ->
+                    val isActive = period == selectedPeriod && !isMinuteSelected
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                width = 1.dp,
+                                color = if (isActive) Gold else Border,
+                                shape = RoundedCornerShape(12.dp),
+                            )
                             .background(if (isActive) GoldDim else Surface)
-                            .clickable { onPeriodSelected(index) }
-                            .padding(horizontal = 12.dp, vertical = 2.dp),
+                            .clickable {
+                                minutesExpanded = false
+                                onPeriodSelected(period)
+                            }
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
                     ) {
                         Text(
-                            text = label,
-                            fontSize = 11.sp,
+                            text = period.label,
+                            fontSize = 10.sp,
                             color = if (isActive) Gold else TextMuted,
                         )
+                    }
+                }
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                width = 1.dp,
+                                color = if (isMinuteSelected || minutesExpanded) Gold else Border,
+                                shape = RoundedCornerShape(12.dp),
+                            )
+                            .background(if (isMinuteSelected || minutesExpanded) GoldDim else Surface)
+                            .clickable { minutesExpanded = !minutesExpanded }
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = if (isMinuteSelected && !minutesExpanded) selectedPeriod.label else "分钟",
+                                fontSize = 10.sp,
+                                color = if (isMinuteSelected || minutesExpanded) Gold else TextMuted,
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Canvas(
+                                modifier = Modifier
+                                    .size(5.dp)
+                                    .rotate(if (minutesExpanded) 180f else 0f),
+                            ) {
+                                val stroke = Stroke(width = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+                                val color = if (isMinuteSelected || minutesExpanded) Gold else TextMuted
+                                drawPath(
+                                    path = Path().apply {
+                                        moveTo(0f, 0f)
+                                        lineTo(size.width / 2, size.height)
+                                        lineTo(size.width, 0f)
+                                    },
+                                    color = color,
+                                    style = stroke,
+                                )
+                            }
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = minutesExpanded,
+                        onDismissRequest = { minutesExpanded = false },
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Card)
+                            .border(1.dp, Border, RoundedCornerShape(10.dp)),
+                    ) {
+                        listOf(ChartPeriod.MIN_1, ChartPeriod.MIN_5, ChartPeriod.MIN_15, ChartPeriod.MIN_30, ChartPeriod.MIN_60).forEach { period ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = period.label,
+                                        fontSize = 11.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = if (selectedPeriod == period) Gold else TextSecondary,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                },
+                                onClick = {
+                                    minutesExpanded = false
+                                    onPeriodSelected(period)
+                                },
+                                trailingIcon = if (selectedPeriod == period) {
+                                    {
+                                        Text(
+                                            text = "\u2713",
+                                            fontSize = 11.sp,
+                                            color = Gold,
+                                        )
+                                    }
+                                } else null,
+                            )
+                        }
                     }
                 }
             }
@@ -330,12 +376,29 @@ private fun ChartCard(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        ChartArea()
+        if (chartData.isNotEmpty()) {
+            ChartArea(chartData)
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "暂无数据",
+                    fontSize = 14.sp,
+                    color = TextMuted,
+                )
+            }
+        }
     }
 }
 
 @Composable
-private fun ChartArea() {
+private fun ChartArea(data: List<Double>) {
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
@@ -349,19 +412,18 @@ private fun ChartArea() {
         val padBottom = 10f
         val chartH = h - padTop - padBottom
 
-        val points = generateChartPoints()
-        val minVal = points.min()
-        val maxVal = points.max()
+        val minVal = data.min()
+        val maxVal = data.max()
         val range = maxVal - minVal
 
         val linePath = Path()
         val fillPath = Path()
-        val stepX = w / (points.size - 1).toFloat()
+        val stepX = w / (data.size - 1).coerceAtLeast(1).toFloat()
 
-        points.forEachIndexed { index, value ->
+        data.forEachIndexed { index, value ->
             val x = index * stepX
-            val normalized = if (range > 0) (value - minVal) / range else 0.5f
-            val y = padTop + chartH * (1f - normalized)
+            val normalized = if (range > 0) (value - minVal) / range else 0.5
+            val y = padTop + chartH * (1f - normalized.toFloat())
             if (index == 0) {
                 linePath.moveTo(x, y)
                 fillPath.moveTo(x, h)
@@ -392,34 +454,54 @@ private fun ChartArea() {
             style = Stroke(width = 2f, cap = StrokeCap.Round, join = StrokeJoin.Round),
         )
 
-        val lastX = (points.size - 1) * stepX
-        val lastNormalized = if (range > 0) (points.last() - minVal) / range else 0.5f
-        val lastY = padTop + chartH * (1f - lastNormalized)
+        val lastX = (data.size - 1) * stepX
+        val lastNormalized = if (range > 0) (data.last() - minVal) / range else 0.5
+        val lastY = padTop + chartH * (1f - lastNormalized.toFloat())
         drawCircle(color = lineColor, radius = 3.5f, center = Offset(lastX, lastY))
         drawCircle(color = Surface, radius = 1.5f, center = Offset(lastX, lastY))
     }
 }
 
 @Composable
-private fun MetricsGrid(stock: StockInfo) {
+private fun MetricsGrid(uiState: StockDetailUiState) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricItem("市值", stock.mktCap.formatCompact(), Modifier.weight(1f))
-            MetricItem("市盈率", stock.pe?.formatDecimal(1) ?: "\u2014", Modifier.weight(1f))
-            MetricItem("收益率", stock.yieldPct?.let { "${it.formatDecimal(2)}%" } ?: "\u2014", Modifier.weight(1f))
+            MetricItem("市值", uiState.totalMarketCap.formatCompact(), Modifier.weight(1f))
+            MetricItem("市盈率", if (uiState.peDynamic > 0) uiState.peDynamic.formatDecimal(1) else "\u2014", Modifier.weight(1f))
+            MetricItem("市净率", if (uiState.pb > 0) uiState.pb.formatDecimal(1) else "\u2014", Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricItem("52周高", stock.high52.formatDecimal(2), Modifier.weight(1f))
-            MetricItem("52周低", stock.low52.formatDecimal(2), Modifier.weight(1f))
-            MetricItem("持仓", "${stock.shares} 股", Modifier.weight(1f))
+            MetricItem("换手率", "${uiState.turnoverRate.formatDecimal(2)}%", Modifier.weight(1f))
+            MetricItem("振幅", "${uiState.amplitude.formatDecimal(2)}%", Modifier.weight(1f))
+            MetricItem("行业", uiState.industry.ifEmpty { "\u2014" }, Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MetricItem("持仓", "${uiState.quantity.toInt()} 股", Modifier.weight(1f))
+            MetricItem(
+                "成本",
+                uiState.averageCost.formatDecimal(2),
+                Modifier.weight(1f),
+                valueColor = if (uiState.averageCost > uiState.price) GainRed else GainGreen,
+            )
+            MetricItem(
+                "盈亏",
+                "${if (uiState.totalGain >= 0) "+" else ""}${uiState.totalGain.formatCompact()}",
+                Modifier.weight(1f),
+                valueColor = if (uiState.totalGain >= 0) GainGreen else GainRed,
+            )
         }
     }
 }
 
 @Composable
-private fun MetricItem(label: String, value: String, modifier: Modifier = Modifier) {
+private fun MetricItem(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    valueColor: Color = TextPrimary,
+) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
@@ -438,13 +520,15 @@ private fun MetricItem(label: String, value: String, modifier: Modifier = Modifi
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace,
-            color = TextPrimary,
+            color = valueColor,
         )
     }
 }
 
 @Composable
-private fun TradesCard(trades: List<TradeRecord>) {
+private fun TradesCard(uiState: StockDetailUiState) {
+    val trades = uiState.transactions
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -503,8 +587,9 @@ private fun TradesCard(trades: List<TradeRecord>) {
 }
 
 @Composable
-private fun TradeRow(trade: TradeRecord) {
-    val isBuy = trade.type == "买入"
+private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
+    val isBuy = trade.type == TransactionType.BUY
+    val typeLabel = if (isBuy) "买入" else "卖出"
     val typeColor = if (isBuy) GainGreen else GainRed
 
     Row(
@@ -516,19 +601,22 @@ private fun TradeRow(trade: TradeRecord) {
     ) {
         Column {
             Text(
-                text = trade.type,
+                text = typeLabel,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = typeColor,
             )
             Text(
-                text = trade.date,
+                text = Instant.fromEpochMilliseconds(trade.timestamp)
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+                    .toString(),
                 fontSize = 11.sp,
                 color = TextMuted,
             )
         }
         Text(
-            text = "${trade.shares} 股 @ ${trade.price.formatDecimal(2)}",
+            text = "${trade.quantity.toInt()} 股 @ ${trade.price.formatDecimal(2)}",
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             fontFamily = FontFamily.Monospace,
@@ -544,14 +632,4 @@ private fun formatVolume(volume: Long): String {
         volume >= 1_000 -> "%.1fK".format(volume / 1_000.0)
         else -> volume.toString()
     }
-}
-
-private fun generateChartPoints(): List<Float> {
-    val points = mutableListOf<Float>()
-    for (i in 0..30) {
-        val t = i / 30.0
-        val y = 0.7 - t * 0.6 + sin(t * Math.PI * 3) * 0.08 + ((i * 7) % 10) / 100.0
-        points.add(y.coerceIn(0.05, 0.95).toFloat())
-    }
-    return points
 }

@@ -12,7 +12,9 @@ import androidx.compose.runtime.setValue
 import com.yoke.gainful.di.initKoin
 import com.yoke.gainful.feature.dashboard.DashboardScreen
 import com.yoke.gainful.feature.holdings.HoldingsScreen
+import com.yoke.gainful.feature.holdings.HoldingsViewModel
 import com.yoke.gainful.feature.holdings.StockDetailScreen
+import com.yoke.gainful.feature.holdings.StockDetailViewModel
 import com.yoke.gainful.feature.settings.SettingsScreen
 import com.yoke.gainful.feature.transactions.AddTransactionScreen
 import com.yoke.gainful.feature.transactions.AddTransactionViewModel
@@ -27,6 +29,9 @@ import com.yoke.gainful.navigation.StockDetail
 import com.yoke.gainful.navigation.Transactions
 import com.yoke.gainful.ui.theme.GainfulTheme
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun App() {
@@ -53,9 +58,13 @@ fun App() {
                                 onAddTransaction = { onNavigate(AddTransaction) },
                             )
                         }
-                        Holdings -> HoldingsScreen(
-                            onStockClick = { code -> onNavigate(StockDetail(code)) },
-                        )
+                        Holdings -> {
+                            val viewModel = koinViewModel<HoldingsViewModel>()
+                            HoldingsScreen(
+                                viewModel = viewModel,
+                                onStockClick = { code -> onNavigate(StockDetail(code)) },
+                            )
+                        }
                         Settings -> SettingsScreen()
                         AddTransaction -> {
                             val viewModel = koinViewModel<AddTransactionViewModel>()
@@ -65,10 +74,17 @@ fun App() {
                                 onBack = onBack,
                             )
                         }
-                        is StockDetail -> StockDetailScreen(
-                            code = screen.code,
-                            onBack = onBack,
-                        )
+                        is StockDetail -> {
+                            val viewModel = remember(screen.code) {
+                                object : KoinComponent {
+                                    fun getViewModel() = get<StockDetailViewModel> { parametersOf(screen.code) }
+                                }.getViewModel()
+                            }
+                            StockDetailScreen(
+                                viewModel = viewModel,
+                                onBack = onBack,
+                            )
+                        }
                     }
                 }
             }
