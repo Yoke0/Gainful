@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,15 +32,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import kotlin.time.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
@@ -60,6 +53,9 @@ import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.ui.components.CalendarDialog
+import com.yoke.gainful.ui.components.DatePickerField
+import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.launch
 
 @Composable
@@ -87,14 +83,12 @@ fun AddTransactionScreen(
 
         if (uiState.showCalendar) {
             CalendarDialog(
-                year = uiState.calendarYear,
-                month = uiState.calendarMonth,
-                selectedDate = uiState.calendarTempSelected,
-                onPrevMonth = viewModel::calendarPrevMonth,
-                onNextMonth = viewModel::calendarNextMonth,
-                onSelectDate = viewModel::calendarSelectDate,
-                onToday = viewModel::calendarGoToday,
-                onConfirm = viewModel::calendarConfirm,
+                selectedDate = uiState.date.toLocalDateOrNull(),
+                selectableToTodayOnly = true,
+                onDateSelected = {
+                    viewModel.onDateChanged(it.toString())
+                    viewModel.hideCalendar()
+                },
                 onDismiss = viewModel::hideCalendar,
             )
         }
@@ -1066,226 +1060,11 @@ private fun SectionLabel(text: String) {
     }
 }
 
-@Composable
-private fun DatePickerField(
-    label: String,
-    date: String,
-    onClick: () -> Unit,
-) {
-    val displayText = date.ifBlank { "选择日期" }
-
-    Column {
-        Text(
-            text = label,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextSecondary,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp))
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "📅",
-                fontSize = 16.sp,
-                color = TextMuted,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = displayText,
-                fontSize = 15.sp,
-                color = if (date.isBlank()) TextMuted else TextPrimary,
-                fontFamily = FontFamily.Monospace,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = "▾",
-                fontSize = 14.sp,
-                color = TextMuted,
-            )
-        }
-    }
+private fun String.toLocalDateOrNull(): LocalDate? = try {
+    val parts = split("-")
+    LocalDate(parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
+} catch (_: Exception) {
+    null
 }
 
-@Composable
-private fun CalendarDialog(
-    year: Int,
-    month: Int,
-    selectedDate: kotlinx.datetime.LocalDate?,
-    onPrevMonth: () -> Unit,
-    onNextMonth: () -> Unit,
-    onSelectDate: (kotlinx.datetime.LocalDate) -> Unit,
-    onToday: () -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val monthNames = listOf("1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月")
-    val weekdays = listOf("一", "二", "三", "四", "五", "六", "日")
 
-    val firstDayOfMonth = kotlinx.datetime.LocalDate(year, month + 1, 1)
-    val nextMonthFirst = kotlinx.datetime.LocalDate(year, month + 2, 1)
-    val daysInMonth = (nextMonthFirst.toEpochDays() - firstDayOfMonth.toEpochDays()).toInt()
-    val offset = firstDayOfMonth.dayOfWeek.ordinal
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "${year}年${monthNames[month]}",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        CalendarNavButton("‹") { onPrevMonth() }
-                        CalendarNavButton("›") { onNextMonth() }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    weekdays.forEach { day ->
-                        Text(
-                            text = day,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextMuted,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f).padding(vertical = 4.dp),
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val totalCells = offset + daysInMonth
-                val rows = (totalCells + 6) / 7
-
-                for (row in 0 until rows) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        for (col in 0 until 7) {
-                            val cellIndex = row * 7 + col
-                            val dayNum = cellIndex - offset + 1
-                            if (dayNum in 1..daysInMonth) {
-                                val date = kotlinx.datetime.LocalDate(year, month + 1, dayNum)
-                                val isToday = date == today
-                                val isSelected = date == selectedDate
-                                val bgColor = when {
-                                    isSelected -> Gold
-                                    isToday -> GoldDim
-                                    else -> androidx.compose.ui.graphics.Color.Transparent
-                                }
-                                val textColor = when {
-                                    isSelected -> Background
-                                    isToday -> TextPrimary
-                                    else -> TextSecondary
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .aspectRatio(1f)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(bgColor)
-                                        .clickable { onSelectDate(date) },
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = "$dayNum",
-                                        fontSize = 15.sp,
-                                        fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.SemiBold,
-                                        color = textColor,
-                                        fontFamily = FontFamily.Monospace,
-                                    )
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    CalendarFooterButton(label = "今天", isPrimary = false, modifier = Modifier.weight(1f), onClick = onToday)
-                    CalendarFooterButton(label = "取消", isPrimary = false, modifier = Modifier.weight(1f), onClick = onDismiss)
-                    CalendarFooterButton(label = "确定", isPrimary = true, modifier = Modifier.weight(1f), onClick = onConfirm)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CalendarNavButton(text: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .border(1.dp, Border, CircleShape)
-            .background(Surface)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextSecondary,
-        )
-    }
-}
-
-@Composable
-private fun CalendarFooterButton(
-    label: String,
-    isPrimary: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(50))
-            .background(if (isPrimary) Gold else Surface)
-            .border(if (isPrimary) 0.dp else 1.dp, Border, RoundedCornerShape(50))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isPrimary) Background else TextSecondary,
-        )
-    }
-}

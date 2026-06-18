@@ -196,66 +196,12 @@ class AddTransactionViewModel(
     }
 
     fun showCalendar() {
-        val state = _uiState.value
-        val parts = state.date.split("-")
-        val y = parts.getOrNull(0)?.toIntOrNull() ?: todayYear()
-        val m = parts.getOrNull(1)?.toIntOrNull()?.minus(1) ?: todayMonth()
-        val d = parts.getOrNull(2)?.toIntOrNull() ?: todayDay()
-        _uiState.update {
-            it.copy(
-                showCalendar = true,
-                calendarYear = y,
-                calendarMonth = m,
-                calendarTempSelected = kotlinx.datetime.LocalDate(y, m + 1, d),
-            )
-        }
+        _uiState.update { it.copy(showCalendar = true) }
     }
 
     fun hideCalendar() {
         _uiState.update { it.copy(showCalendar = false) }
     }
-
-    fun calendarPrevMonth() {
-        _uiState.update {
-            var y = it.calendarYear
-            var m = it.calendarMonth - 1
-            if (m < 0) { m = 11; y-- }
-            it.copy(calendarYear = y, calendarMonth = m)
-        }
-    }
-
-    fun calendarNextMonth() {
-        _uiState.update {
-            var y = it.calendarYear
-            var m = it.calendarMonth + 1
-            if (m > 11) { m = 0; y++ }
-            it.copy(calendarYear = y, calendarMonth = m)
-        }
-    }
-
-    fun calendarSelectDate(date: kotlinx.datetime.LocalDate) {
-        _uiState.update { it.copy(calendarTempSelected = date) }
-    }
-
-    fun calendarConfirm() {
-        val selected = _uiState.value.calendarTempSelected ?: return
-        _uiState.update { it.copy(date = selected.toString(), showCalendar = false) }
-    }
-
-    fun calendarGoToday() {
-        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-        _uiState.update {
-            it.copy(
-                calendarYear = today.year,
-                calendarMonth = today.monthNumber - 1,
-                calendarTempSelected = today,
-            )
-        }
-    }
-
-    private fun todayYear(): Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.year
-    private fun todayMonth(): Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.monthNumber - 1
-    private fun todayDay(): Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.dayOfMonth
 
     fun computeFee(): String {
         val state = _uiState.value
@@ -354,9 +300,6 @@ data class AddTransactionUiState(
     val date: String = "",
     val fieldError: FieldError? = null,
     val showCalendar: Boolean = false,
-    val calendarYear: Int = 0,
-    val calendarMonth: Int = 0,
-    val calendarTempSelected: kotlinx.datetime.LocalDate? = null,
 ) {
     val amountError: Boolean get() = fieldError == FieldError.AMOUNT
     val priceError: Boolean get() = fieldError == FieldError.PRICE
