@@ -1,5 +1,6 @@
 package com.yoke.gainful.domain.di
 
+import com.yoke.gainful.domain.usecase.asset.InsertAssetUseCase
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsUseCase
@@ -19,6 +20,7 @@ val domainModule = module {
     factory { GetTransactionsUseCase(get()) }
     factory { GetTransactionsWithAssetsUseCase(get(), get()) }
     factory { SearchAssetsUseCase(get()) }
-    factory { AddTransactionUseCase(get(), get()) }
+    factory { InsertAssetUseCase(get()) }
+    factory { AddTransactionUseCase(get()) }
     factory { DeleteTransactionUseCase(get()) }
 }

@@ -53,10 +53,10 @@ import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Composable
 fun TransactionsScreen(
@@ -90,13 +90,9 @@ fun TransactionsScreen(
             transaction = deleteTarget!!,
             onConfirm = {
                 viewModel.deleteTransaction(deleteTarget!!.id)
-                showDeleteDialog = false
                 deleteTarget = null
             },
-            onDismiss = {
-                showDeleteDialog = false
-                deleteTarget = null
-            },
+            onDismiss = {},
         )
     }
 
@@ -171,7 +167,6 @@ fun TransactionsScreen(
                             trade = trade,
                             onLongPress = {
                                 deleteTarget = trade
-                                showDeleteDialog = true
                             },
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -292,7 +287,7 @@ private fun TradeCard(
         isSell -> "卖出"
         else -> "股息"
     }
-    val amountPrefix = if (isBuy) "- " else "+ "
+    val amountPrefix = if (isBuy) "-" else "+"
     val dateStr = Instant.fromEpochMilliseconds(trade.timestamp)
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .date
@@ -308,12 +303,9 @@ private fun TradeCard(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
-                        isPressed = true
                         tryAwaitRelease()
-                        isPressed = false
                     },
                     onLongPress = {
-                        isPressed = false
                         onLongPress()
                     },
                 )
@@ -322,9 +314,9 @@ private fun TradeCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top,
+            verticalAlignment = Alignment.Bottom,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -364,7 +356,7 @@ private fun TradeCard(
                 horizontalAlignment = Alignment.End,
             ) {
                 Text(
-                    text = "$amountPrefix${trade.amount.formatDecimal(2)}",
+                    text = "$amountPrefix${trade.displayAmount.formatDecimal(2)}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
@@ -379,26 +371,75 @@ private fun TradeCard(
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = "${trade.quantity.toInt()} 股 @ ${trade.price.formatDecimal(2)}",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Monospace,
-                color = TextPrimary,
-            )
-            if (trade.fee > 0) {
-                Text(
-                    text = "手续费 ${trade.fee.formatDecimal(2)}",
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = TextMuted,
+        if (trade.type != TransactionType.DIVIDEND) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Border.copy(alpha = 0.3f)),
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "数量",
+                            fontSize = 11.sp,
+                            color = TextMuted,
+                        )
+                        Text(
+                            text = "${trade.quantity.toInt()} 股",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = FontFamily.Monospace,
+                            color = TextPrimary,
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "价格",
+                            fontSize = 11.sp,
+                            color = TextMuted,
+                        )
+                        Text(
+                            text = "\u00A5${trade.price.formatDecimal(2)}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = FontFamily.Monospace,
+                            color = TextPrimary,
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "手续费",
+                            fontSize = 11.sp,
+                            color = TextMuted,
+                        )
+                        Text(
+                            text = "\u00A5${trade.fee.formatDecimal(2)}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = FontFamily.Monospace,
+                            color = TextSecondary,
+                        )
+                    }
+                }
             }
         }
     }

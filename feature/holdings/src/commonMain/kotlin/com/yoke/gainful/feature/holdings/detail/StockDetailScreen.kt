@@ -588,9 +588,16 @@ private fun TradesCard(uiState: StockDetailUiState) {
 
 @Composable
 private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
-    val isBuy = trade.type == TransactionType.BUY
-    val typeLabel = if (isBuy) "买入" else "卖出"
-    val typeColor = if (isBuy) GainGreen else GainRed
+    val typeLabel = when (trade.type) {
+        TransactionType.BUY -> "买入"
+        TransactionType.SELL -> "卖出"
+        TransactionType.DIVIDEND -> "股息"
+    }
+    val typeColor = when (trade.type) {
+        TransactionType.BUY -> GainGreen
+        TransactionType.SELL -> GainRed
+        TransactionType.DIVIDEND -> Gold
+    }
 
     Row(
         modifier = Modifier
@@ -615,13 +622,23 @@ private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
                 color = TextMuted,
             )
         }
-        Text(
-            text = "${trade.quantity.toInt()} 股 @ ${trade.price.formatDecimal(2)}",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = FontFamily.Monospace,
-            color = TextPrimary,
-        )
+        if (trade.type == TransactionType.DIVIDEND) {
+            Text(
+                text = "+${trade.amount.formatDecimal(2)}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Monospace,
+                color = Gold,
+            )
+        } else {
+            Text(
+                text = "${trade.quantity.toInt()} 股 @ ${trade.price.formatDecimal(2)}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Monospace,
+                color = TextPrimary,
+            )
+        }
     }
 }
 

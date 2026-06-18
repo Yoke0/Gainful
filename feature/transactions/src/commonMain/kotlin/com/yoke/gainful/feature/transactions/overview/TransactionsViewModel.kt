@@ -38,6 +38,7 @@ class TransactionsViewModel(
                             type = tx.type,
                             price = tx.price,
                             quantity = tx.quantity,
+                            amount = tx.amount,
                             fee = tx.fee,
                             timestamp = tx.timestamp,
                         )
@@ -71,10 +72,15 @@ data class TransactionItem(
     val type: TransactionType,
     val price: Double,
     val quantity: Double,
+    val amount: Double,
     val fee: Double,
     val timestamp: Long,
 ) {
-    val amount: Double get() = price * quantity
+    val displayAmount: Double get() = when (type) {
+        TransactionType.BUY -> amount
+        TransactionType.SELL -> amount
+        TransactionType.DIVIDEND -> amount
+    }
     val typeLabel: String get() = when (type) {
         TransactionType.BUY -> "买入"
         TransactionType.SELL -> "卖出"

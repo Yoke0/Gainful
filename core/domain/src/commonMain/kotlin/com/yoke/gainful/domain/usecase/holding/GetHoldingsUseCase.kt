@@ -20,7 +20,7 @@ class GetHoldingsUseCase(
                     assetTransactions.sortedBy { it.timestamp }.forEach { tx ->
                         when (tx.type) {
                             TransactionType.BUY -> {
-                                totalCost += tx.price * tx.quantity + tx.fee
+                                totalCost += tx.amount
                                 quantity += tx.quantity
                             }
                             TransactionType.SELL -> {
@@ -28,7 +28,9 @@ class GetHoldingsUseCase(
                                 totalCost -= avgCost * tx.quantity
                                 quantity -= tx.quantity
                             }
-                            else -> {}
+                            TransactionType.DIVIDEND -> {
+                                totalCost -= tx.amount
+                            }
                         }
                     }
 

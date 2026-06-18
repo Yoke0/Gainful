@@ -10,7 +10,7 @@ fun TransactionEntity.toDomain(): Transaction = Transaction(
     type = TransactionType.fromCode(type),
     quantity = quantity,
     price = price,
-    fee = fee,
+    amount = amount,
     timestamp = timestamp,
 )
 
@@ -20,6 +20,6 @@ fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
     type = type.value,
     quantity = quantity,
     price = price,
-    fee = fee,
+    amount = amount,
     timestamp = timestamp,
 )

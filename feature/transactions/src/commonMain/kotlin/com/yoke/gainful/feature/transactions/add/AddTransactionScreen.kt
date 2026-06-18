@@ -70,6 +70,7 @@ fun AddTransactionScreen(
     ) {
         AddTransactionHeader(
             onBack = onBack,
+            isEnabled = uiState.canSave,
             onSave = {
                 scope.launch {
                     if (viewModel.saveTransaction()) onBack()
@@ -99,7 +100,6 @@ fun AddTransactionScreen(
                 holdings = uiState.holdings,
                 type = uiState.type,
                 onToggleSearch = viewModel::onToggleSearch,
-                onCollapseSearch = viewModel::onCollapseSearch,
                 onQueryChanged = viewModel::onSearchQueryChanged,
                 onAssetSelected = viewModel::onAssetSelected,
                 onAssetSelectedFromHolding = viewModel::onAssetSelectedFromHolding,
@@ -114,9 +114,11 @@ fun AddTransactionScreen(
                     date = uiState.date,
                     onAmountChanged = viewModel::onAmountChanged,
                     onDateChanged = viewModel::onDateChanged,
+                    amountError = uiState.amountError,
                 )
             } else {
                 TradeFields(
+                    type = uiState.type,
                     amount = uiState.amount,
                     price = uiState.price,
                     quantity = uiState.quantity,
@@ -126,6 +128,10 @@ fun AddTransactionScreen(
                     onPriceChanged = viewModel::onPriceChanged,
                     onQuantityChanged = viewModel::onQuantityChanged,
                     onDateChanged = viewModel::onDateChanged,
+                    amountError = uiState.amountError,
+                    priceError = uiState.priceError,
+                    quantityError = uiState.quantityError,
+                    feeError = uiState.feeError,
                 )
             }
 
@@ -147,8 +153,10 @@ fun AddTransactionScreen(
 @Composable
 private fun AddTransactionHeader(
     onBack: () -> Unit,
+    isEnabled: Boolean = true,
     onSave: () -> Unit,
 ) {
+    val saveAlpha = if (isEnabled) 1f else 0.4f
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -188,8 +196,8 @@ private fun AddTransactionHeader(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
-                .background(Gold)
-                .clickable(onClick = onSave)
+                .background(Gold.copy(alpha = saveAlpha))
+                .clickable(enabled = isEnabled, onClick = onSave)
                 .padding(horizontal = 18.dp, vertical = 6.dp),
         ) {
             Text(
@@ -285,7 +293,6 @@ private fun AssetSelectorSection(
     holdings: List<HoldingDisplay>,
     type: TransactionType,
     onToggleSearch: () -> Unit,
-    onCollapseSearch: () -> Unit,
     onQueryChanged: (String) -> Unit,
     onAssetSelected: (Asset) -> Unit,
     onAssetSelectedFromHolding: (HoldingDisplay) -> Unit,
@@ -326,7 +333,6 @@ private fun AssetSelectorSection(
             holdings = holdings,
             onQueryChanged = onQueryChanged,
             onAssetSelected = onAssetSelected,
-            onCollapseSearch = onCollapseSearch,
         )
     }
 
@@ -437,7 +443,6 @@ private fun AssetSearchExpandable(
     holdings: List<HoldingDisplay>,
     onQueryChanged: (String) -> Unit,
     onAssetSelected: (Asset) -> Unit,
-    onCollapseSearch: () -> Unit,
 ) {
     Column {
         Row(
@@ -699,6 +704,7 @@ private fun Double.formatQuantity(): String {
 
 @Composable
 private fun TradeFields(
+    type: TransactionType,
     amount: String,
     price: String,
     quantity: String,
@@ -708,7 +714,22 @@ private fun TradeFields(
     onPriceChanged: (String) -> Unit,
     onQuantityChanged: (String) -> Unit,
     onDateChanged: (String) -> Unit,
+    amountError: Boolean = false,
+    priceError: Boolean = false,
+    quantityError: Boolean = false,
+    feeError: Boolean = false,
 ) {
+    val isBuy = type == TransactionType.BUY
+    val amountHint = if (isBuy) "实际成交总金额（已含手续费）" else "实际到账金额（已扣手续费）"
+    val feePlaceholder = if (isBuy) "= 金额 − 价×量" else "= 价×量 − 金额"
+    val feeHint = if (isBuy) "手续费 = 成交金额 − 成交价 × 成交量" else "手续费 = 成交价 × 成交量 − 成交金额"
+    val decimalKeyboard = androidx.compose.foundation.text.KeyboardOptions(
+        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+    )
+    val integerKeyboard = androidx.compose.foundation.text.KeyboardOptions(
+        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+    )
+
     SectionLabel("\u4EA4\u6613\u8BE6\u60C5")
 
     Row(
@@ -722,17 +743,20 @@ private fun TradeFields(
             prefix = "\u00A5",
             placeholder = "\u8F93\u5165\u5B9E\u9645\u6210\u4EA4\u603B\u91D1\u989D",
             modifier = Modifier.weight(1f),
-            hint = "\u5B9E\u9645\u6210\u4EA4\u603B\u91D1\u989D\uFF08\u5DF2\u542B\u624B\u7EED\u8D39\uFF09",
+            hint = amountHint,
+            isError = amountError,
+            keyboardOptions = decimalKeyboard,
         )
         FormField(
             label = "\u624B\u7EED\u8D39\uFF08\u81EA\u52A8\u8BA1\u7B97\uFF09",
             value = fee,
             onValueChange = {},
             prefix = "\u00A5",
-            placeholder = "= \u91D1\u989D \u2212 \u4EF7\u00D7\u91CF",
+            placeholder = feePlaceholder,
             readOnly = true,
             modifier = Modifier.weight(1f),
-            hint = "\u624B\u7EED\u8D39 = \u6210\u4EA4\u91D1\u989D \u2212 \u6210\u4EA4\u4EF7 \u00D7 \u6210\u4EA4\u91CF",
+            hint = feeHint,
+            isError = feeError,
         )
     }
 
@@ -749,6 +773,8 @@ private fun TradeFields(
             prefix = "\u00A5",
             placeholder = "0.00",
             modifier = Modifier.weight(1f),
+            isError = priceError,
+            keyboardOptions = decimalKeyboard,
         )
         FormField(
             label = "\u6210\u4EA4\u91CF",
@@ -757,6 +783,8 @@ private fun TradeFields(
             suffix = "\u80A1",
             placeholder = "0",
             modifier = Modifier.weight(1f),
+            isError = quantityError,
+            keyboardOptions = integerKeyboard,
         )
     }
 
@@ -777,17 +805,24 @@ private fun DividendFields(
     date: String,
     onAmountChanged: (String) -> Unit,
     onDateChanged: (String) -> Unit,
+    amountError: Boolean = false,
 ) {
-    SectionLabel("\u80A1\u606F\u8BE6\u60C5")
+    val decimalKeyboard = androidx.compose.foundation.text.KeyboardOptions(
+        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+    )
+
+    SectionLabel("\u80A1\u006F\u606F\u8BE6\u60C5")
 
     FormField(
-        label = "\u80A1\u606F\u91D1\u989D",
+        label = "\u80A1\u006F\u606F\u91D1\u989D",
         value = amount,
         onValueChange = onAmountChanged,
         prefix = "\u00A5",
-        placeholder = "\u8F93\u5165\u80A1\u606F\u91D1\u989D",
+        placeholder = "\u8F93\u5165\u80A1\u006F\u606F\u91D1\u989D",
         modifier = Modifier.fillMaxWidth(),
         hint = "\u5B9E\u9645\u5230\u8D26\u91D1\u989D",
+        isError = amountError,
+        keyboardOptions = decimalKeyboard,
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -812,7 +847,10 @@ private fun FormField(
     placeholder: String = "",
     readOnly: Boolean = false,
     hint: String? = null,
+    isError: Boolean = false,
+    keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default,
 ) {
+    val borderColor = if (isError) GainRed else Border
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -826,7 +864,7 @@ private fun FormField(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(6.dp))
                 .background(if (readOnly) Surface2 else Surface)
-                .border(1.dp, Border, RoundedCornerShape(6.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
                 .padding(horizontal = 12.dp, vertical = 10.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -857,6 +895,7 @@ private fun FormField(
                         ),
                         singleLine = true,
                         readOnly = readOnly,
+                        keyboardOptions = keyboardOptions,
                         cursorBrush = SolidColor(Gold),
                     )
                 }

@@ -2,6 +2,7 @@ package com.yoke.gainful.feature.transactions.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yoke.gainful.domain.usecase.asset.InsertAssetUseCase
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
 import com.yoke.gainful.domain.usecase.transaction.AddTransactionUseCase
@@ -24,6 +25,7 @@ class AddTransactionViewModel(
     private val searchAssetsUseCase: SearchAssetsUseCase,
     private val addTransactionUseCase: AddTransactionUseCase,
     private val getHoldingsDisplayUseCase: GetHoldingsDisplayUseCase,
+    private val insertAssetUseCase: InsertAssetUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -108,6 +110,9 @@ class AddTransactionViewModel(
     }
 
     fun onAssetSelected(asset: Asset) {
+        viewModelScope.launch {
+            insertAssetUseCase(asset)
+        }
         _uiState.update {
             it.copy(
                 selectedAsset = asset,
@@ -152,14 +157,48 @@ class AddTransactionViewModel(
 
     fun onAmountChanged(amount: String) {
         _uiState.update { it.copy(amount = amount) }
+        validateFields()
     }
 
     fun onPriceChanged(price: String) {
         _uiState.update { it.copy(price = price) }
+        validateFields()
     }
 
     fun onQuantityChanged(quantity: String) {
         _uiState.update { it.copy(quantity = quantity) }
+        validateFields()
+    }
+
+    private fun validateFields() {
+        val state = _uiState.value
+        if (state.type == TransactionType.DIVIDEND) {
+            val amount = state.amount.toDoubleOrNull()
+            _uiState.update {
+                it.copy(fieldError = if (state.amount.isNotBlank() && (amount == null || amount <= 0)) FieldError.AMOUNT else null)
+            }
+            return
+        }
+        val amount = state.amount.toDoubleOrNull()
+        val price = state.price.toDoubleOrNull()
+        val qty = state.quantity.toDoubleOrNull()
+
+        val error = when {
+            state.amount.isNotBlank() && (amount == null || amount <= 0) -> FieldError.AMOUNT
+            state.price.isNotBlank() && (price == null || price <= 0) -> FieldError.PRICE
+            state.quantity.isNotBlank() && (qty == null || qty <= 0 || qty != qty.toLong().toDouble()) -> FieldError.QUANTITY
+            amount != null && price != null && qty != null && amount > 0 && price > 0 && qty > 0 -> {
+                val marketValue = price * qty
+                val fee = when (state.type) {
+                    TransactionType.BUY -> amount - marketValue
+                    TransactionType.SELL -> marketValue - amount
+                    else -> 0.0
+                }
+                if (fee < 0) FieldError.FEE else null
+            }
+            else -> null
+        }
+        _uiState.update { it.copy(fieldError = error) }
     }
 
     fun onDateChanged(date: String) {
@@ -172,13 +211,46 @@ class AddTransactionViewModel(
         val price = state.price.toDoubleOrNull() ?: return ""
         val qty = state.quantity.toDoubleOrNull() ?: return ""
         if (amt <= 0 || price <= 0 || qty <= 0) return ""
-        val fee = amt - price * qty
-        return if (fee >= 0) fee.formatTwoDecimals() else ""
+        val marketValue = price * qty
+        val fee = when (state.type) {
+            TransactionType.BUY -> amt - marketValue
+            TransactionType.SELL -> marketValue - amt
+            TransactionType.DIVIDEND -> 0.0
+        }
+        return fee.formatTwoDecimals()
     }
 
     suspend fun saveTransaction(): Boolean {
+        validateFields()
         val state = _uiState.value
+        if (state.fieldError != null) return false
+
         val asset = state.selectedAsset ?: return false
+
+        if (state.type == TransactionType.DIVIDEND) {
+            val amount = state.amount.toDoubleOrNull() ?: return false
+            val timestamp = kotlin.time.Clock.System.now().toEpochMilliseconds()
+            val id = buildString {
+                append(timestamp)
+                append('-')
+                repeat(8) { append(('a'..'z').random()) }
+            }
+            val transaction = Transaction(
+                id = id,
+                assetId = asset.unifiedCode.ifBlank { asset.code },
+                type = TransactionType.DIVIDEND,
+                quantity = 0.0,
+                price = 0.0,
+                amount = amount,
+                timestamp = timestamp,
+            )
+            addTransactionUseCase(transaction)
+            return true
+        }
+
+        val amount = state.amount.toDoubleOrNull() ?: return false
+        val price = state.price.toDoubleOrNull() ?: return false
+        val qty = state.quantity.toDoubleOrNull() ?: return false
 
         val timestamp = kotlin.time.Clock.System.now().toEpochMilliseconds()
         val id = buildString {
@@ -186,42 +258,17 @@ class AddTransactionViewModel(
             append('-')
             repeat(8) { append(('a'..'z').random()) }
         }
-
-        return try {
-            if (state.type == TransactionType.DIVIDEND) {
-                val amount = state.amount.toDoubleOrNull() ?: return false
-                if (amount <= 0) return false
-                val transaction = Transaction(
-                    id = id,
-                    assetId = asset.unifiedCode.ifBlank { asset.code },
-                    type = TransactionType.DIVIDEND,
-                    quantity = 0.0,
-                    price = 0.0,
-                    fee = 0.0,
-                    timestamp = timestamp,
-                )
-                addTransactionUseCase(transaction, asset)
-            } else {
-                val amount = state.amount.toDoubleOrNull() ?: return false
-                if (amount <= 0) return false
-                val price = state.price.toDoubleOrNull() ?: 0.0
-                val qty = state.quantity.toDoubleOrNull() ?: 0.0
-                val fee = computeFee().toDoubleOrNull() ?: 0.0
-                val transaction = Transaction(
-                    id = id,
-                    assetId = asset.unifiedCode.ifBlank { asset.code },
-                    type = state.type,
-                    quantity = qty,
-                    price = price,
-                    fee = fee,
-                    timestamp = timestamp,
-                )
-                addTransactionUseCase(transaction, asset)
-            }
-            true
-        } catch (_: Exception) {
-            false
-        }
+        val transaction = Transaction(
+            id = id,
+            assetId = asset.unifiedCode.ifBlank { asset.code },
+            type = state.type,
+            quantity = qty,
+            price = price,
+            amount = amount,
+            timestamp = timestamp,
+        )
+        addTransactionUseCase(transaction)
+        return true
     }
 
     private fun todayDateString(): String {
@@ -229,6 +276,10 @@ class AddTransactionViewModel(
         val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
         return today.toString()
     }
+}
+
+enum class FieldError {
+    AMOUNT, PRICE, QUANTITY, FEE
 }
 
 data class AddTransactionUiState(
@@ -243,5 +294,15 @@ data class AddTransactionUiState(
     val price: String = "",
     val quantity: String = "",
     val date: String = "",
-    val error: String? = null,
-)
+    val fieldError: FieldError? = null,
+) {
+    val amountError: Boolean get() = fieldError == FieldError.AMOUNT
+    val priceError: Boolean get() = fieldError == FieldError.PRICE
+    val quantityError: Boolean get() = fieldError == FieldError.QUANTITY
+    val feeError: Boolean get() = fieldError == FieldError.FEE
+    val canSave: Boolean get() = when {
+        selectedAsset == null -> false
+        type == TransactionType.DIVIDEND -> amount.isNotBlank() && fieldError == null
+        else -> amount.isNotBlank() && price.isNotBlank() && quantity.isNotBlank() && fieldError == null
+    }
+}

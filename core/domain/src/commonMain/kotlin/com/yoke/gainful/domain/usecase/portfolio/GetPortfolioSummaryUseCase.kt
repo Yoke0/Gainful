@@ -26,13 +26,15 @@ class GetPortfolioSummaryUseCase(
                                 (avgCost * quantity + tx.price * tx.quantity) / totalQty
                             } else 0.0
                             quantity = totalQty
-                            totalCost += tx.price * tx.quantity + tx.fee
+                            totalCost += tx.amount
                         }
                         TransactionType.SELL -> {
                             quantity -= tx.quantity
-                            totalValue += tx.price * tx.quantity - tx.fee
+                            totalValue += tx.amount
                         }
-                        else -> {}
+                        TransactionType.DIVIDEND -> {
+                            totalCost -= tx.amount
+                        }
                     }
                 }
 

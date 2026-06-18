@@ -18,9 +18,10 @@ class GetStockDetailUseCase(
 ) {
     suspend operator fun invoke(stockCode: String): StockDetailResult {
         val assets = assetRepository.getAssets().firstOrNull() ?: emptyList()
-        val asset = assets.find {
+        val matches = assets.filter {
             it.code == stockCode || it.unifiedCode == stockCode || it.innerCode == stockCode
         }
+        val asset = matches.firstOrNull { it.quoteId.isNotBlank() } ?: matches.firstOrNull()
 
         val quote = if (asset?.quoteId != null) {
             try {
@@ -42,7 +43,7 @@ class GetStockDetailUseCase(
         assetTransactions.sortedBy { it.timestamp }.forEach { tx ->
             when (tx.type) {
                 TransactionType.BUY -> {
-                    totalCost += tx.price * tx.quantity + tx.fee
+                    totalCost += tx.amount
                     quantity += tx.quantity
                 }
                 TransactionType.SELL -> {
@@ -50,7 +51,9 @@ class GetStockDetailUseCase(
                     totalCost -= avgCost * tx.quantity
                     quantity -= tx.quantity
                 }
-                else -> {}
+                TransactionType.DIVIDEND -> {
+                    totalCost -= tx.amount
+                }
             }
         }
 

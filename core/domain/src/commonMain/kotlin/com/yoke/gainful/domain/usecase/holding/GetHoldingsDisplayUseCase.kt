@@ -18,7 +18,9 @@ class GetHoldingsDisplayUseCase(
             transactionRepository.getTransactions(),
             assetRepository.getAssets(),
         ) { transactions, assets ->
-            val assetMap = assets.associateBy { it.unifiedCode.ifBlank { it.code } }
+            val assetMap = assets
+                .groupBy { it.unifiedCode.ifBlank { it.code } }
+                .mapValues { (_, group) -> group.firstOrNull { it.quoteId.isNotBlank() } ?: group.first() }
 
             val holdings = transactions
                 .groupBy { it.assetId }
@@ -29,7 +31,7 @@ class GetHoldingsDisplayUseCase(
                     assetTransactions.sortedBy { it.timestamp }.forEach { tx ->
                         when (tx.type) {
                             TransactionType.BUY -> {
-                                totalCost += tx.price * tx.quantity + tx.fee
+                                totalCost += tx.amount
                                 quantity += tx.quantity
                             }
                             TransactionType.SELL -> {
@@ -37,7 +39,9 @@ class GetHoldingsDisplayUseCase(
                                 totalCost -= avgCost * tx.quantity
                                 quantity -= tx.quantity
                             }
-                            else -> {}
+                            TransactionType.DIVIDEND -> {
+                                totalCost -= tx.amount
+                            }
                         }
                     }
 

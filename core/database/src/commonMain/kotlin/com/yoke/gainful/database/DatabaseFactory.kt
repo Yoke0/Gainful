@@ -5,5 +5,7 @@ import androidx.room.RoomDatabase
 const val DATABASE_NAME = "gainful.db"
 
 fun createDatabase(builder: RoomDatabase.Builder<GainfulDatabase>): GainfulDatabase {
-    return builder.build()
+    return builder
+        .addMigrations(GainfulDatabase.MIGRATION_1_2)
+        .build()
 }
