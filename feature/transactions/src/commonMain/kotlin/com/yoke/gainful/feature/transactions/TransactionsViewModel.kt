@@ -2,7 +2,8 @@ package com.yoke.gainful.feature.transactions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yoke.gainful.domain.usecase.GetTransactionsWithAssetsUseCase
+import com.yoke.gainful.domain.usecase.transaction.DeleteTransactionUseCase
+import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,6 +13,7 @@ import com.yoke.gainful.model.TransactionType
 
 class TransactionsViewModel(
     private val getTransactionsWithAssetsUseCase: GetTransactionsWithAssetsUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionsUiState())
@@ -32,6 +34,7 @@ class TransactionsViewModel(
                             assetId = tx.assetId,
                             code = item.code,
                             name = item.name,
+                            pinYin = item.pinYin,
                             type = tx.type,
                             price = tx.price,
                             quantity = tx.quantity,
@@ -43,6 +46,12 @@ class TransactionsViewModel(
                 .collect { items ->
                     _uiState.value = TransactionsUiState(transactions = items)
                 }
+        }
+    }
+
+    fun deleteTransaction(id: String) {
+        viewModelScope.launch {
+            deleteTransactionUseCase(id)
         }
     }
 }
@@ -58,6 +67,7 @@ data class TransactionItem(
     val assetId: String,
     val code: String,
     val name: String,
+    val pinYin: String,
     val type: TransactionType,
     val price: Double,
     val quantity: Double,
@@ -68,6 +78,6 @@ data class TransactionItem(
     val typeLabel: String get() = when (type) {
         TransactionType.BUY -> "买入"
         TransactionType.SELL -> "卖出"
-        TransactionType.DIVIDEND -> "分红"
+        TransactionType.DIVIDEND -> "股息"
     }
 }

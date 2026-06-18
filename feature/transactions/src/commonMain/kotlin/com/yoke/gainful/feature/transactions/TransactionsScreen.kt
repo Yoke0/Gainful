@@ -1,7 +1,10 @@
 package com.yoke.gainful.feature.transactions
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,19 +28,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.theme.Background
+import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
+import com.yoke.gainful.ui.theme.GreenDim
+import com.yoke.gainful.ui.theme.RedDim
+import com.yoke.gainful.ui.theme.Surface
+import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 @Composable
 fun TransactionsScreen(
@@ -45,12 +65,39 @@ fun TransactionsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedFilter by remember { mutableStateOf("all") }
-    var expandedIndex by remember { mutableStateOf(-1) }
 
     val filteredTrades = when (selectedFilter) {
         "buy" -> uiState.transactions.filter { it.type == TransactionType.BUY }
         "sell" -> uiState.transactions.filter { it.type == TransactionType.SELL }
+        "dividend" -> uiState.transactions.filter { it.type == TransactionType.DIVIDEND }
         else -> uiState.transactions
+    }
+
+    val buyCount = uiState.transactions.count { it.type == TransactionType.BUY }
+    val sellCount = uiState.transactions.count { it.type == TransactionType.SELL }
+    val divCount = uiState.transactions.count { it.type == TransactionType.DIVIDEND }
+
+    val groups = remember(filteredTrades) {
+        filteredTrades.groupBy { getTimeGroup(it.timestamp) }
+    }
+    val groupOrder = listOf("今天", "最近7天", "本月", "更早")
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var deleteTarget by remember { mutableStateOf<TransactionItem?>(null) }
+
+    if (showDeleteDialog && deleteTarget != null) {
+        DeleteConfirmDialog(
+            transaction = deleteTarget!!,
+            onConfirm = {
+                viewModel.deleteTransaction(deleteTarget!!.id)
+                showDeleteDialog = false
+                deleteTarget = null
+            },
+            onDismiss = {
+                showDeleteDialog = false
+                deleteTarget = null
+            },
+        )
     }
 
     Column(
@@ -71,68 +118,66 @@ fun TransactionsScreen(
                 fontWeight = FontWeight.ExtraBold,
                 color = TextPrimary,
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Gold)
+                    .clickable(onClick = onAddTransaction)
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
             ) {
-                FilterButton("全部", selectedFilter == "all") { selectedFilter = "all" }
-                FilterButton("买入", selectedFilter == "buy") { selectedFilter = "buy" }
-                FilterButton("卖出", selectedFilter == "sell") { selectedFilter = "sell" }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(Gold)
-                        .clickable(onClick = onAddTransaction)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
-                ) {
-                    Text(
-                        text = "+",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Background,
-                    )
-                }
+                Text(
+                    text = "+ 添加",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Background,
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(
-                text = "最近交易",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-            )
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(GoldDim)
-                    .padding(horizontal = 10.dp, vertical = 2.dp),
-            ) {
-                Text(
-                    text = "${filteredTrades.size} 笔",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Gold,
-                )
-            }
+            FilterTab("全部", selectedFilter == "all", null) { selectedFilter = "all" }
+            FilterTab("买入", selectedFilter == "buy", GainGreen) { selectedFilter = "buy" }
+            FilterTab("卖出", selectedFilter == "sell", GainRed) { selectedFilter = "sell" }
+            FilterTab("股息", selectedFilter == "dividend", Gold) { selectedFilter = "dividend" }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        filteredTrades.forEachIndexed { index, trade ->
-            TradeCard(
-                trade = trade,
-                isExpanded = expandedIndex == index,
-                onClick = {
-                    expandedIndex = if (expandedIndex == index) -1 else index
-                },
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            SummaryItem("共", "${uiState.transactions.size} 笔")
+            SummaryItem("买入", "$buyCount", GainGreen)
+            SummaryItem("卖出", "$sellCount", GainRed)
+            SummaryItem("股息", "$divCount", Gold)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (filteredTrades.isEmpty()) {
+            EmptyState()
+        } else {
+            groupOrder.forEach { groupName ->
+                val items = groups[groupName]
+                if (!items.isNullOrEmpty()) {
+                    TimeGroupHeader(groupName, items.size)
+                    items.forEach { trade ->
+                        TradeCard(
+                            trade = trade,
+                            onLongPress = {
+                                deleteTarget = trade
+                                showDeleteDialog = true
+                            },
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(80.dp))
@@ -140,146 +185,411 @@ fun TransactionsScreen(
 }
 
 @Composable
-private fun FilterButton(text: String, isActive: Boolean, onClick: () -> Unit) {
+private fun FilterTab(text: String, isActive: Boolean, activeColor: Color?, onClick: () -> Unit) {
+    val bgColor = when {
+        isActive && activeColor != null -> activeColor.copy(alpha = 0.12f)
+        isActive -> GoldDim
+        else -> Surface
+    }
+    val textColor = when {
+        isActive && activeColor != null -> activeColor
+        isActive -> Gold
+        else -> TextSecondary
+    }
+    val borderColor = when {
+        isActive && activeColor != null -> activeColor
+        isActive -> Gold
+        else -> Border
+    }
+
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (isActive) GoldDim else Card)
+            .clip(RoundedCornerShape(20.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
+            .background(bgColor)
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
         Text(
             text = text,
             fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
-            color = if (isActive) Gold else TextSecondary,
+            fontWeight = FontWeight.SemiBold,
+            color = textColor,
         )
+    }
+}
+
+@Composable
+private fun SummaryItem(label: String, value: String, valueColor: Color = TextPrimary) {
+    Row {
+        Text(
+            text = "$label ",
+            fontSize = 11.sp,
+            color = TextMuted,
+        )
+        Text(
+            text = value,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = FontFamily.Monospace,
+            color = valueColor,
+        )
+    }
+}
+
+@Composable
+private fun TimeGroupHeader(title: String, count: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(top = 14.dp, bottom = 8.dp),
+    ) {
+        Text(
+            text = title,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextSecondary,
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Surface)
+                .padding(horizontal = 10.dp, vertical = 2.dp),
+        ) {
+            Text(
+                text = "$count 笔",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextMuted,
+            )
+        }
     }
 }
 
 @Composable
 private fun TradeCard(
     trade: TransactionItem,
-    isExpanded: Boolean,
-    onClick: () -> Unit,
+    onLongPress: () -> Unit = {},
 ) {
+    val isBuy = trade.type == TransactionType.BUY
     val isSell = trade.type == TransactionType.SELL
-    val isDividend = trade.type == TransactionType.DIVIDEND
-    val isPositive = isSell || isDividend
+
+    var isPressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (isPressed) 0.97f else 1f, label = "scale")
+
+    val typeColor = when {
+        isBuy -> GainGreen
+        isSell -> GainRed
+        else -> Gold
+    }
+    val typeBgColor = when {
+        isBuy -> GreenDim
+        isSell -> RedDim
+        else -> GoldDim
+    }
+    val typeLabel = when {
+        isBuy -> "买入"
+        isSell -> "卖出"
+        else -> "股息"
+    }
+    val amountPrefix = if (isBuy) "- " else "+ "
+    val dateStr = Instant.fromEpochMilliseconds(trade.timestamp)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
+        .toString()
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .scale(scale)
             .clip(RoundedCornerShape(10.dp))
-            .background(Card)
-            .clickable(onClick = onClick),
+            .background(if (isPressed) Card.copy(alpha = 0.8f) else Card)
+            .border(1.dp, if (isPressed) GainRed.copy(alpha = 0.5f) else Border, RoundedCornerShape(10.dp))
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        tryAwaitRelease()
+                        isPressed = false
+                    },
+                    onLongPress = {
+                        isPressed = false
+                        onLongPress()
+                    },
+                )
+            },
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = trade.code,
+                    text = trade.name,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary,
                 )
-                Text(
-                    text = trade.name,
-                    fontSize = 12.sp,
-                    color = TextMuted,
-                    maxLines = 1,
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(typeBgColor)
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            text = typeLabel,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = typeColor,
+                        )
+                    }
+                    Text(
+                        text = trade.pinYin.ifBlank { trade.code },
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = TextMuted,
+                    )
+                }
             }
 
             Column(
                 horizontalAlignment = Alignment.End,
             ) {
                 Text(
-                    text = if (isPositive) "+${trade.amount.toInt()}" else "-${trade.amount.toInt()}",
+                    text = "$amountPrefix${trade.amount.formatDecimal(2)}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isPositive) GainGreen else GainRed,
+                    fontFamily = FontFamily.Monospace,
+                    color = typeColor,
                 )
                 Text(
-                    text = "\u00A5${trade.amount.toInt()} | \u00A5${trade.fee.toInt()}",
+                    text = dateStr,
                     fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
                     color = TextMuted,
                 )
             }
         }
 
-        if (isExpanded) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Background.copy(alpha = 0.4f))
-                    .padding(16.dp),
-            ) {
-                DetailRow("类型", trade.typeLabel)
-                DetailRow("成交价", "\u00A5${trade.price}")
-                DetailRow("数量", "${trade.quantity.toInt()} 股")
-                DetailRow("金额", "\u00A5${trade.amount.toInt()}")
-                DetailRow("手续费", "\u00A5${trade.fee.toInt()}")
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TagChip(
-                        text = trade.typeLabel,
-                        isGreen = trade.type == TransactionType.BUY,
-                    )
-                    TagChip(
-                        text = trade.code,
-                        isGreen = true,
-                    )
-                }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "${trade.quantity.toInt()} 股 @ ${trade.price.formatDecimal(2)}",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Monospace,
+                color = TextPrimary,
+            )
+            if (trade.fee > 0) {
+                Text(
+                    text = "手续费 ${trade.fee.formatDecimal(2)}",
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextMuted,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun DetailRow(label: String, value: String) {
-    Row(
+private fun EmptyState() {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 3.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .clip(RoundedCornerShape(14.dp))
+            .background(Card)
+            .border(1.dp, Border, RoundedCornerShape(14.dp))
+            .padding(40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(48.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Surface2)
+                .border(1.dp, Border, RoundedCornerShape(24.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "\uD83D\uDCCB",
+                fontSize = 20.sp,
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = label,
-            fontSize = 13.sp,
-            color = TextMuted,
+            text = "暂无交易记录",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextSecondary,
         )
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = value,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextPrimary,
+            text = "点击右上角添加你的第一笔交易",
+            fontSize = 14.sp,
+            color = TextMuted,
         )
     }
 }
 
+private fun getTimeGroup(timestamp: Long): String {
+    val days = getDaysAgo(timestamp)
+    return when {
+        days == 0 -> "今天"
+        days <= 7 -> "最近7天"
+        days <= 30 -> "本月"
+        else -> "更早"
+    }
+}
+
+private fun getDaysAgo(timestamp: Long): Int {
+    val tradeDate = Instant.fromEpochMilliseconds(timestamp)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
+    val now = Clock.System.now()
+    val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return (today.toEpochDays() - tradeDate.toEpochDays()).toInt()
+}
+
 @Composable
-private fun TagChip(text: String, isGreen: Boolean) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                if (isGreen) com.yoke.gainful.ui.theme.GreenDim else GoldDim,
+private fun DeleteConfirmDialog(
+    transaction: TransactionItem,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val typeLabel = when (transaction.type) {
+        TransactionType.BUY -> "买入"
+        TransactionType.SELL -> "卖出"
+        TransactionType.DIVIDEND -> "股息"
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(24.dp),
+        ) {
+            Text(
+                text = "确认删除",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
             )
-            .padding(horizontal = 12.dp, vertical = 3.dp),
-    ) {
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = if (isGreen) GainGreen else Gold,
-        )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = "确定要删除这笔",
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    textAlign = TextAlign.Center,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                when (transaction.type) {
+                                    TransactionType.BUY -> GreenDim
+                                    TransactionType.SELL -> RedDim
+                                    else -> GoldDim
+                                },
+                            )
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            text = typeLabel,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = when (transaction.type) {
+                                TransactionType.BUY -> GainGreen
+                                TransactionType.SELL -> GainRed
+                                else -> Gold
+                            },
+                        )
+                    }
+                    Text(
+                        text = transaction.name,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = FontFamily.Monospace,
+                        color = TextPrimary,
+                    )
+                }
+                Text(
+                    text = "交易吗？此操作不可撤销。",
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Surface)
+                        .border(1.dp, Border, RoundedCornerShape(12.dp))
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "取消",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextSecondary,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(GainRed)
+                        .clickable(onClick = onConfirm)
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "删除",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                    )
+                }
+            }
+        }
     }
 }

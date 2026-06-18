@@ -1,4 +1,4 @@
-package com.yoke.gainful.domain.usecase
+package com.yoke.gainful.domain.usecase.transaction
 
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -22,6 +22,7 @@ class GetTransactionsWithAssetsUseCase(
                     transaction = tx,
                     code = asset?.code ?: tx.assetId,
                     name = asset?.name ?: tx.assetId,
+                    pinYin = asset?.pinYin ?: "",
                 )
             }
         }
@@ -32,4 +33,5 @@ data class TransactionWithAsset(
     val transaction: Transaction,
     val code: String,
     val name: String,
+    val pinYin: String,
 )

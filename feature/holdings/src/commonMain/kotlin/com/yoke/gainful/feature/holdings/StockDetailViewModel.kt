@@ -2,7 +2,7 @@ package com.yoke.gainful.feature.holdings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yoke.gainful.domain.usecase.GetStockDetailUseCase
+import com.yoke.gainful.domain.usecase.holding.GetStockDetailUseCase
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.KLine
 import com.yoke.gainful.model.KLinePeriod

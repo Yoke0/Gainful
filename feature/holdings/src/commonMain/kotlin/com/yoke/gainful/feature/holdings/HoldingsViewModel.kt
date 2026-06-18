@@ -2,7 +2,7 @@ package com.yoke.gainful.feature.holdings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yoke.gainful.domain.usecase.GetHoldingsDisplayUseCase
+import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
 import com.yoke.gainful.model.HoldingDisplay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

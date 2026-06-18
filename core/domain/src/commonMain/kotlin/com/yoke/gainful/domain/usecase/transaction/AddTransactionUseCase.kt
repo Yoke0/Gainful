@@ -1,4 +1,4 @@
-package com.yoke.gainful.domain.usecase
+package com.yoke.gainful.domain.usecase.transaction
 
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.TransactionRepository

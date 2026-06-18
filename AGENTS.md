@@ -106,6 +106,37 @@ Strictly adhere to the **Conventional Commits** format for all code diffs or tas
 - `fix(network): handle timeout on East Money API`
 - `chore(deps): bump AGP version to 9.2.1`
 
+## Android Verification
+
+After making changes, verify on Android device using this workflow:
+
+> **Prerequisites**: `android` CLI installed (`curl -fsSL https://dl.google.com/android/cli/latest/darwin_arm64/install.sh | bash`), `adb` at `~/Library/Android/sdk/platform-tools/adb`, wireless ADB connected.
+
+```bash
+# 1. Build and install
+./gradlew :androidApp:installDebug
+
+# 2. Launch app
+adb shell am force-stop com.yoke.gainful
+adb shell am start -n com.yoke.gainful/.MainActivity
+
+# 3. Inspect UI (structured JSON with center coords)
+android layout
+
+# 4. Tap element (use center from layout output)
+adb shell input tap <x> <y>
+
+# 5. Check what changed after an action
+android layout --diff
+
+# 6. Screenshot (only when visual inspection needed)
+android screen capture -o /tmp/s.png
+```
+
+- `android layout` returns JSON with `text`, `center`, `bounds`, `interactions` — no grep needed.
+- `adb shell input tap` may fail with SecurityException on first wireless ADB attempt; retry works.
+- Clean up screenshots after verification.
+
 ## Gotchas
 
 - **NEVER use `java.time.*` in commonMain** — use `kotlin.time.Instant`/`Clock` + `kotlinx.datetime.toLocalDateTime()` + `kotlinx.datetime.TimeZone` instead. Add `libs.kotlinx.datetime` dependency if needed.

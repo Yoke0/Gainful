@@ -3,6 +3,7 @@ package com.yoke.gainful.feature.transactions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +22,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +37,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.model.Asset
+import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
@@ -58,21 +58,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddTransactionScreen(
     viewModel: AddTransactionViewModel,
-    todayDate: String,
     onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        if (uiState.date.isBlank()) {
-            viewModel.onDateChanged(todayDate)
-        }
-    }
-
-    LaunchedEffect(uiState.saved) {
-        if (uiState.saved) onBack()
-    }
 
     Column(
         modifier = Modifier
@@ -82,7 +71,9 @@ fun AddTransactionScreen(
         AddTransactionHeader(
             onBack = onBack,
             onSave = {
-                scope.launch { viewModel.saveTransaction() }
+                scope.launch {
+                    if (viewModel.saveTransaction()) onBack()
+                }
             },
         )
 
@@ -100,12 +91,18 @@ fun AddTransactionScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             AssetSelectorSection(
+                selectedAsset = uiState.selectedAsset,
+                showSearch = uiState.showSearch,
                 searchQuery = uiState.searchQuery,
                 suggestions = uiState.suggestions,
                 showSuggestions = uiState.showSuggestions,
-                selectedAsset = uiState.selectedAsset,
+                holdings = uiState.holdings,
+                type = uiState.type,
+                onToggleSearch = viewModel::onToggleSearch,
+                onCollapseSearch = viewModel::onCollapseSearch,
                 onQueryChanged = viewModel::onSearchQueryChanged,
                 onAssetSelected = viewModel::onAssetSelected,
+                onAssetSelectedFromHolding = viewModel::onAssetSelectedFromHolding,
                 onAssetCleared = viewModel::onAssetCleared,
             )
 
@@ -280,203 +277,118 @@ private fun TypeButton(
 
 @Composable
 private fun AssetSelectorSection(
+    selectedAsset: Asset?,
+    showSearch: Boolean,
     searchQuery: String,
     suggestions: List<Asset>,
     showSuggestions: Boolean,
-    selectedAsset: Asset?,
+    holdings: List<HoldingDisplay>,
+    type: TransactionType,
+    onToggleSearch: () -> Unit,
+    onCollapseSearch: () -> Unit,
     onQueryChanged: (String) -> Unit,
     onAssetSelected: (Asset) -> Unit,
+    onAssetSelectedFromHolding: (HoldingDisplay) -> Unit,
     onAssetCleared: () -> Unit,
 ) {
     SectionLabel("\u6807\u7684\u8D44\u4EA7")
 
-    Box {
-        AssetSearchField(
-            query = searchQuery,
-            onQueryChanged = onQueryChanged,
-        )
-
-        if (showSuggestions && suggestions.isNotEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 52.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Card)
-                    .border(1.dp, Border, RoundedCornerShape(10.dp)),
-            ) {
-                suggestions.take(6).forEach { asset ->
-                    SuggestionItem(
-                        asset = asset,
-                        onClick = { onAssetSelected(asset) },
-                    )
-                }
-            }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (selectedAsset != null) {
+            SelectedStockInfo(
+                asset = selectedAsset,
+                onRemove = onAssetCleared,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            StockPlaceholder(
+                modifier = Modifier.weight(1f),
+            )
         }
 
-        if (showSuggestions && suggestions.isEmpty() && searchQuery.isNotBlank()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 52.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Card)
-                    .border(1.dp, Border, RoundedCornerShape(10.dp))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "\u672A\u627E\u5230\u5339\u914D\u7684\u80A1\u7968",
-                    fontSize = 15.sp,
-                    color = TextMuted,
-                )
-            }
+        if (type == TransactionType.BUY) {
+            SearchToggleButton(
+                isExpanded = showSearch,
+                onClick = onToggleSearch,
+            )
         }
     }
 
-    if (selectedAsset != null) {
-        Spacer(modifier = Modifier.height(8.dp))
-        SelectedAssetTag(
-            asset = selectedAsset,
-            onRemove = onAssetCleared,
+    if (showSearch) {
+        Spacer(modifier = Modifier.height(10.dp))
+        AssetSearchExpandable(
+            query = searchQuery,
+            suggestions = suggestions,
+            showSuggestions = showSuggestions,
+            holdings = holdings,
+            onQueryChanged = onQueryChanged,
+            onAssetSelected = onAssetSelected,
+            onCollapseSearch = onCollapseSearch,
+        )
+    }
+
+    if (!showSearch && holdings.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(10.dp))
+        HoldingsQuickSelect(
+            holdings = holdings,
+            onHoldingSelected = onAssetSelectedFromHolding,
         )
     }
 }
 
 @Composable
-private fun AssetSearchField(
-    query: String,
-    onQueryChanged: (String) -> Unit,
+private fun StockPlaceholder(
+    modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
+    Box(
+        modifier = modifier
+            .height(44.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(Surface)
             .border(1.dp, Border, RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.CenterStart,
     ) {
         Text(
-            text = "\uD83D\uDD0D",
-            fontSize = 16.sp,
+            text = "\u5DF2\u9009\uFF1A\u65E0",
+            fontSize = 15.sp,
             color = TextMuted,
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        BasicTextField(
-            value = query,
-            onValueChange = onQueryChanged,
-            modifier = Modifier.weight(1f).padding(vertical = 8.dp),
-            textStyle = TextStyle(
-                fontSize = 17.sp,
-                color = TextPrimary,
-            ),
-            singleLine = true,
-            cursorBrush = SolidColor(Gold),
-            decorationBox = { innerTextField ->
-                if (query.isBlank()) {
-                    Text(
-                        text = "\u641C\u7D22\u80A1\u7968\u540D\u79F0\u6216\u4EE3\u7801\u2026",
-                        fontSize = 17.sp,
-                        color = TextMuted,
-                    )
-                }
-                innerTextField()
-            },
-        )
-        if (query.isNotBlank()) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .clickable { onQueryChanged("") }
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "\u2715",
-                    fontSize = 12.sp,
-                    color = TextMuted,
-                )
-            }
-        }
     }
 }
 
 @Composable
-private fun SuggestionItem(
-    asset: Asset,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column {
-            Text(
-                text = asset.name,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
-            )
-            Text(
-                text = asset.jys,
-                fontSize = 13.sp,
-                color = TextMuted,
-            )
-        }
-        Text(
-            text = asset.code,
-            fontSize = 13.sp,
-            fontFamily = FontFamily.Monospace,
-            color = TextSecondary,
-        )
-    }
-}
-
-@Composable
-private fun SelectedAssetTag(
+private fun SelectedStockInfo(
     asset: Asset,
     onRemove: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            .height(44.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(GoldDim)
             .border(1.dp, Gold.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
-            .padding(10.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(text = "\uD83D\uDCC8", fontSize = 14.sp)
-        }
-        Spacer(modifier = Modifier.width(10.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = asset.name,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
-            )
-            Text(
-                text = "${asset.code} \u00B7 ${asset.jys}",
-                fontSize = 13.sp,
-                fontFamily = FontFamily.Monospace,
-                color = TextMuted,
-            )
-        }
+        Text(
+            text = asset.pinYin.ifBlank { asset.code },
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            color = TextPrimary,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = asset.name,
+            fontSize = 13.sp,
+            color = TextSecondary,
+        )
+        Spacer(modifier = Modifier.weight(1f))
         Box(
             modifier = Modifier
                 .size(24.dp)
@@ -492,6 +404,297 @@ private fun SelectedAssetTag(
             )
         }
     }
+}
+
+@Composable
+private fun SearchToggleButton(
+    isExpanded: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .width(44.dp)
+            .height(44.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(Surface)
+            .border(1.dp, Border, RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = if (isExpanded) "\u2715" else "\uD83D\uDD0D",
+            fontSize = 20.sp,
+            color = TextSecondary,
+        )
+    }
+}
+
+@Composable
+private fun AssetSearchExpandable(
+    query: String,
+    suggestions: List<Asset>,
+    showSuggestions: Boolean,
+    holdings: List<HoldingDisplay>,
+    onQueryChanged: (String) -> Unit,
+    onAssetSelected: (Asset) -> Unit,
+    onCollapseSearch: () -> Unit,
+) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(10.dp))
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "\uD83D\uDD0D",
+                fontSize = 18.sp,
+                color = TextMuted,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChanged,
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp),
+                textStyle = TextStyle(
+                    fontSize = 15.sp,
+                    color = TextPrimary,
+                ),
+                singleLine = true,
+                cursorBrush = SolidColor(Gold),
+                decorationBox = { innerTextField ->
+                    if (query.isBlank()) {
+                        Text(
+                            text = "\u641C\u7D22\u80A1\u7968\u540D\u79F0\u6216\u4EE3\u7801\u2026",
+                            fontSize = 15.sp,
+                            color = TextMuted,
+                        )
+                    }
+                    innerTextField()
+                },
+            )
+            if (query.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .clickable { onQueryChanged("") }
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "\u2715",
+                        fontSize = 12.sp,
+                        color = TextMuted,
+                    )
+                }
+            }
+        }
+
+        if (showSuggestions && suggestions.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Card)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp)),
+            ) {
+                suggestions.take(6).forEach { asset ->
+                    SuggestionItem(
+                        asset = asset,
+                        isHolding = holdings.any { it.code == asset.code },
+                        onClick = { onAssetSelected(asset) },
+                    )
+                }
+            }
+        }
+
+        if (showSuggestions && suggestions.isEmpty() && query.isNotBlank()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Card)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "\u672A\u627E\u5230\u5339\u914D\u7684\u80A1\u7968",
+                    fontSize = 15.sp,
+                    color = TextMuted,
+                )
+            }
+        }
+
+        if (!showSuggestions && holdings.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(10.dp))
+            HoldingsQuickSelect(
+                holdings = holdings,
+                onHoldingSelected = { holding ->
+                    val asset = Asset(
+                        innerCode = holding.code,
+                        code = holding.code,
+                        name = holding.name,
+                        pinYin = holding.pinYin,
+                        id = holding.assetId,
+                        jys = "",
+                        classify = "",
+                        marketType = "",
+                        typeName = "",
+                        securityType = "",
+                        market = 0,
+                        typeUS = "",
+                        quoteId = "",
+                        unifiedCode = holding.assetId,
+                    )
+                    onAssetSelected(asset)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SuggestionItem(
+    asset: Asset,
+    isHolding: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = asset.name,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary,
+                    )
+                    if (isHolding) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "\u6301\u4ED3",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Gold,
+                            modifier = Modifier
+                                .background(GoldDim, RoundedCornerShape(10.dp))
+                                .padding(horizontal = 8.dp, vertical = 1.dp),
+                        )
+                    }
+                }
+                Text(
+                    text = asset.typeName,
+                    fontSize = 13.sp,
+                    color = TextMuted,
+                )
+            }
+        }
+        Text(
+            text = asset.pinYin.ifBlank { asset.code },
+            fontSize = 13.sp,
+            fontFamily = FontFamily.Monospace,
+            color = TextSecondary,
+        )
+    }
+}
+
+@Composable
+private fun HoldingsQuickSelect(
+    holdings: List<HoldingDisplay>,
+    onHoldingSelected: (HoldingDisplay) -> Unit,
+) {
+    if (holdings.isEmpty()) return
+
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "\u5DF2\u6709\u6301\u4ED3",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextMuted,
+                letterSpacing = 0.04.em,
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "${holdings.size}",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextSecondary,
+                modifier = Modifier
+                    .background(Surface, RoundedCornerShape(10.dp))
+                    .padding(horizontal = 8.dp, vertical = 1.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            holdings.forEach { holding ->
+                HoldingChip(
+                    holding = holding,
+                    onClick = { onHoldingSelected(holding) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HoldingChip(
+    holding: HoldingDisplay,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .border(1.dp, Border, RoundedCornerShape(50))
+            .background(Surface)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            text = holding.pinYin.ifBlank { holding.code },
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            color = TextPrimary,
+        )
+        Text(
+            text = holding.name,
+            fontSize = 12.sp,
+            color = TextSecondary,
+        )
+        Text(
+            text = "${holding.quantity.formatQuantity()} \u80A1",
+            fontSize = 10.sp,
+            color = TextMuted,
+            fontFamily = FontFamily.Monospace,
+        )
+    }
+}
+
+private fun Double.formatQuantity(): String {
+    val qty = this.toLong()
+    return if (qty.toDouble() == this) qty.toString() else this.formatTwoDecimals()
 }
 
 @Composable
@@ -731,7 +934,7 @@ private fun TransactionSummary(
                 SummaryItem("\u7C7B\u578B", typeLabel, Modifier.weight(1f))
                 SummaryItem(
                     "\u6807\u7684",
-                    asset?.let { "${it.code} ${it.name}" } ?: "\u2014",
+                    asset?.let { "${it.pinYin.ifBlank { it.code }} ${it.name}" } ?: "\u2014",
                     Modifier.weight(1f),
                 )
             }

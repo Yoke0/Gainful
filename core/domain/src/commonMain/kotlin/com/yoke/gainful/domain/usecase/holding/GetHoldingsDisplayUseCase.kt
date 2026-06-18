@@ -1,4 +1,4 @@
-package com.yoke.gainful.domain.usecase
+package com.yoke.gainful.domain.usecase.holding
 
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.MarketRepository
@@ -49,6 +49,7 @@ class GetHoldingsDisplayUseCase(
                             assetId = assetId,
                             code = asset?.code ?: assetId,
                             name = asset?.name ?: assetId,
+                            pinYin = asset?.pinYin ?: "",
                             quantity = quantity,
                             averageCost = avgCost,
                             currentPrice = 0.0,

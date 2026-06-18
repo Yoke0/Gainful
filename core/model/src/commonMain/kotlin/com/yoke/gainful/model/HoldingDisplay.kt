@@ -5,6 +5,7 @@ data class HoldingDisplay(
     val assetId: String,
     val code: String,
     val name: String,
+    val pinYin: String = "",
     val quantity: Double,
     val averageCost: Double,
     val currentPrice: Double,

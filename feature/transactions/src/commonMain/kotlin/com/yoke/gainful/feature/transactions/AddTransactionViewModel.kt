@@ -2,10 +2,12 @@ package com.yoke.gainful.feature.transactions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yoke.gainful.domain.usecase.AddTransactionUseCase
-import com.yoke.gainful.domain.usecase.SearchAssetsUseCase
+import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
+import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
+import com.yoke.gainful.domain.usecase.transaction.AddTransactionUseCase
 import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.model.Asset
+import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
 import kotlinx.coroutines.Job
@@ -21,15 +23,88 @@ import kotlinx.datetime.toLocalDateTime
 class AddTransactionViewModel(
     private val searchAssetsUseCase: SearchAssetsUseCase,
     private val addTransactionUseCase: AddTransactionUseCase,
+    private val getHoldingsDisplayUseCase: GetHoldingsDisplayUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AddTransactionUiState())
+    private val _uiState = MutableStateFlow(
+        AddTransactionUiState(date = todayDateString()),
+    )
     val uiState: StateFlow<AddTransactionUiState> = _uiState.asStateFlow()
 
     private var searchJob: Job? = null
 
+    init {
+        loadHoldings()
+    }
+
+    private fun loadHoldings() {
+        viewModelScope.launch {
+            getHoldingsDisplayUseCase().collect { holdings ->
+                _uiState.update { it.copy(holdings = holdings) }
+            }
+        }
+    }
+
     fun onTypeSelected(type: TransactionType) {
-        _uiState.update { it.copy(type = type) }
+        _uiState.update {
+            it.copy(
+                type = type,
+                showSearch = false,
+                searchQuery = "",
+                suggestions = emptyList(),
+                showSuggestions = false,
+            )
+        }
+    }
+
+    fun onToggleSearch() {
+        _uiState.update {
+            it.copy(
+                showSearch = !it.showSearch,
+                searchQuery = "",
+                suggestions = emptyList(),
+                showSuggestions = false,
+            )
+        }
+    }
+
+    fun onCollapseSearch() {
+        _uiState.update {
+            it.copy(
+                showSearch = false,
+                searchQuery = "",
+                suggestions = emptyList(),
+                showSuggestions = false,
+            )
+        }
+    }
+
+    fun onAssetSelectedFromHolding(holding: HoldingDisplay) {
+        val asset = Asset(
+            innerCode = holding.code,
+            code = holding.code,
+            name = holding.name,
+            pinYin = holding.pinYin,
+            id = holding.assetId,
+            jys = "",
+            classify = "",
+            marketType = "",
+            typeName = "",
+            securityType = "",
+            market = 0,
+            typeUS = "",
+            quoteId = "",
+            unifiedCode = holding.assetId,
+        )
+        _uiState.update {
+            it.copy(
+                selectedAsset = asset,
+                showSearch = false,
+                searchQuery = "",
+                suggestions = emptyList(),
+                showSuggestions = false,
+            )
+        }
     }
 
     fun onAssetSelected(asset: Asset) {
@@ -39,6 +114,7 @@ class AddTransactionViewModel(
                 searchQuery = "",
                 suggestions = emptyList(),
                 showSuggestions = false,
+                showSearch = false,
             )
         }
     }
@@ -66,13 +142,9 @@ class AddTransactionViewModel(
         searchJob = viewModelScope.launch {
             delay(300)
             try {
-                println("[SearchAssets] query=$query")
                 val results = searchAssetsUseCase(query)
-                println("[SearchAssets] results=${results.size}")
                 _uiState.update { it.copy(suggestions = results) }
-            } catch (e: Exception) {
-                println("[SearchAssets] error=${e.message}")
-                e.printStackTrace()
+            } catch (_: Exception) {
                 _uiState.update { it.copy(suggestions = emptyList()) }
             }
         }
@@ -146,14 +218,13 @@ class AddTransactionViewModel(
                 )
                 addTransactionUseCase(transaction, asset)
             }
-            _uiState.update { it.copy(saved = true) }
             true
         } catch (_: Exception) {
             false
         }
     }
 
-    fun todayDateString(): String {
+    private fun todayDateString(): String {
         val now = kotlin.time.Clock.System.now()
         val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
         return today.toString()
@@ -166,10 +237,11 @@ data class AddTransactionUiState(
     val searchQuery: String = "",
     val suggestions: List<Asset> = emptyList(),
     val showSuggestions: Boolean = false,
+    val showSearch: Boolean = false,
+    val holdings: List<HoldingDisplay> = emptyList(),
     val amount: String = "",
     val price: String = "",
     val quantity: String = "",
     val date: String = "",
-    val saved: Boolean = false,
     val error: String? = null,
 )

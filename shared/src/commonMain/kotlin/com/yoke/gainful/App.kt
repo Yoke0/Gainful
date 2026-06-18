@@ -70,7 +70,6 @@ fun App() {
                             val viewModel = koinViewModel<AddTransactionViewModel>()
                             AddTransactionScreen(
                                 viewModel = viewModel,
-                                todayDate = viewModel.todayDateString(),
                                 onBack = onBack,
                             )
                         }

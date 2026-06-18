@@ -2,7 +2,7 @@ package com.yoke.gainful.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yoke.gainful.domain.usecase.GetPortfolioSummaryUseCase
+import com.yoke.gainful.domain.usecase.portfolio.GetPortfolioSummaryUseCase
 import com.yoke.gainful.model.PortfolioSummary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
