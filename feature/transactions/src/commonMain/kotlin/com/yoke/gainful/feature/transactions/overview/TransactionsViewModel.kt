@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.yoke.gainful.model.TransactionType
 
@@ -20,7 +21,15 @@ class TransactionsViewModel(
     val uiState: StateFlow<TransactionsUiState> = _uiState.asStateFlow()
 
     init {
-        loadTransactions()
+        onIntent(TransactionsIntent.LoadTransactions)
+    }
+
+    fun onIntent(intent: TransactionsIntent) {
+        when (intent) {
+            is TransactionsIntent.LoadTransactions -> loadTransactions()
+            is TransactionsIntent.DeleteTransaction -> deleteTransaction(intent.id)
+            is TransactionsIntent.SetFilter -> _uiState.update { it.copy(filterType = intent.type) }
+        }
     }
 
     private fun loadTransactions() {
@@ -51,7 +60,7 @@ class TransactionsViewModel(
         }
     }
 
-    fun deleteTransaction(id: String) {
+    private fun deleteTransaction(id: String) {
         viewModelScope.launch {
             deleteTransactionUseCase(id)
         }
@@ -61,6 +70,7 @@ class TransactionsViewModel(
 data class TransactionsUiState(
     val isLoading: Boolean = false,
     val transactions: List<TransactionItem> = emptyList(),
+    val filterType: TransactionType? = null,
     val error: String? = null,
 )
 

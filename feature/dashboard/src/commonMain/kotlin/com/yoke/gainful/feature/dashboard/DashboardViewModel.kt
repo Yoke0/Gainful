@@ -17,7 +17,14 @@ class DashboardViewModel(
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
-        loadPortfolioSummary()
+        onIntent(DashboardIntent.LoadPortfolioSummary)
+    }
+
+    fun onIntent(intent: DashboardIntent) {
+        when (intent) {
+            is DashboardIntent.LoadPortfolioSummary -> loadPortfolioSummary()
+            is DashboardIntent.Refresh -> loadPortfolioSummary()
+        }
     }
 
     private fun loadPortfolioSummary() {

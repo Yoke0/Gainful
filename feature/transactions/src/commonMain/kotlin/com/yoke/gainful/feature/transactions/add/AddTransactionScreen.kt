@@ -22,9 +22,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,7 +56,6 @@ import com.yoke.gainful.ui.theme.TextSecondary
 import com.yoke.gainful.ui.components.CalendarDialog
 import com.yoke.gainful.ui.components.DatePickerField
 import kotlinx.datetime.LocalDate
-import kotlinx.coroutines.launch
 
 @Composable
 fun AddTransactionScreen(
@@ -64,7 +63,12 @@ fun AddTransactionScreen(
     onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.saveSuccess) {
+        if (uiState.saveSuccess) {
+            onBack()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -75,9 +79,7 @@ fun AddTransactionScreen(
             onBack = onBack,
             isEnabled = uiState.canSave,
             onSave = {
-                scope.launch {
-                    if (viewModel.saveTransaction()) onBack()
-                }
+                viewModel.onIntent(AddTransactionIntent.SaveTransaction)
             },
         )
 
@@ -86,10 +88,10 @@ fun AddTransactionScreen(
                 selectedDate = uiState.date.toLocalDateOrNull(),
                 selectableToTodayOnly = true,
                 onDateSelected = {
-                    viewModel.onDateChanged(it.toString())
-                    viewModel.hideCalendar()
+                    viewModel.onIntent(AddTransactionIntent.DateChanged(it.toString()))
+                    viewModel.onIntent(AddTransactionIntent.HideCalendar)
                 },
-                onDismiss = viewModel::hideCalendar,
+                onDismiss = { viewModel.onIntent(AddTransactionIntent.HideCalendar) },
             )
         }
 
@@ -101,7 +103,7 @@ fun AddTransactionScreen(
         ) {
             TypeSelector(
                 selectedType = uiState.type,
-                onTypeSelected = viewModel::onTypeSelected,
+                onTypeSelected = { viewModel.onIntent(AddTransactionIntent.SelectType(it)) },
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -114,11 +116,11 @@ fun AddTransactionScreen(
                 showSuggestions = uiState.showSuggestions,
                 holdings = uiState.holdings,
                 type = uiState.type,
-                onToggleSearch = viewModel::onToggleSearch,
-                onQueryChanged = viewModel::onSearchQueryChanged,
-                onAssetSelected = viewModel::onAssetSelected,
-                onAssetSelectedFromHolding = viewModel::onAssetSelectedFromHolding,
-                onAssetCleared = viewModel::onAssetCleared,
+                onToggleSearch = { viewModel.onIntent(AddTransactionIntent.ToggleSearch) },
+                onQueryChanged = { viewModel.onIntent(AddTransactionIntent.SearchQueryChanged(it)) },
+                onAssetSelected = { viewModel.onIntent(AddTransactionIntent.SelectAsset(it)) },
+                onAssetSelectedFromHolding = { viewModel.onIntent(AddTransactionIntent.SelectAssetFromHolding(it)) },
+                onAssetCleared = { viewModel.onIntent(AddTransactionIntent.ClearAsset) },
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -127,8 +129,8 @@ fun AddTransactionScreen(
                 DividendFields(
                     amount = uiState.amount,
                     date = uiState.date,
-                    onAmountChanged = viewModel::onAmountChanged,
-                    onDateClicked = viewModel::showCalendar,
+                    onAmountChanged = { viewModel.onIntent(AddTransactionIntent.AmountChanged(it)) },
+                    onDateClicked = { viewModel.onIntent(AddTransactionIntent.ShowCalendar) },
                     amountError = uiState.amountError,
                 )
             } else {
@@ -139,10 +141,10 @@ fun AddTransactionScreen(
                     quantity = uiState.quantity,
                     fee = viewModel.computeFee(),
                     date = uiState.date,
-                    onAmountChanged = viewModel::onAmountChanged,
-                    onPriceChanged = viewModel::onPriceChanged,
-                    onQuantityChanged = viewModel::onQuantityChanged,
-                    onDateClicked = viewModel::showCalendar,
+                    onAmountChanged = { viewModel.onIntent(AddTransactionIntent.AmountChanged(it)) },
+                    onPriceChanged = { viewModel.onIntent(AddTransactionIntent.PriceChanged(it)) },
+                    onQuantityChanged = { viewModel.onIntent(AddTransactionIntent.QuantityChanged(it)) },
+                    onDateClicked = { viewModel.onIntent(AddTransactionIntent.ShowCalendar) },
                     amountError = uiState.amountError,
                     priceError = uiState.priceError,
                     quantityError = uiState.quantityError,
@@ -1066,5 +1068,3 @@ private fun String.toLocalDateOrNull(): LocalDate? = try {
 } catch (_: Exception) {
     null
 }
-
-

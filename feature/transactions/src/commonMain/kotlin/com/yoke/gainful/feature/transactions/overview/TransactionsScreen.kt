@@ -64,13 +64,12 @@ fun TransactionsScreen(
     onAddTransaction: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedFilter by remember { mutableStateOf("all") }
 
-    val filteredTrades = when (selectedFilter) {
-        "buy" -> uiState.transactions.filter { it.type == TransactionType.BUY }
-        "sell" -> uiState.transactions.filter { it.type == TransactionType.SELL }
-        "dividend" -> uiState.transactions.filter { it.type == TransactionType.DIVIDEND }
-        else -> uiState.transactions
+    val filteredTrades = when (uiState.filterType) {
+        TransactionType.BUY -> uiState.transactions.filter { it.type == TransactionType.BUY }
+        TransactionType.SELL -> uiState.transactions.filter { it.type == TransactionType.SELL }
+        TransactionType.DIVIDEND -> uiState.transactions.filter { it.type == TransactionType.DIVIDEND }
+        null -> uiState.transactions
     }
 
     val buyCount = uiState.transactions.count { it.type == TransactionType.BUY }
@@ -89,7 +88,7 @@ fun TransactionsScreen(
         DeleteConfirmDialog(
             transaction = deleteTarget.value!!,
             onConfirm = {
-                viewModel.deleteTransaction(deleteTarget.value!!.id)
+                viewModel.onIntent(TransactionsIntent.DeleteTransaction(deleteTarget.value!!.id))
                 deleteTarget.value = null
                 showDeleteDialog.value = false
             },
@@ -140,10 +139,18 @@ fun TransactionsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            FilterTab("全部", selectedFilter == "all", null) { selectedFilter = "all" }
-            FilterTab("买入", selectedFilter == "buy", GainGreen) { selectedFilter = "buy" }
-            FilterTab("卖出", selectedFilter == "sell", GainRed) { selectedFilter = "sell" }
-            FilterTab("股息", selectedFilter == "dividend", Gold) { selectedFilter = "dividend" }
+            FilterTab("全部", uiState.filterType == null, null) {
+                viewModel.onIntent(TransactionsIntent.SetFilter(null))
+            }
+            FilterTab("买入", uiState.filterType == TransactionType.BUY, GainGreen) {
+                viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.BUY))
+            }
+            FilterTab("卖出", uiState.filterType == TransactionType.SELL, GainRed) {
+                viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.SELL))
+            }
+            FilterTab("股息", uiState.filterType == TransactionType.DIVIDEND, Gold) {
+                viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.DIVIDEND))
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))

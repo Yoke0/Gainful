@@ -16,10 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +35,11 @@ import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,19 +70,17 @@ fun SettingsScreen() {
 
         // Preferences Group
         SettingsGroup(title = "偏好") {
-            var darkMode by remember { mutableStateOf(true) }
-            var notifications by remember { mutableStateOf(true) }
-            var marketAlert by remember { mutableStateOf(false) }
-
             SettingToggleRow(
                 label = "深色模式",
-                isChecked = darkMode,
-                onToggle = { darkMode = it },
+                isChecked = uiState.darkMode,
+                onToggle = { viewModel.onIntent(SettingsIntent.ToggleDarkMode(it)) },
             )
             SettingSelectRow(
                 label = "货币单位",
                 description = "显示金额的基准货币",
                 options = listOf("CNY", "USD", "HKD"),
+                selectedIndex = listOf("CNY", "USD", "HKD").indexOf(uiState.currency),
+                onSelected = { viewModel.onIntent(SettingsIntent.SetCurrency(it)) },
             )
             SettingSelectRow(
                 label = "盈亏显示",
@@ -91,14 +91,14 @@ fun SettingsScreen() {
             SettingToggleRow(
                 label = "推送通知",
                 description = "大额波动、成交提醒",
-                isChecked = notifications,
-                onToggle = { notifications = it },
+                isChecked = uiState.notifications,
+                onToggle = { viewModel.onIntent(SettingsIntent.ToggleNotifications(it)) },
             )
             SettingToggleRow(
                 label = "市值警报",
                 description = "单日跌幅超过 5% 时提醒",
-                isChecked = marketAlert,
-                onToggle = { marketAlert = it },
+                isChecked = uiState.marketAlert,
+                onToggle = { viewModel.onIntent(SettingsIntent.ToggleMarketAlert(it)) },
                 showBorder = false,
             )
         }
@@ -110,13 +110,13 @@ fun SettingsScreen() {
             SettingSelectRow(
                 label = "数据自动刷新",
                 options = listOf("每 30 秒", "每 1 分钟", "每 5 分钟", "手动"),
-                selectedIndex = 1,
+                selectedIndex = listOf("每 30 秒", "每 1 分钟", "每 5 分钟", "手动").indexOf(uiState.refreshInterval),
+                onSelected = { viewModel.onIntent(SettingsIntent.SetRefreshInterval(it)) },
             )
-            var faceId by remember { mutableStateOf(true) }
             SettingToggleRow(
                 label = "使用面容 ID 解锁",
-                isChecked = faceId,
-                onToggle = { faceId = it },
+                isChecked = uiState.faceId,
+                onToggle = { viewModel.onIntent(SettingsIntent.ToggleFaceId(it)) },
             )
             SettingActionRow(
                 label = "导出交易记录",
@@ -241,9 +241,8 @@ private fun SettingSelectRow(
     description: String? = null,
     options: List<String>,
     selectedIndex: Int = 0,
+    onSelected: (String) -> Unit = {},
 ) {
-    var selected by remember { mutableStateOf(selectedIndex) }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -270,11 +269,14 @@ private fun SettingSelectRow(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(Surface)
-                .clickable { selected = (selected + 1) % options.size }
+                .clickable {
+                    val nextIndex = (selectedIndex + 1) % options.size
+                    onSelected(options[nextIndex])
+                }
                 .padding(horizontal = 12.dp, vertical = 4.dp),
         ) {
             Text(
-                text = options[selected],
+                text = options[selectedIndex],
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextPrimary,

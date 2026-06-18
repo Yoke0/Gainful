@@ -24,7 +24,14 @@ class StockDetailViewModel(
     private var quoteId: String? = null
 
     init {
-        loadData()
+        onIntent(StockDetailIntent.LoadData)
+    }
+
+    fun onIntent(intent: StockDetailIntent) {
+        when (intent) {
+            is StockDetailIntent.LoadData -> loadData()
+            is StockDetailIntent.LoadChart -> loadChart(intent.period)
+        }
     }
 
     private fun loadData() {
@@ -56,7 +63,7 @@ class StockDetailViewModel(
         }
     }
 
-    fun loadChart(period: ChartPeriod) {
+    private fun loadChart(period: ChartPeriod) {
         val qid = quoteId ?: return
         viewModelScope.launch {
             try {

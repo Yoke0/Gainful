@@ -128,7 +128,10 @@ fun StockDetailScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        ChartCard(selectedPeriod, uiState.kLines.map { it.close }) { selectedPeriod = it; viewModel.loadChart(selectedPeriod) }
+        ChartCard(selectedPeriod, uiState.kLines.map { it.close }) {
+            selectedPeriod = it
+            viewModel.onIntent(StockDetailIntent.LoadChart(selectedPeriod))
+        }
 
         Spacer(modifier = Modifier.height(14.dp))
 

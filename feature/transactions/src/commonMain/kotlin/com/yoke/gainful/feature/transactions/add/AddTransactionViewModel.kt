@@ -41,6 +41,24 @@ class AddTransactionViewModel(
         loadHoldings()
     }
 
+    fun onIntent(intent: AddTransactionIntent) {
+        when (intent) {
+            is AddTransactionIntent.SelectType -> onTypeSelected(intent.type)
+            is AddTransactionIntent.ToggleSearch -> onToggleSearch()
+            is AddTransactionIntent.SearchQueryChanged -> onSearchQueryChanged(intent.query)
+            is AddTransactionIntent.SelectAssetFromHolding -> onAssetSelectedFromHolding(intent.holding)
+            is AddTransactionIntent.SelectAsset -> onAssetSelected(intent.asset)
+            is AddTransactionIntent.ClearAsset -> onAssetCleared()
+            is AddTransactionIntent.AmountChanged -> onAmountChanged(intent.amount)
+            is AddTransactionIntent.PriceChanged -> onPriceChanged(intent.price)
+            is AddTransactionIntent.QuantityChanged -> onQuantityChanged(intent.quantity)
+            is AddTransactionIntent.DateChanged -> onDateChanged(intent.date)
+            is AddTransactionIntent.ShowCalendar -> showCalendar()
+            is AddTransactionIntent.HideCalendar -> hideCalendar()
+            is AddTransactionIntent.SaveTransaction -> saveTransaction()
+        }
+    }
+
     private fun loadHoldings() {
         viewModelScope.launch {
             getHoldingsDisplayUseCase().collect { holdings ->
@@ -49,7 +67,7 @@ class AddTransactionViewModel(
         }
     }
 
-    fun onTypeSelected(type: TransactionType) {
+    private fun onTypeSelected(type: TransactionType) {
         _uiState.update {
             it.copy(
                 type = type,
@@ -61,7 +79,7 @@ class AddTransactionViewModel(
         }
     }
 
-    fun onToggleSearch() {
+    private fun onToggleSearch() {
         _uiState.update {
             it.copy(
                 showSearch = !it.showSearch,
@@ -72,7 +90,7 @@ class AddTransactionViewModel(
         }
     }
 
-    fun onAssetSelectedFromHolding(holding: HoldingDisplay) {
+    private fun onAssetSelectedFromHolding(holding: HoldingDisplay) {
         val asset = Asset(
             innerCode = holding.code,
             code = holding.code,
@@ -100,7 +118,7 @@ class AddTransactionViewModel(
         }
     }
 
-    fun onAssetSelected(asset: Asset) {
+    private fun onAssetSelected(asset: Asset) {
         viewModelScope.launch {
             insertAssetUseCase(asset)
         }
@@ -115,7 +133,7 @@ class AddTransactionViewModel(
         }
     }
 
-    fun onAssetCleared() {
+    private fun onAssetCleared() {
         _uiState.update {
             it.copy(
                 selectedAsset = null,
@@ -126,7 +144,7 @@ class AddTransactionViewModel(
         }
     }
 
-    fun onSearchQueryChanged(query: String) {
+    private fun onSearchQueryChanged(query: String) {
         _uiState.update {
             it.copy(searchQuery = query, showSuggestions = query.isNotBlank())
         }
@@ -146,17 +164,17 @@ class AddTransactionViewModel(
         }
     }
 
-    fun onAmountChanged(amount: String) {
+    private fun onAmountChanged(amount: String) {
         _uiState.update { it.copy(amount = amount) }
         validateFields()
     }
 
-    fun onPriceChanged(price: String) {
+    private fun onPriceChanged(price: String) {
         _uiState.update { it.copy(price = price) }
         validateFields()
     }
 
-    fun onQuantityChanged(quantity: String) {
+    private fun onQuantityChanged(quantity: String) {
         _uiState.update { it.copy(quantity = quantity) }
         validateFields()
     }
@@ -191,15 +209,15 @@ class AddTransactionViewModel(
         _uiState.update { it.copy(fieldError = error) }
     }
 
-    fun onDateChanged(date: String) {
+    private fun onDateChanged(date: String) {
         _uiState.update { it.copy(date = date) }
     }
 
-    fun showCalendar() {
+    private fun showCalendar() {
         _uiState.update { it.copy(showCalendar = true) }
     }
 
-    fun hideCalendar() {
+    private fun hideCalendar() {
         _uiState.update { it.copy(showCalendar = false) }
     }
 
@@ -218,50 +236,53 @@ class AddTransactionViewModel(
         return fee.formatTwoDecimals()
     }
 
-    suspend fun saveTransaction(): Boolean {
+    private fun saveTransaction() {
         validateFields()
         val state = _uiState.value
-        if (state.fieldError != null) return false
+        if (state.fieldError != null) return
 
-        val asset = state.selectedAsset ?: return false
+        val asset = state.selectedAsset ?: return
         val tradeDateMs = state.date.toTradeDateMs()
 
-        if (state.type == TransactionType.DIVIDEND) {
-            val amount = state.amount.toDoubleOrNull() ?: return false
+        viewModelScope.launch {
+            if (state.type == TransactionType.DIVIDEND) {
+                val amount = state.amount.toDoubleOrNull() ?: return@launch
+                val timestamp = Clock.System.now().toEpochMilliseconds()
+                val id = Uuid.random().toString()
+                val transaction = Transaction(
+                    id = id,
+                    assetId = asset.unifiedCode.ifBlank { asset.code },
+                    type = TransactionType.DIVIDEND,
+                    quantity = 0.0,
+                    price = 0.0,
+                    amount = amount,
+                    tradeDate = tradeDateMs,
+                    timestamp = timestamp,
+                )
+                addTransactionUseCase(transaction)
+                _uiState.update { it.copy(saveSuccess = true) }
+                return@launch
+            }
+
+            val amount = state.amount.toDoubleOrNull() ?: return@launch
+            val price = state.price.toDoubleOrNull() ?: return@launch
+            val qty = state.quantity.toDoubleOrNull() ?: return@launch
+
             val timestamp = Clock.System.now().toEpochMilliseconds()
             val id = Uuid.random().toString()
             val transaction = Transaction(
                 id = id,
                 assetId = asset.unifiedCode.ifBlank { asset.code },
-                type = TransactionType.DIVIDEND,
-                quantity = 0.0,
-                price = 0.0,
+                type = state.type,
+                quantity = qty,
+                price = price,
                 amount = amount,
                 tradeDate = tradeDateMs,
                 timestamp = timestamp,
             )
             addTransactionUseCase(transaction)
-            return true
+            _uiState.update { it.copy(saveSuccess = true) }
         }
-
-        val amount = state.amount.toDoubleOrNull() ?: return false
-        val price = state.price.toDoubleOrNull() ?: return false
-        val qty = state.quantity.toDoubleOrNull() ?: return false
-
-        val timestamp = Clock.System.now().toEpochMilliseconds()
-        val id = Uuid.random().toString()
-        val transaction = Transaction(
-            id = id,
-            assetId = asset.unifiedCode.ifBlank { asset.code },
-            type = state.type,
-            quantity = qty,
-            price = price,
-            amount = amount,
-            tradeDate = tradeDateMs,
-            timestamp = timestamp,
-        )
-        addTransactionUseCase(transaction)
-        return true
     }
 
     private fun String.toTradeDateMs(): Long {
@@ -300,6 +321,7 @@ data class AddTransactionUiState(
     val date: String = "",
     val fieldError: FieldError? = null,
     val showCalendar: Boolean = false,
+    val saveSuccess: Boolean = false,
 ) {
     val amountError: Boolean get() = fieldError == FieldError.AMOUNT
     val priceError: Boolean get() = fieldError == FieldError.PRICE

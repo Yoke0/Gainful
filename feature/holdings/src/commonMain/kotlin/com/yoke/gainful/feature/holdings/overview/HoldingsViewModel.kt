@@ -17,7 +17,14 @@ class HoldingsViewModel(
     val uiState: StateFlow<HoldingsUiState> = _uiState.asStateFlow()
 
     init {
-        loadHoldings()
+        onIntent(HoldingsIntent.LoadHoldings)
+    }
+
+    fun onIntent(intent: HoldingsIntent) {
+        when (intent) {
+            is HoldingsIntent.LoadHoldings -> loadHoldings()
+            is HoldingsIntent.Refresh -> loadHoldings()
+        }
     }
 
     private fun loadHoldings() {
