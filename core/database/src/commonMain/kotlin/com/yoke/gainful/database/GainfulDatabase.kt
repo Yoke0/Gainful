@@ -1,7 +1,9 @@
 package com.yoke.gainful.database
 
+import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.RoomDatabaseConstructor
 import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
@@ -14,6 +16,7 @@ import com.yoke.gainful.database.model.TransactionEntity
     entities = [AssetEntity::class, TransactionEntity::class],
     version = 3
 )
+@ConstructedBy(GainfulDatabaseConstructor::class)
 abstract class GainfulDatabase : RoomDatabase() {
     abstract fun assetDao(): AssetDao
     abstract fun transactionDao(): TransactionDao
@@ -56,4 +59,9 @@ abstract class GainfulDatabase : RoomDatabase() {
             }
         }
     }
+}
+
+@Suppress("KotlinNoActualForExpect")
+expect object GainfulDatabaseConstructor : RoomDatabaseConstructor<GainfulDatabase> {
+    override fun initialize(): GainfulDatabase
 }

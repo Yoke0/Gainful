@@ -10,6 +10,10 @@ fun String?.orDefault(default: String = ""): String = this ?: default
 fun Double.formatTwoDecimals(): String = formatDecimal(2)
 
 fun Double.formatDecimal(decimals: Int = 2): String {
+    if (decimals == 0) {
+        val rounded = round(this).toLong()
+        return rounded.toString()
+    }
     val factor = listOf(1.0, 10.0, 100.0, 1000.0, 10000.0).getOrElse(decimals) { 10.0.pow(decimals) }
     val rounded = round(this * factor) / factor
     val isNegative = rounded < 0
@@ -39,10 +43,10 @@ fun Double.formatSigned(decimals: Int = 2): String {
 fun Double.formatTurnover(): String {
     val absVal = abs(this)
     return when {
-        absVal >= 1_000_000_000 -> "%.1f亿".format(absVal / 1_000_000_000.0)
-        absVal >= 1_000_000 -> "%.1fM".format(absVal / 1_000_000.0)
-        absVal >= 1_000 -> "%.1fK".format(absVal / 1_000.0)
-        else -> "%.0f".format(absVal)
+        absVal >= 1_000_000_000 -> "${(absVal / 1_000_000_000.0).formatDecimal(1)}亿"
+        absVal >= 1_000_000 -> "${(absVal / 1_000_000.0).formatDecimal(1)}M"
+        absVal >= 1_000 -> "${(absVal / 1_000.0).formatDecimal(1)}K"
+        else -> absVal.formatDecimal(0)
     }
 }
 

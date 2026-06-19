@@ -647,9 +647,9 @@ private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
 
 private fun formatVolume(volume: Long): String {
     return when {
-        volume >= 1_000_000_000 -> "%.1fB".format(volume / 1_000_000_000.0)
-        volume >= 1_000_000 -> "%.1fM".format(volume / 1_000_000.0)
-        volume >= 1_000 -> "%.1fK".format(volume / 1_000.0)
+        volume >= 1_000_000_000 -> "${(volume / 1_000_000_000.0).formatDecimal(1)}B"
+        volume >= 1_000_000 -> "${(volume / 1_000_000.0).formatDecimal(1)}M"
+        volume >= 1_000 -> "${(volume / 1_000.0).formatDecimal(1)}K"
         else -> volume.toString()
     }
 }
