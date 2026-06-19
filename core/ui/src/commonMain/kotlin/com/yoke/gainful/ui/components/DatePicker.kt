@@ -44,9 +44,11 @@ import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 
@@ -118,7 +120,8 @@ fun CalendarDialog(
     val weekdays = listOf("一", "二", "三", "四", "五", "六", "日")
 
     val firstDayOfMonth = LocalDate(year, month + 1, 1)
-    val daysInMonth = (LocalDate(year, month + 2, 1).toEpochDays() - firstDayOfMonth.toEpochDays()).toInt()
+    val firstDayOfNextMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH)
+    val daysInMonth = (firstDayOfNextMonth.toEpochDays() - firstDayOfMonth.toEpochDays()).toInt()
     val offset = firstDayOfMonth.dayOfWeek.ordinal
 
     fun prevMonth() {
