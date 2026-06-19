@@ -1,5 +1,6 @@
  package com.yoke.gainful.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -119,11 +120,6 @@ fun CalendarDialog(
     val monthNames = listOf("1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月")
     val weekdays = listOf("一", "二", "三", "四", "五", "六", "日")
 
-    val firstDayOfMonth = LocalDate(year, month + 1, 1)
-    val firstDayOfNextMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH)
-    val daysInMonth = (firstDayOfNextMonth.toEpochDays() - firstDayOfMonth.toEpochDays()).toInt()
-    val offset = firstDayOfMonth.dayOfWeek.ordinal
-
     fun prevMonth() {
         if (month == 0) { month = 11; year-- } else month--
     }
@@ -143,7 +139,7 @@ fun CalendarDialog(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
@@ -151,7 +147,6 @@ fun CalendarDialog(
                     .border(1.dp, Border, RoundedCornerShape(14.dp))
                     .padding(20.dp),
             ) {
-            Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -186,55 +181,14 @@ fun CalendarDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val totalCells = offset + daysInMonth
-                val rows = (totalCells + 6) / 7
-
-                for (row in 0 until rows) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        for (col in 0 until 7) {
-                            val cellIndex = row * 7 + col
-                            val dayNum = cellIndex - offset + 1
-                            if (dayNum in 1..daysInMonth) {
-                                val date = LocalDate(year, month + 1, dayNum)
-                                val isToday = date == today
-                                val isSelected = date == tempSelected
-                                val isAfterToday = selectableToTodayOnly && date > today
-                                val bgColor = when {
-                                    isSelected && !isAfterToday -> Gold
-                                    isToday -> GoldDim
-                                    else -> Color.Transparent
-                                }
-                                val textColor = when {
-                                    isSelected && !isAfterToday -> Background
-                                    isToday -> TextPrimary
-                                    isAfterToday -> TextMuted.copy(alpha = 0.4f)
-                                    else -> TextSecondary
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .aspectRatio(1f)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .then(
-                                            if (isAfterToday) Modifier else Modifier.clickable { tempSelected = date }
-                                        )
-                                        .background(bgColor),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = "$dayNum",
-                                        fontSize = 15.sp,
-                                        fontWeight = if (isSelected && !isAfterToday || isToday) FontWeight.Bold else FontWeight.SemiBold,
-                                        color = textColor,
-                                        fontFamily = FontFamily.Monospace,
-                                    )
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
+                CalendarGrid(
+                    year = year,
+                    month = month,
+                    today = today,
+                    tempSelected = tempSelected,
+                    selectableToTodayOnly = selectableToTodayOnly,
+                    onDayClick = { tempSelected = it },
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -262,6 +216,72 @@ fun CalendarDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CalendarGrid(
+    year: Int,
+    month: Int,
+    today: LocalDate,
+    tempSelected: LocalDate,
+    selectableToTodayOnly: Boolean,
+    onDayClick: (LocalDate) -> Unit,
+) {
+    val firstDayOfMonth = LocalDate(year, month + 1, 1)
+    val firstDayOfNextMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH)
+    val daysInMonth = (firstDayOfNextMonth.toEpochDays() - firstDayOfMonth.toEpochDays()).toInt()
+    val offset = firstDayOfMonth.dayOfWeek.ordinal
+
+    Column(modifier = Modifier.animateContentSize()) {
+        val totalCells = offset + daysInMonth
+        val rows = (totalCells + 6) / 7
+
+        for (row in 0 until rows) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                for (col in 0 until 7) {
+                    val cellIndex = row * 7 + col
+                    val dayNum = cellIndex - offset + 1
+                    if (dayNum in 1..daysInMonth) {
+                        val date = LocalDate(year, month + 1, dayNum)
+                        val isToday = date == today
+                        val isSelected = date == tempSelected
+                        val isAfterToday = selectableToTodayOnly && date > today
+                        val bgColor = when {
+                            isSelected && !isAfterToday -> Gold
+                            isToday -> GoldDim
+                            else -> Color.Transparent
+                        }
+                        val textColor = when {
+                            isSelected && !isAfterToday -> Background
+                            isToday -> TextPrimary
+                            isAfterToday -> TextMuted.copy(alpha = 0.4f)
+                            else -> TextSecondary
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .then(
+                                    if (isAfterToday) Modifier else Modifier.clickable { onDayClick(date) }
+                                )
+                                .background(bgColor),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "$dayNum",
+                                fontSize = 15.sp,
+                                fontWeight = if (isSelected && !isAfterToday || isToday) FontWeight.Bold else FontWeight.SemiBold,
+                                color = textColor,
+                                fontFamily = FontFamily.Monospace,
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
         }
     }
 }
