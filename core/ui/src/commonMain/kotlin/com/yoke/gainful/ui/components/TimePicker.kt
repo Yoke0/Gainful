@@ -3,6 +3,7 @@ package com.yoke.gainful.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,18 +24,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -48,12 +49,15 @@ import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
-import androidx.compose.ui.tooling.preview.Preview
 import com.yoke.gainful.ui.theme.TextSecondary
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
 import kotlin.time.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 internal val TimeItemHeight = 44.dp
 internal const val VisibleItems = 5
@@ -62,12 +66,14 @@ internal const val HalfVisible = VisibleItems / 2
 @Composable
 fun TimePickerField(
     label: String,
-    hour: Int,
-    minute: Int,
+    dateTimeMillis: Long?,
     onClick: () -> Unit,
 ) {
-    val hasValue = hour in 0..23 && minute in 0..59
-    val displayText = if (hasValue) "${hour.pad2()}:${minute.pad2()}" else "选择时间"
+    val time = dateTimeMillis?.let {
+        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
+    }
+    val hasValue = time != null
+    val displayText = if (hasValue) "${time.hour.pad2()}:${time.minute.pad2()}" else "选择时间"
 
     Column {
         Text(
@@ -113,14 +119,16 @@ fun TimePickerField(
 
 @Composable
 fun TimePickerDialog(
-    initialHour: Int,
-    initialMinute: Int,
+    initialSelectedTimeMillis: Long? = null,
     onTimeSelected: (hour: Int, minute: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    var workingHour by remember { mutableIntStateOf(initialHour.coerceIn(0, 23)) }
-    var workingMinute by remember { mutableIntStateOf(initialMinute.coerceIn(0, 59)) }
+    val initialTime = initialSelectedTimeMillis?.let {
+        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
+    } ?: now
+    var workingHour by remember { mutableIntStateOf(initialTime.hour.coerceIn(0, 23)) }
+    var workingMinute by remember { mutableIntStateOf(initialTime.minute.coerceIn(0, 59)) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -191,8 +199,9 @@ fun TimePickerDialog(
                         isPrimary = false,
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            workingHour = now.hour
-                            workingMinute = now.minute
+                            val currentNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                            workingHour = currentNow.hour
+                            workingMinute = currentNow.minute
                         },
                     )
                     TimeFooterButton(
@@ -220,9 +229,6 @@ internal fun WheelColumn(
     initialValue: Int,
     onValueChanged: (Int) -> Unit,
 ) {
-    val density = LocalDensity.current
-    val itemHeightPx = with(density) { TimeItemHeight.toPx() }
-
     val itemCount = valueRange.count()
     val repeatCount = 1000
     val totalItems = itemCount * repeatCount
@@ -234,21 +240,11 @@ internal fun WheelColumn(
         initialFirstVisibleItemIndex = startIndex - HalfVisible,
     )
 
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { isScrolling ->
-                if (!isScrolling) {
-                    val offset = listState.firstVisibleItemScrollOffset
-                    if (offset != 0) {
-                        val target = if (offset > itemHeightPx / 2f) {
-                            listState.firstVisibleItemIndex + 1
-                        } else {
-                            listState.firstVisibleItemIndex
-                        }
-                        listState.animateScrollToItem(target)
-                    }
-                }
-            }
+    val snapBehavior = rememberSnapFlingBehavior(listState)
+
+    LaunchedEffect(initialValue) {
+        val target = middleOffset + (initialValue - valueRange.first)
+        listState.scrollToItem(target - HalfVisible)
     }
 
     val currentValue by remember {
@@ -310,6 +306,7 @@ internal fun WheelColumn(
 
             LazyColumn(
                 state = listState,
+                flingBehavior = snapBehavior,
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -317,10 +314,13 @@ internal fun WheelColumn(
                     val valueIndex = index % itemCount
                     val value = valueIndex + valueRange.first
 
-                    val distance = abs(index - centerIndex)
+                    val distance = abs(index - centerIndex).toFloat()
+                    val t = (distance / 2f).coerceIn(0f, 1f)
 
-                    val isActive = distance == 0
-                    val isNear = distance == 1
+                    val fontSize = (24f - (24f - 16f) * t).sp
+                    val fontWeight = if (distance < 0.5f) FontWeight.Bold else FontWeight.Medium
+                    val alpha = 1f - 0.6f * t
+                    val color = if (distance < 0.5f) TextPrimary else TextSecondary
 
                     Box(
                         modifier = Modifier
@@ -330,10 +330,10 @@ internal fun WheelColumn(
                     ) {
                         Text(
                             text = value.pad2(),
-                            fontSize = if (isActive) 24.sp else if (isNear) 18.sp else 20.sp,
-                            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
+                            fontSize = fontSize,
+                            fontWeight = fontWeight,
                             fontFamily = FontFamily.Monospace,
-                            color = if (isActive) TextPrimary else if (isNear) TextSecondary else TextMuted,
+                            color = color.copy(alpha = alpha),
                         )
                     }
                 }
@@ -373,8 +373,7 @@ internal fun Int.pad2(): String = if (this < 10) "0$this" else "$this"
 @Composable
 fun TimePickerPreview() {
     var showDialog by remember { mutableStateOf(false) }
-    var hour by remember { mutableIntStateOf(14) }
-    var minute by remember { mutableIntStateOf(30) }
+    var timeMillis by remember { mutableLongStateOf(Clock.System.now().toEpochMilliseconds()) }
 
     GainfulTheme {
         Column(
@@ -385,15 +384,15 @@ fun TimePickerPreview() {
         ) {
             TimePickerField(
                 label = "交易时间",
-                hour = hour,
-                minute = minute,
+                dateTimeMillis = timeMillis,
                 onClick = { showDialog = true },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val time = Instant.fromEpochMilliseconds(timeMillis).toLocalDateTime(TimeZone.currentSystemDefault())
             Text(
-                text = "已选时间：${hour.pad2()}:${minute.pad2()}",
+                text = "已选时间：${time.hour.pad2()}:${time.minute.pad2()}",
                 fontSize = 15.sp,
                 color = TextSecondary,
             )
@@ -401,11 +400,10 @@ fun TimePickerPreview() {
 
         if (showDialog) {
             TimePickerDialog(
-                initialHour = hour,
-                initialMinute = minute,
+                initialSelectedTimeMillis = timeMillis,
                 onTimeSelected = { h, m ->
-                    hour = h
-                    minute = m
+                    val currentDate = Instant.fromEpochMilliseconds(timeMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    timeMillis = LocalDateTime(currentDate, LocalTime(h, m)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
                     showDialog = false
                 },
                 onDismiss = { showDialog = false },

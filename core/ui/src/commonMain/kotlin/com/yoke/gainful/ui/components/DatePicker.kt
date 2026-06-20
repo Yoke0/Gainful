@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,16 +54,22 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Composable
 fun DatePickerField(
     label: String,
-    date: String,
+    dateMillis: Long?,
     onClick: () -> Unit,
 ) {
-    val displayText = date.ifBlank { "选择日期" }
+    val dateStr = dateMillis?.let {
+        val d = Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date
+        "${d.year}年${d.month.number}月${d.day}日"
+    }
+    val displayText = dateStr ?: "选择日期"
 
     Column {
         Text(
@@ -92,7 +99,7 @@ fun DatePickerField(
             Text(
                 text = displayText,
                 fontSize = 15.sp,
-                color = if (date.isBlank()) TextMuted else TextPrimary,
+                color = if (dateStr == null) TextMuted else TextPrimary,
                 fontFamily = FontFamily.Monospace,
                 modifier = Modifier.weight(1f),
             )
@@ -107,12 +114,15 @@ fun DatePickerField(
 
 @Composable
 fun CalendarDialog(
-    selectedDate: LocalDate?,
-    onDateSelected: (LocalDate) -> Unit,
+    initialSelectedDateMillis: Long? = null,
+    onDateSelected: (Long) -> Unit,
     onDismiss: () -> Unit,
     selectableToTodayOnly: Boolean = false,
 ) {
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val selectedDate = initialSelectedDateMillis?.let {
+        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date
+    }
     val initialYear = selectedDate?.year ?: today.year
     val initialMonth = (selectedDate?.month?.number ?: today.month.number) - 1
 
@@ -214,7 +224,7 @@ fun CalendarDialog(
                         label = "确定",
                         isPrimary = true,
                         modifier = Modifier.weight(1f),
-                        onClick = { onDateSelected(tempSelected) },
+                        onClick = { onDateSelected(kotlinx.datetime.LocalDateTime(tempSelected, kotlinx.datetime.LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()) },
                     )
                 }
             }
@@ -338,7 +348,7 @@ internal fun CalendarFooterButton(
 @Composable
 fun DatePickerPreview() {
     var showDialog by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var dateMillis by remember { mutableLongStateOf(Clock.System.now().toEpochMilliseconds()) }
 
     GainfulTheme {
         Column(
@@ -349,14 +359,18 @@ fun DatePickerPreview() {
         ) {
             DatePickerField(
                 label = "交易日期",
-                date = selectedDate?.toString() ?: "",
+                dateMillis = dateMillis,
                 onClick = { showDialog = true },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val dateStr = if (dateMillis > 0) {
+                val d = Instant.fromEpochMilliseconds(dateMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+                "${d.year}-${d.month.number.pad2()}-${d.day.pad2()}"
+            } else "未选择"
             Text(
-                text = "已选日期：${selectedDate ?: "未选择"}",
+                text = "已选日期：$dateStr",
                 fontSize = 15.sp,
                 color = TextSecondary,
             )
@@ -364,9 +378,9 @@ fun DatePickerPreview() {
 
         if (showDialog) {
             CalendarDialog(
-                selectedDate = selectedDate,
+                initialSelectedDateMillis = if (dateMillis > 0) dateMillis else null,
                 onDateSelected = {
-                    selectedDate = it
+                    dateMillis = it
                     showDialog = false
                 },
                 onDismiss = { showDialog = false },

@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
@@ -191,8 +190,8 @@ fun HoldingsIcon(
         val handle = Path().apply {
             moveTo(s * 0.36f, s * 0.32f)
             lineTo(s * 0.36f, s * 0.22f)
-            quadraticBezierTo(s * 0.36f, s * 0.14f, s * 0.50f, s * 0.14f)
-            quadraticBezierTo(s * 0.64f, s * 0.14f, s * 0.64f, s * 0.22f)
+            quadraticTo(s * 0.36f, s * 0.14f, s * 0.50f, s * 0.14f)
+            quadraticTo(s * 0.64f, s * 0.14f, s * 0.64f, s * 0.22f)
             lineTo(s * 0.64f, s * 0.32f)
         }
         drawPath(handle, color = color, style = stroke)

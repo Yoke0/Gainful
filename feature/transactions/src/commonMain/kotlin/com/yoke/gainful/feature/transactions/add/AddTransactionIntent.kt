@@ -14,7 +14,7 @@ sealed interface AddTransactionIntent {
     data class AmountChanged(val amount: String) : AddTransactionIntent
     data class PriceChanged(val price: String) : AddTransactionIntent
     data class QuantityChanged(val quantity: String) : AddTransactionIntent
-    data class DateChanged(val date: String) : AddTransactionIntent
+    data class DateTimeChanged(val dateTimeMillis: Long) : AddTransactionIntent
     data object ShowCalendar : AddTransactionIntent
     data object HideCalendar : AddTransactionIntent
     data object SaveTransaction : AddTransactionIntent

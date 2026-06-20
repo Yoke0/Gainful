@@ -1,5 +1,6 @@
 package com.yoke.gainful.feature.transactions.add
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,6 +40,8 @@ import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.components.DateTimePickerDialog
+import com.yoke.gainful.ui.components.DateTimePickerField
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -53,9 +56,8 @@ import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
-import com.yoke.gainful.ui.components.CalendarDialog
-import com.yoke.gainful.ui.components.DatePickerField
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.number
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun AddTransactionScreen(
@@ -83,12 +85,12 @@ fun AddTransactionScreen(
             },
         )
 
-        if (uiState.showCalendar) {
-            CalendarDialog(
-                selectedDate = uiState.date.toLocalDateOrNull(),
+        AnimatedVisibility(visible = uiState.showCalendar) {
+            DateTimePickerDialog(
+                initialSelectedDateTimeMillis = uiState.dateTimeMillis,
                 selectableToTodayOnly = true,
-                onDateSelected = {
-                    viewModel.onIntent(AddTransactionIntent.DateChanged(it.toString()))
+                onDateTimeSelected = {
+                    viewModel.onIntent(AddTransactionIntent.DateTimeChanged(it))
                     viewModel.onIntent(AddTransactionIntent.HideCalendar)
                 },
                 onDismiss = { viewModel.onIntent(AddTransactionIntent.HideCalendar) },
@@ -128,7 +130,7 @@ fun AddTransactionScreen(
             if (uiState.type == TransactionType.DIVIDEND) {
                 DividendFields(
                     amount = uiState.amount,
-                    date = uiState.date,
+                    dateTimeMillis = uiState.dateTimeMillis,
                     onAmountChanged = { viewModel.onIntent(AddTransactionIntent.AmountChanged(it)) },
                     onDateClicked = { viewModel.onIntent(AddTransactionIntent.ShowCalendar) },
                     amountError = uiState.amountError,
@@ -140,7 +142,7 @@ fun AddTransactionScreen(
                     price = uiState.price,
                     quantity = uiState.quantity,
                     fee = viewModel.computeFee(),
-                    date = uiState.date,
+                    dateTimeMillis = uiState.dateTimeMillis,
                     onAmountChanged = { viewModel.onIntent(AddTransactionIntent.AmountChanged(it)) },
                     onPriceChanged = { viewModel.onIntent(AddTransactionIntent.PriceChanged(it)) },
                     onQuantityChanged = { viewModel.onIntent(AddTransactionIntent.QuantityChanged(it)) },
@@ -159,7 +161,7 @@ fun AddTransactionScreen(
                 asset = uiState.selectedAsset,
                 amount = uiState.amount,
                 fee = if (uiState.type != TransactionType.DIVIDEND) viewModel.computeFee() else "",
-                date = uiState.date,
+                dateTimeMillis = uiState.dateTimeMillis,
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -726,7 +728,7 @@ private fun TradeFields(
     price: String,
     quantity: String,
     fee: String,
-    date: String,
+    dateTimeMillis: Long,
     onAmountChanged: (String) -> Unit,
     onPriceChanged: (String) -> Unit,
     onQuantityChanged: (String) -> Unit,
@@ -807,9 +809,9 @@ private fun TradeFields(
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    DatePickerField(
+    DateTimePickerField(
         label = "交易日期",
-        date = date,
+        dateTimeMillis = dateTimeMillis,
         onClick = onDateClicked,
     )
 }
@@ -817,7 +819,7 @@ private fun TradeFields(
 @Composable
 private fun DividendFields(
     amount: String,
-    date: String,
+    dateTimeMillis: Long,
     onAmountChanged: (String) -> Unit,
     onDateClicked: () -> Unit,
     amountError: Boolean = false,
@@ -842,9 +844,9 @@ private fun DividendFields(
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    DatePickerField(
+    DateTimePickerField(
         label = "到账日期",
-        date = date,
+        dateTimeMillis = dateTimeMillis,
         onClick = onDateClicked,
     )
 }
@@ -939,7 +941,7 @@ private fun TransactionSummary(
     asset: Asset?,
     amount: String,
     fee: String,
-    date: String,
+    dateTimeMillis: Long,
 ) {
     val hasContent = asset != null || amount.isNotBlank()
     if (!hasContent) return
@@ -1006,7 +1008,10 @@ private fun TransactionSummary(
                 SummaryItem("盈亏", pnlText, Modifier.weight(1f), valueColor = pnlColor)
                 SummaryItem(
                     "日期",
-                    date.ifBlank { "—" },
+                    run {
+                        val dt = kotlin.time.Instant.fromEpochMilliseconds(dateTimeMillis).toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                        "${dt.date.year}-${dt.date.month.number.toString().padStart(2, '0')}-${dt.date.day.toString().padStart(2, '0')}"
+                    },
                     Modifier.weight(1f),
                 )
             }
@@ -1060,11 +1065,4 @@ private fun SectionLabel(text: String) {
                 .background(Border),
         )
     }
-}
-
-private fun String.toLocalDateOrNull(): LocalDate? = try {
-    val parts = split("-")
-    LocalDate(parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
-} catch (_: Exception) {
-    null
 }

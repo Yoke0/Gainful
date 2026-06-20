@@ -2,25 +2,26 @@ package com.yoke.gainful.feature.transactions.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.domain.usecase.asset.InsertAssetUseCase
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
 import com.yoke.gainful.domain.usecase.transaction.AddTransactionUseCase
-import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
 class AddTransactionViewModel(
@@ -31,14 +32,13 @@ class AddTransactionViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
-        AddTransactionUiState(date = todayDateString()),
+        AddTransactionUiState(),
     )
     val uiState: StateFlow<AddTransactionUiState> = _uiState.asStateFlow()
 
-    private var searchJob: Job? = null
-
     init {
         loadHoldings()
+        observeSearchQuery()
     }
 
     fun onIntent(intent: AddTransactionIntent) {
@@ -52,7 +52,7 @@ class AddTransactionViewModel(
             is AddTransactionIntent.AmountChanged -> onAmountChanged(intent.amount)
             is AddTransactionIntent.PriceChanged -> onPriceChanged(intent.price)
             is AddTransactionIntent.QuantityChanged -> onQuantityChanged(intent.quantity)
-            is AddTransactionIntent.DateChanged -> onDateChanged(intent.date)
+            is AddTransactionIntent.DateTimeChanged -> onDateTimeChanged(intent.dateTimeMillis)
             is AddTransactionIntent.ShowCalendar -> showCalendar()
             is AddTransactionIntent.HideCalendar -> hideCalendar()
             is AddTransactionIntent.SaveTransaction -> saveTransaction()
@@ -144,23 +144,31 @@ class AddTransactionViewModel(
         }
     }
 
+    @OptIn(FlowPreview::class)
+    private fun observeSearchQuery() {
+        viewModelScope.launch {
+            _uiState
+                .map { it.searchQuery }
+                .distinctUntilChanged()
+                .debounce(300.milliseconds)
+                .collect { query ->
+                    if (query.isBlank()) {
+                        _uiState.update { it.copy(suggestions = emptyList()) }
+                        return@collect
+                    }
+                    try {
+                        val results = searchAssetsUseCase(query)
+                        _uiState.update { it.copy(suggestions = results) }
+                    } catch (_: Exception) {
+                        _uiState.update { it.copy(suggestions = emptyList()) }
+                    }
+                }
+        }
+    }
+
     private fun onSearchQueryChanged(query: String) {
         _uiState.update {
             it.copy(searchQuery = query, showSuggestions = query.isNotBlank())
-        }
-        searchJob?.cancel()
-        if (query.isBlank()) {
-            _uiState.update { it.copy(suggestions = emptyList()) }
-            return
-        }
-        searchJob = viewModelScope.launch {
-            delay(300)
-            try {
-                val results = searchAssetsUseCase(query)
-                _uiState.update { it.copy(suggestions = results) }
-            } catch (_: Exception) {
-                _uiState.update { it.copy(suggestions = emptyList()) }
-            }
         }
     }
 
@@ -209,8 +217,8 @@ class AddTransactionViewModel(
         _uiState.update { it.copy(fieldError = error) }
     }
 
-    private fun onDateChanged(date: String) {
-        _uiState.update { it.copy(date = date) }
+    private fun onDateTimeChanged(dateTimeMillis: Long) {
+        _uiState.update { it.copy(dateTimeMillis = dateTimeMillis) }
     }
 
     private fun showCalendar() {
@@ -242,7 +250,7 @@ class AddTransactionViewModel(
         if (state.fieldError != null) return
 
         val asset = state.selectedAsset ?: return
-        val tradeDateMs = state.date.toTradeDateMs()
+        val tradeDateMs = state.dateTimeMillis
 
         viewModelScope.launch {
             if (state.type == TransactionType.DIVIDEND) {
@@ -285,22 +293,6 @@ class AddTransactionViewModel(
         }
     }
 
-    private fun String.toTradeDateMs(): Long {
-        return try {
-            val parts = split("-")
-            val date = kotlinx.datetime.LocalDate(parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
-            val epochDays = date.toEpochDays()
-            epochDays * 86_400_000L
-        } catch (_: Exception) {
-            Clock.System.now().toEpochMilliseconds()
-        }
-    }
-
-    private fun todayDateString(): String {
-        val now = Clock.System.now()
-        val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
-        return today.toString()
-    }
 }
 
 enum class FieldError {
@@ -318,7 +310,7 @@ data class AddTransactionUiState(
     val amount: String = "",
     val price: String = "",
     val quantity: String = "",
-    val date: String = "",
+    val dateTimeMillis: Long = Clock.System.now().toEpochMilliseconds(),
     val fieldError: FieldError? = null,
     val showCalendar: Boolean = false,
     val saveSuccess: Boolean = false,
