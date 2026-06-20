@@ -14,27 +14,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -44,30 +40,27 @@ import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainfulTheme
 import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
-import androidx.compose.ui.tooling.preview.Preview
 import com.yoke.gainful.ui.theme.TextSecondary
-import kotlin.math.abs
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.time.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 
-internal val TimeItemHeight = 44.dp
-internal const val VisibleItems = 5
-internal const val HalfVisible = VisibleItems / 2
-
 @Composable
-fun TimePickerField(
+fun DateTimePickerField(
     label: String,
+    date: LocalDate?,
     hour: Int,
     minute: Int,
     onClick: () -> Unit,
 ) {
-    val hasValue = hour in 0..23 && minute in 0..59
-    val displayText = if (hasValue) "${hour.pad2()}:${minute.pad2()}" else "选择时间"
+    val hasDate = date != null
+    val hasTime = hour in 0..23 && minute in 0..59
 
     Column {
         Text(
@@ -89,19 +82,35 @@ fun TimePickerField(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "\uD83D\uDD50",
+                text = "\uD83D\uDCC5",
                 fontSize = 16.sp,
                 color = TextMuted,
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = displayText,
-                fontSize = 15.sp,
-                color = if (hasValue) Gold else TextMuted,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = if (hasValue) FontWeight.SemiBold else FontWeight.Normal,
-                modifier = Modifier.weight(1f),
-            )
+            if (hasDate && hasTime) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = TextPrimary, fontFamily = FontFamily.Monospace)) {
+                            append("${date.year}年${date.month.number}月${date.day}日")
+                        }
+                        withStyle(SpanStyle(color = TextMuted)) {
+                            append(" · ")
+                        }
+                        withStyle(SpanStyle(color = Gold, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace)) {
+                            append("${hour.pad2()}:${minute.pad2()}")
+                        }
+                    },
+                    fontSize = 15.sp,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                Text(
+                    text = "选择日期和时间",
+                    fontSize = 15.sp,
+                    color = TextMuted,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             Text(
                 text = "\u25BE",
                 fontSize = 14.sp,
@@ -112,15 +121,34 @@ fun TimePickerField(
 }
 
 @Composable
-fun TimePickerDialog(
+fun DateTimePickerDialog(
+    initialDate: LocalDate?,
     initialHour: Int,
     initialMinute: Int,
-    onTimeSelected: (hour: Int, minute: Int) -> Unit,
+    onDateTimeSelected: (date: LocalDate, hour: Int, minute: Int) -> Unit,
     onDismiss: () -> Unit,
+    selectableToTodayOnly: Boolean = false,
 ) {
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+    val initDate = initialDate ?: today
+    var calendarYear by remember { mutableIntStateOf(initDate.year) }
+    var calendarMonth by remember { mutableIntStateOf(initDate.month.number - 1) }
+    var selectedDate by remember { mutableStateOf(initDate) }
     var workingHour by remember { mutableIntStateOf(initialHour.coerceIn(0, 23)) }
     var workingMinute by remember { mutableIntStateOf(initialMinute.coerceIn(0, 59)) }
+
+    val monthNames = listOf("1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月")
+    val weekdays = listOf("一", "二", "三", "四", "五", "六", "日")
+
+    fun prevMonth() {
+        if (calendarMonth == 0) { calendarMonth = 11; calendarYear-- } else calendarMonth--
+    }
+
+    fun nextMonth() {
+        if (calendarMonth == 11) { calendarMonth = 0; calendarYear++ } else calendarMonth++
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -129,7 +157,7 @@ fun TimePickerDialog(
         Box(
             modifier = Modifier
                 .padding(16.dp)
-                .widthIn(max = 340.dp)
+                .widthIn(max = 360.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
@@ -142,7 +170,7 @@ fun TimePickerDialog(
                     .padding(20.dp),
             ) {
                 Text(
-                    text = "选择时间",
+                    text = "选择日期和时间",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary,
@@ -151,6 +179,63 @@ fun TimePickerDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Calendar header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "${calendarYear}年${monthNames[calendarMonth]}",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        CalendarNavButton("‹") { prevMonth() }
+                        CalendarNavButton("›") { nextMonth() }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Weekday headers
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    weekdays.forEach { day ->
+                        Text(
+                            text = day,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextMuted,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f).padding(vertical = 2.dp),
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Calendar grid
+                CalendarGrid(
+                    year = calendarYear,
+                    month = calendarMonth,
+                    today = today,
+                    tempSelected = selectedDate,
+                    selectableToTodayOnly = selectableToTodayOnly,
+                    onDayClick = { selectedDate = it },
+                )
+
+                // Divider
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Border),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Time wheels
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -182,6 +267,7 @@ fun TimePickerDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+                // Footer buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -191,8 +277,11 @@ fun TimePickerDialog(
                         isPrimary = false,
                         modifier = Modifier.weight(1f),
                         onClick = {
+                            selectedDate = today
                             workingHour = now.hour
                             workingMinute = now.minute
+                            calendarYear = today.year
+                            calendarMonth = today.month.number - 1
                         },
                     )
                     TimeFooterButton(
@@ -205,7 +294,9 @@ fun TimePickerDialog(
                         label = "确认",
                         isPrimary = true,
                         modifier = Modifier.weight(1f),
-                        onClick = { onTimeSelected(workingHour, workingMinute) },
+                        onClick = {
+                            onDateTimeSelected(selectedDate, workingHour, workingMinute)
+                        },
                     )
                 }
             }
@@ -213,166 +304,11 @@ fun TimePickerDialog(
     }
 }
 
-@Composable
-internal fun WheelColumn(
-    label: String,
-    valueRange: IntRange,
-    initialValue: Int,
-    onValueChanged: (Int) -> Unit,
-) {
-    val density = LocalDensity.current
-    val itemHeightPx = with(density) { TimeItemHeight.toPx() }
-
-    val itemCount = valueRange.count()
-    val repeatCount = 1000
-    val totalItems = itemCount * repeatCount
-    val middleOffset = (repeatCount / 2) * itemCount
-
-    val startIndex = middleOffset + (initialValue - valueRange.first)
-
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = startIndex - HalfVisible,
-    )
-
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { isScrolling ->
-                if (!isScrolling) {
-                    val offset = listState.firstVisibleItemScrollOffset
-                    if (offset != 0) {
-                        val target = if (offset > itemHeightPx / 2f) {
-                            listState.firstVisibleItemIndex + 1
-                        } else {
-                            listState.firstVisibleItemIndex
-                        }
-                        listState.animateScrollToItem(target)
-                    }
-                }
-            }
-    }
-
-    val currentValue by remember {
-        derivedStateOf {
-            val centerIndex = listState.firstVisibleItemIndex + HalfVisible
-            val wrapped = ((centerIndex % itemCount) + itemCount) % itemCount
-            (wrapped + valueRange.first).coerceIn(valueRange)
-        }
-    }
-
-    val centerIndex by remember {
-        derivedStateOf { listState.firstVisibleItemIndex + HalfVisible }
-    }
-
-    LaunchedEffect(currentValue) {
-        onValueChanged(currentValue)
-    }
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = label,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextMuted,
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Box(
-            modifier = Modifier
-                .width(96.dp)
-                .height(TimeItemHeight * VisibleItems)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp)),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(TimeItemHeight)
-                    .align(Alignment.Center)
-                    .background(GoldDim)
-                    .drawBehind {
-                        val stroke = 1.dp.toPx()
-                        drawLine(
-                            color = Gold,
-                            start = Offset(0f, stroke / 2),
-                            end = Offset(size.width, stroke / 2),
-                            strokeWidth = stroke,
-                        )
-                        drawLine(
-                            color = Gold,
-                            start = Offset(0f, size.height - stroke / 2),
-                            end = Offset(size.width, size.height - stroke / 2),
-                            strokeWidth = stroke,
-                        )
-                    },
-            )
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                items(totalItems) { index ->
-                    val valueIndex = index % itemCount
-                    val value = valueIndex + valueRange.first
-
-                    val distance = abs(index - centerIndex)
-
-                    val isActive = distance == 0
-                    val isNear = distance == 1
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(TimeItemHeight),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = value.pad2(),
-                            fontSize = if (isActive) 24.sp else if (isNear) 18.sp else 20.sp,
-                            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                            fontFamily = FontFamily.Monospace,
-                            color = if (isActive) TextPrimary else if (isNear) TextSecondary else TextMuted,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-internal fun TimeFooterButton(
-    label: String,
-    isPrimary: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onClick)
-            .background(if (isPrimary) Gold else Surface)
-            .border(if (isPrimary) 0.dp else 1.dp, Border, RoundedCornerShape(50)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isPrimary) Background else TextSecondary,
-        )
-    }
-}
-
-internal fun Int.pad2(): String = if (this < 10) "0$this" else "$this"
-
 @Preview
 @Composable
-fun TimePickerPreview() {
+fun DateTimePickerPreview() {
     var showDialog by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var hour by remember { mutableIntStateOf(14) }
     var minute by remember { mutableIntStateOf(30) }
 
@@ -383,8 +319,9 @@ fun TimePickerPreview() {
                 .background(Background)
                 .padding(20.dp),
         ) {
-            TimePickerField(
-                label = "交易时间",
+            DateTimePickerField(
+                label = "日期与时间",
+                date = selectedDate,
                 hour = hour,
                 minute = minute,
                 onClick = { showDialog = true },
@@ -392,18 +329,21 @@ fun TimePickerPreview() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val dateStr = selectedDate?.let { "${it.year}-${it.month.number.pad2()}-${it.day.pad2()}" } ?: "未选择"
             Text(
-                text = "已选时间：${hour.pad2()}:${minute.pad2()}",
+                text = "已选：$dateStr ${hour.pad2()}:${minute.pad2()}",
                 fontSize = 15.sp,
                 color = TextSecondary,
             )
         }
 
         if (showDialog) {
-            TimePickerDialog(
+            DateTimePickerDialog(
+                initialDate = selectedDate,
                 initialHour = hour,
                 initialMinute = minute,
-                onTimeSelected = { h, m ->
+                onDateTimeSelected = { date, h, m ->
+                    selectedDate = date
                     hour = h
                     minute = m
                     showDialog = false

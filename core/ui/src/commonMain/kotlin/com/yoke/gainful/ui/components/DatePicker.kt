@@ -1,4 +1,4 @@
- package com.yoke.gainful.ui.components
+package com.yoke.gainful.ui.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -39,6 +41,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
+import com.yoke.gainful.ui.theme.GainfulTheme
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
@@ -220,7 +223,7 @@ fun CalendarDialog(
 }
 
 @Composable
-private fun CalendarGrid(
+internal fun CalendarGrid(
     year: Int,
     month: Int,
     today: LocalDate,
@@ -287,7 +290,7 @@ private fun CalendarGrid(
 }
 
 @Composable
-private fun CalendarNavButton(text: String, onClick: () -> Unit) {
+internal fun CalendarNavButton(text: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(36.dp)
@@ -307,7 +310,7 @@ private fun CalendarNavButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CalendarFooterButton(
+internal fun CalendarFooterButton(
     label: String,
     isPrimary: Boolean,
     modifier: Modifier = Modifier,
@@ -328,5 +331,46 @@ private fun CalendarFooterButton(
             fontWeight = FontWeight.SemiBold,
             color = if (isPrimary) Background else TextSecondary,
         )
+    }
+}
+
+@Preview
+@Composable
+fun DatePickerPreview() {
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+
+    GainfulTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Background)
+                .padding(20.dp),
+        ) {
+            DatePickerField(
+                label = "交易日期",
+                date = selectedDate?.toString() ?: "",
+                onClick = { showDialog = true },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "已选日期：${selectedDate ?: "未选择"}",
+                fontSize = 15.sp,
+                color = TextSecondary,
+            )
+        }
+
+        if (showDialog) {
+            CalendarDialog(
+                selectedDate = selectedDate,
+                onDateSelected = {
+                    selectedDate = it
+                    showDialog = false
+                },
+                onDismiss = { showDialog = false },
+            )
+        }
     }
 }
