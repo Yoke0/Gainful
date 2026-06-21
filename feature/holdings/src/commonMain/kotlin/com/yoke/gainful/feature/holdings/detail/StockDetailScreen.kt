@@ -159,19 +159,6 @@ private fun PriceHeroCard(
             .background(Card)
             .padding(20.dp),
     ) {
-        if (uiState.industry.isNotEmpty()) {
-            Text(
-                text = uiState.industry,
-                fontSize = 11.sp,
-                color = TextMuted,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Surface)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-        }
-
         Row(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -472,13 +459,8 @@ private fun MetricsGrid(uiState: StockDetailUiState) {
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MetricItem("市值", uiState.totalMarketCap.formatCompact(), Modifier.weight(1f))
-            MetricItem("市盈率", if (uiState.peDynamic > 0) uiState.peDynamic.formatDecimal(1) else "\u2014", Modifier.weight(1f))
-            MetricItem("市净率", if (uiState.pb > 0) uiState.pb.formatDecimal(1) else "\u2014", Modifier.weight(1f))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MetricItem("换手率", "${uiState.turnoverRate.formatDecimal(2)}%", Modifier.weight(1f))
             MetricItem("振幅", "${uiState.amplitude.formatDecimal(2)}%", Modifier.weight(1f))
-            MetricItem("行业", uiState.industry.ifEmpty { "\u2014" }, Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MetricItem("持仓", "${uiState.quantity.toInt()} 股", Modifier.weight(1f))

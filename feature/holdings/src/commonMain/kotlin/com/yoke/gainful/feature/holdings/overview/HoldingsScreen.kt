@@ -12,10 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -155,11 +153,6 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
                 fontFamily = FontFamily.Monospace,
                 color = if (totalPnlPct >= 0) GainGreen else GainRed,
             )
-            Text(
-                text = "今日",
-                fontSize = 14.sp,
-                color = TextMuted,
-            )
         }
     }
 }
@@ -212,7 +205,7 @@ private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    row.forEachIndexed { idx, holding ->
+                    row.forEachIndexed { _, holding ->
                         val pct = if (totalValue > 0) (holding.totalMarketValue / totalValue) * 100 else 0.0
                         val colors = gradientColors[(sorted.indexOf(holding)) % gradientColors.size]
 
@@ -297,7 +290,7 @@ private fun HoldingList(
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        holdings.forEach { holding ->
+        holdings.sortedByDescending { it.quantity }.forEach { holding ->
             HoldingCard(holding, onStockClick)
         }
     }
@@ -308,9 +301,9 @@ private fun HoldingCard(
     holding: HoldingDisplay,
     onStockClick: (String) -> Unit,
 ) {
-    val isPositive = holding.totalGain >= 0
-    val change = holding.currentPrice - holding.averageCost
-    val strokeColor = if (holding.changeAmount >= 0) GainGreen else GainRed
+    val isPositive = holding.changeAmount >= 0
+    val change = holding.changeAmount
+    val strokeColor = if (isPositive) GainGreen else GainRed
 
     Row(
         modifier = Modifier
@@ -382,8 +375,8 @@ private fun HoldingCard(
             ) {
                 MetaText(
                     "盈亏",
-                    "${if (isPositive) "+" else ""}${holding.totalGain.formatDecimal(2)}",
-                    valueColor = if (isPositive) GainGreen else GainRed,
+                    holding.totalGain.formatDecimal(2),
+                    valueColor = if (holding.totalGain > 0) GainGreen else GainRed,
                 )
             }
         }
@@ -424,12 +417,13 @@ private fun Sparkline(
     modifier: Modifier = Modifier,
     strokeColor: Color = GainGreen,
 ) {
-    val points = remember(trendPrices, changeAmount) {
-        if (trendPrices.size >= 2) {
-            val min = trendPrices.min()
-            val max = trendPrices.max()
+    val reversedPrices = remember(trendPrices) { trendPrices.reversed() }
+    val points = remember(reversedPrices, changeAmount) {
+        if (reversedPrices.size >= 2) {
+            val min = reversedPrices.min()
+            val max = reversedPrices.max()
             val range = max - min
-            trendPrices.map { price ->
+            reversedPrices.map { price ->
                 if (range > 0) (price - min) / range else 0.5
             }
         } else {
@@ -469,7 +463,7 @@ private fun Sparkline(
 private fun generateSparkline(direction: String): List<Double> {
     val points = mutableListOf<Double>()
     val seed = direction.hashCode().toLong()
-    var y = 0.5
+    var y: Double
     for (i in 0..20) {
         val t = i / 20.0
         val wave = sin(t * PI * 3) * 0.08 + (((seed + i * 7) % 100) / 100.0 - 0.5) * 0.06
