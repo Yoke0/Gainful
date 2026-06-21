@@ -15,11 +15,11 @@ fun Double.formatDecimal(decimals: Int = 2): String {
         return rounded.toString()
     }
     val factor = listOf(1.0, 10.0, 100.0, 1000.0, 10000.0).getOrElse(decimals) { 10.0.pow(decimals) }
-    val rounded = round(this * factor) / factor
-    val isNegative = rounded < 0
-    val absVal = if (isNegative) -rounded else rounded
-    val intPart = absVal.toLong()
-    val fracPart = ((absVal - intPart) * factor).toLong()
+    val total = round(this * factor).toLong()
+    val isNegative = total < 0
+    val absTotal = if (isNegative) -total else total
+    val intPart = absTotal / factor.toLong()
+    val fracPart = absTotal % factor.toLong()
     val intStr = intPart.toString()
     val fracStr = fracPart.toString().padStart(decimals, '0').take(decimals)
     return if (isNegative) "-$intStr.$fracStr" else "$intStr.$fracStr"
