@@ -670,7 +670,7 @@ private fun HoldingsQuickSelect(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            holdings.forEach { holding ->
+            holdings.sortedByDescending { it.quantity }.forEach { holding ->
                 HoldingChip(
                     holding = holding,
                     onClick = { onHoldingSelected(holding) },
