@@ -39,6 +39,7 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.androidx.lifecycle.viewmodelNavigation3)
             implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {

@@ -1,8 +1,5 @@
 package com.yoke.gainful.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,10 +19,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation3.ui.NavDisplay
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.yoke.gainful.ui.components.DashboardIcon
 import com.yoke.gainful.ui.components.HoldingsIcon
@@ -86,9 +85,7 @@ fun GainfulNavGraph(
     }
 
     val onBack: () -> Unit = {
-        if (backStack.size > 1) {
-            backStack.removeAt(backStack.lastIndex)
-        }
+        backStack.removeLastOrNull()
     }
 
     Column(
@@ -100,6 +97,10 @@ fun GainfulNavGraph(
         NavDisplay(
             backStack = backStack,
             onBack = onBack,
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator()
+            ),
             entryProvider = entryProvider {
                 entry<Dashboard> { screenContent(Dashboard, onNavigate, onBack) }
                 entry<Transactions> { screenContent(Transactions, onNavigate, onBack) }
