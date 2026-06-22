@@ -1,6 +1,7 @@
 package com.yoke.gainful.feature.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,12 +19,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yoke.gainful.ui.components.TimePickerDialog
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -47,95 +53,75 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "设置",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = TextPrimary,
-            )
-            Text(
-                text = "v2.1.0",
-                fontSize = 12.sp,
-                color = TextMuted,
-            )
-        }
+        Text(
+            text = "设置",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = TextPrimary,
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Preferences Group
-        SettingsGroup(title = "偏好") {
-            SettingToggleRow(
-                label = "深色模式",
-                isChecked = uiState.darkMode,
-                onToggle = { viewModel.onIntent(SettingsIntent.ToggleDarkMode(it)) },
+        SettingsGroup(title = "数据") {
+            SettingRow(
+                label = "股票数据刷新频率",
+                value = uiState.refreshDisplay,
+                onClick = { viewModel.onIntent(SettingsIntent.ShowFreqPicker(true)) },
             )
-            SettingSelectRow(
-                label = "货币单位",
-                description = "显示金额的基准货币",
-                options = listOf("CNY", "USD", "HKD"),
-                selectedIndex = listOf("CNY", "USD", "HKD").indexOf(uiState.currency),
-                onSelected = { viewModel.onIntent(SettingsIntent.SetCurrency(it)) },
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SettingsGroup(title = "交易时段") {
+            SettingRow(
+                label = "开盘时间",
+                value = uiState.openTimeDisplay,
+                valueColor = Gold,
+                onClick = { viewModel.onIntent(SettingsIntent.ShowTimePicker(TimePickerTarget.OPEN)) },
             )
-            SettingSelectRow(
-                label = "盈亏显示",
-                description = "首页默认展示周期",
-                options = listOf("今日", "本周", "本月", "今年以来"),
-                selectedIndex = 1,
-            )
-            SettingToggleRow(
-                label = "推送通知",
-                description = "大额波动、成交提醒",
-                isChecked = uiState.notifications,
-                onToggle = { viewModel.onIntent(SettingsIntent.ToggleNotifications(it)) },
-            )
-            SettingToggleRow(
-                label = "市值警报",
-                description = "单日跌幅超过 5% 时提醒",
-                isChecked = uiState.marketAlert,
-                onToggle = { viewModel.onIntent(SettingsIntent.ToggleMarketAlert(it)) },
+            SettingRow(
+                label = "收盘时间",
+                value = uiState.closeTimeDisplay,
+                valueColor = Gold,
+                onClick = { viewModel.onIntent(SettingsIntent.ShowTimePicker(TimePickerTarget.CLOSE)) },
                 showBorder = false,
             )
         }
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Data & Privacy Group
-        SettingsGroup(title = "数据与隐私") {
-            SettingSelectRow(
-                label = "数据自动刷新",
-                options = listOf("每 30 秒", "每 1 分钟", "每 5 分钟", "手动"),
-                selectedIndex = listOf("每 30 秒", "每 1 分钟", "每 5 分钟", "手动").indexOf(uiState.refreshInterval),
-                onSelected = { viewModel.onIntent(SettingsIntent.SetRefreshInterval(it)) },
-            )
-            SettingToggleRow(
-                label = "使用面容 ID 解锁",
-                isChecked = uiState.faceId,
-                onToggle = { viewModel.onIntent(SettingsIntent.ToggleFaceId(it)) },
-            )
-            SettingActionRow(
-                label = "导出交易记录",
-                actionText = "导出 CSV",
-                showBorder = false,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        // About Group
         SettingsGroup(title = "关于") {
-            InfoRow("版本", "2.1.0 (Build 2025.03)")
-            InfoRow("数据来源", "Yahoo Finance \u00B7 新浪财经")
-            InfoRow("隐私政策", "查看", isLink = true)
-            InfoRow("用户协议", "查看", isLink = true, showBorder = false)
+            SettingRow(
+                label = "APP 版本",
+                value = "v2.4.1",
+                showArrow = false,
+                showBorder = false,
+                onClick = {},
+            )
         }
 
         Spacer(modifier = Modifier.height(80.dp))
+    }
+
+    if (uiState.showTimePicker) {
+        TimePickerDialog(
+            onTimeSelected = { hour, minute ->
+                when (uiState.timePickerTarget) {
+                    TimePickerTarget.OPEN -> viewModel.onIntent(SettingsIntent.SetOpenTime(hour, minute))
+                    TimePickerTarget.CLOSE -> viewModel.onIntent(SettingsIntent.SetCloseTime(hour, minute))
+                }
+                viewModel.onIntent(SettingsIntent.DismissTimePicker)
+            },
+            onDismiss = { viewModel.onIntent(SettingsIntent.DismissTimePicker) },
+        )
+    }
+
+    if (uiState.showFreqPicker) {
+        FrequencyPickerDialog(
+            selected = uiState.refreshMinutes,
+            onConfirm = { viewModel.onIntent(SettingsIntent.SetRefreshMinutes(it)) },
+            onDismiss = { viewModel.onIntent(SettingsIntent.ShowFreqPicker(false)) },
+        )
     }
 }
 
@@ -145,11 +131,7 @@ private fun SettingsGroup(
     content: @Composable () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
             text = title,
@@ -157,214 +139,168 @@ private fun SettingsGroup(
             fontWeight = FontWeight.SemiBold,
             color = TextMuted,
             letterSpacing = 0.6.sp,
-            modifier = Modifier.padding(bottom = 12.dp),
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
         )
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
-                .background(Border),
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        content()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(10.dp)),
+        ) {
+            content()
+        }
     }
 }
 
 @Composable
-private fun SettingToggleRow(
+private fun SettingRow(
     label: String,
-    description: String? = null,
-    isChecked: Boolean,
-    onToggle: (Boolean) -> Unit,
+    value: String,
+    valueColor: androidx.compose.ui.graphics.Color = TextSecondary,
+    showArrow: Boolean = true,
     showBorder: Boolean = true,
+    onClick: () -> Unit,
 ) {
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onToggle(!isChecked) }
-                .padding(vertical = 12.dp),
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary,
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 Text(
-                    text = label,
-                    fontSize = 14.sp,
-                    color = TextPrimary,
+                    text = value,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = valueColor,
+                    fontFamily = if (valueColor == Gold) FontFamily.Monospace else FontFamily.Default,
                 )
-                if (description != null) {
+                if (showArrow) {
                     Text(
-                        text = description,
-                        fontSize = 11.sp,
+                        text = "\u25BE",
+                        fontSize = 12.sp,
                         color = TextMuted,
-                        modifier = Modifier.padding(top = 2.dp),
                     )
                 }
             }
-            ToggleSwitch(isChecked = isChecked)
         }
         if (showBorder) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(Border.copy(alpha = 0.03f)),
+                    .background(Border),
             )
         }
     }
 }
 
 @Composable
-private fun ToggleSwitch(isChecked: Boolean) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(15.dp))
-            .background(if (isChecked) Gold else Border)
-            .clickable { }
-            .padding(2.dp),
-        contentAlignment = if (isChecked) Alignment.CenterEnd else Alignment.CenterStart,
-    ) {
-        Box(
-            modifier = Modifier
-                .height(26.dp)
-                .clip(RoundedCornerShape(13.dp))
-                .background(if (isChecked) com.yoke.gainful.ui.theme.TextPrimary else TextMuted)
-                .padding(horizontal = 2.dp),
-        )
-    }
-}
-
-@Composable
-private fun SettingSelectRow(
-    label: String,
-    description: String? = null,
-    options: List<String>,
-    selectedIndex: Int = 0,
-    onSelected: (String) -> Unit = {},
+private fun FrequencyPickerDialog(
+    selected: Int,
+    onConfirm: (Int) -> Unit,
+    onDismiss: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
+    var workingSelection by remember { mutableIntStateOf(selected) }
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(20.dp),
+        ) {
             Text(
-                text = label,
-                fontSize = 14.sp,
+                text = "刷新频率",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
                 color = TextPrimary,
+                modifier = Modifier.fillMaxWidth(),
             )
-            if (description != null) {
-                Text(
-                    text = description,
-                    fontSize = 11.sp,
-                    color = TextMuted,
-                    modifier = Modifier.padding(top = 2.dp),
-                )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            listOf(1, 3, 10).forEach { minutes ->
+                val isSelected = minutes == workingSelection
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(if (isSelected) GoldDim else Surface)
+                        .border(
+                            width = 1.dp,
+                            color = if (isSelected) Gold else Border,
+                            shape = RoundedCornerShape(6.dp),
+                        )
+                        .clickable { workingSelection = minutes }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "$minutes 分钟",
+                        fontSize = 15.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) Gold else TextPrimary,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Surface)
+                        .border(1.dp, Border, RoundedCornerShape(50))
+                        .clickable(onClick = onDismiss),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "取消",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextSecondary,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Gold)
+                        .clickable { onConfirm(workingSelection); onDismiss() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "确认",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Background,
+                    )
+                }
             }
         }
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(Surface)
-                .clickable {
-                    val nextIndex = (selectedIndex + 1) % options.size
-                    onSelected(options[nextIndex])
-                }
-                .padding(horizontal = 12.dp, vertical = 4.dp),
-        ) {
-            Text(
-                text = options[selectedIndex],
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = TextPrimary,
-            )
-        }
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(Border.copy(alpha = 0.03f)),
-    )
-}
-
-@Composable
-private fun SettingActionRow(
-    label: String,
-    actionText: String,
-    showBorder: Boolean = true,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = TextPrimary,
-        )
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(Surface)
-                .clickable { }
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-        ) {
-            Text(
-                text = actionText,
-                fontSize = 12.sp,
-                color = TextPrimary,
-            )
-        }
-    }
-    if (showBorder) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Border.copy(alpha = 0.03f)),
-        )
-    }
-}
-
-@Composable
-private fun InfoRow(
-    label: String,
-    value: String,
-    isLink: Boolean = false,
-    showBorder: Boolean = true,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = TextPrimary,
-        )
-        Text(
-            text = value,
-            fontSize = 13.sp,
-            color = if (isLink) Gold else TextMuted,
-            modifier = if (isLink) Modifier.clickable { } else Modifier,
-        )
-    }
-    if (showBorder) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Border.copy(alpha = 0.03f)),
-        )
     }
 }
