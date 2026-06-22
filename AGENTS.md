@@ -47,20 +47,18 @@ open iosApp/iosApp.xcodeproj
 ## Tests
 
 ```bash
-./gradlew :shared:testAndroidHostTest      # Android host tests
-./gradlew :shared:jvmTest                  # Desktop tests
-./gradlew :shared:iosSimulatorArm64Test    # iOS tests
+./gradlew allTests                         # All platform tests
 ```
 
-Run tests after making changes to `shared/`. There is no CI; local verification is required.
+Run tests after making changes. CI runs `./gradlew allTests`.
 
 ## Key Versions
 
 - Kotlin 2.4.0
-- Gradle 9.1.0
+- Gradle 9.4.1
 - AGP 9.2.1
 - Compose Multiplatform 1.11.1
-- Material3 1.12.0-alpha01
+- Material3 1.12.0-alpha02
 - JVM target: 11
 - compileSdk/targetSdk: 37, minSdk: 24
 - Ktor 3.5.0
@@ -106,6 +104,24 @@ Strictly adhere to the **Conventional Commits** format for all code diffs or tas
 - `feat(dashboard): add portfolio summary card`
 - `fix(network): handle timeout on East Money API`
 - `chore(deps): bump AGP version to 9.2.1`
+
+## Localization (i18n)
+
+Each module has its own `composeResources/` with localized strings:
+- `values/strings.xml` — Chinese (default)
+- `values-en/strings.xml` — English
+
+### Adding new strings
+1. Add `<string name="key">文本</string>` to the module's `values/strings.xml`
+2. Add English translation to `values-en/strings.xml`
+3. Use positional format args: `%1$d`, `%2$s` (not `%d`, `%s`)
+4. Import: `import gainful.<module>.generated.resources.<key>`
+5. Usage: `stringResource(Res.string.key)` in @Composable functions
+
+### Gotchas
+- `import xxx.generated.resources.string` does NOT work — use individual imports
+- ViewModels can't use `stringResource()` — resolve strings in UI layer
+- Enums with display labels: use `@Composable` extension function to resolve labels
 
 ## Android Verification
 

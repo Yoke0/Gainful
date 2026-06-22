@@ -61,6 +61,7 @@ Gainful/
 | 导航 | Navigation3 | Compose 跨平台导航 |
 | 日期时间 | kotlinx-datetime | 跨平台日期时间处理 |
 | UI 框架 | Compose Multiplatform | 跨平台声明式 UI |
+| 国际化 | Compose Resources | 多模块字符串本地化（中文/英文） |
 
 ### 关键版本
 
@@ -68,7 +69,7 @@ Gainful/
 |------|------|
 | Kotlin | 2.4.0 |
 | Compose Multiplatform | 1.11.1 |
-| Material3 | 1.12.0-alpha01 |
+| Material3 | 1.12.0-alpha02 |
 | Gradle | 9.4.1 |
 | AGP | 9.2.1 |
 | Ktor | 3.5.0 |
@@ -115,20 +116,15 @@ Gainful/
 - **依赖管理**: Gradle Version Catalog (`gradle/libs.versions.toml`)
 - **项目引用**: 使用 `projects.shared` 而非 `:shared`（已启用 `TYPESAFE_PROJECT_ACCESSORS`）
 - **iOS 框架**: 静态框架，名称为 `Shared`
-- **Compose 资源**: 放在 `shared/src/commonMain/composeResources/`
-- **生成的资源 ID**: `gainful.shared.generated.resources.*`
+- **Compose 资源**: 每个模块独立维护 `src/commonMain/composeResources/values/strings.xml`（中文）和 `values-en/strings.xml`（英文）
+- **生成的资源 ID**: `gainful.<module>.generated.resources.*`（如 `gainful.feature.dashboard.generated.resources.*`）
+- **格式化字符串**: 使用位置参数 `%1$d`、`%2$s`（CMP 要求）
+- **测试命令**: `./gradlew allTests` 运行所有平台测试
 
 ### 测试
 
 ```bash
-# Android 主机测试
-./gradlew :shared:testAndroidHostTest
-
-# Desktop 测试
-./gradlew :shared:jvmTest
-
-# iOS 测试
-./gradlew :shared:iosSimulatorArm64Test
+./gradlew allTests
 ```
 
 ## 许可证

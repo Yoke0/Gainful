@@ -61,6 +61,7 @@ Gainful/
 | Navigation | Navigation3 | Compose cross-platform navigation |
 | DateTime | kotlinx-datetime | Cross-platform date/time handling |
 | UI | Compose Multiplatform | Declarative cross-platform UI |
+| i18n | Compose Resources | Multi-module string localization (Chinese/English) |
 
 ### Key Versions
 
@@ -68,7 +69,7 @@ Gainful/
 |-----------|---------|
 | Kotlin | 2.4.0 |
 | Compose Multiplatform | 1.11.1 |
-| Material3 | 1.12.0-alpha01 |
+| Material3 | 1.12.0-alpha02 |
 | Gradle | 9.4.1 |
 | AGP | 9.2.1 |
 | Ktor | 3.5.0 |
@@ -115,20 +116,14 @@ Gainful/
 - **Dependency management**: Gradle Version Catalog (`gradle/libs.versions.toml`)
 - **Project references**: Use `projects.shared` instead of `:shared` (`TYPESAFE_PROJECT_ACCESSORS` enabled)
 - **iOS framework**: Static framework named `Shared`
-- **Compose resources**: Place in `shared/src/commonMain/composeResources/`
-- **Generated resource IDs**: `gainful.shared.generated.resources.*`
+- **Compose resources**: Each module maintains its own `src/commonMain/composeResources/values/strings.xml` (Chinese) and `values-en/strings.xml` (English)
+- **Generated resource IDs**: `gainful.<module>.generated.resources.*` (e.g., `gainful.feature.dashboard.generated.resources.*`)
+- **Format strings**: Use positional args: `%1$d`, `%2$s` (CMP requirement)
 
 ### Testing
 
 ```bash
-# Android host tests
-./gradlew :shared:testAndroidHostTest
-
-# Desktop tests
-./gradlew :shared:jvmTest
-
-# iOS tests
-./gradlew :shared:iosSimulatorArm64Test
+./gradlew allTests
 ```
 
 ## License
