@@ -50,6 +50,7 @@ kotlin {
             implementation(projects.core.navigation)
             implementation(libs.jetbrains.navigation3.ui)
             implementation(projects.core.database)
+            implementation(projects.core.datastore)
             implementation(projects.core.network)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.holdings)

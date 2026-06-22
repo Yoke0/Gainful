@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yoke.gainful.common.BuildConfig
 import com.yoke.gainful.ui.components.TimePickerDialog
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
@@ -93,7 +94,7 @@ fun SettingsScreen(
         SettingsGroup(title = "关于") {
             SettingRow(
                 label = "APP 版本",
-                value = "v2.4.1",
+                value = "v${BuildConfig.APP_VERSION}",
                 showArrow = false,
                 showBorder = false,
                 onClick = {},

@@ -1,30 +1,57 @@
 package com.yoke.gainful.feature.settings
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.yoke.gainful.data.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(
+    private val repository: UserPreferencesRepository,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            repository.userPreferences.collect { prefs ->
+                _uiState.update {
+                    it.copy(
+                        refreshMinutes = prefs.refreshMinutes,
+                        openHour = prefs.openHour,
+                        openMinute = prefs.openMinute,
+                        closeHour = prefs.closeHour,
+                        closeMinute = prefs.closeMinute,
+                    )
+                }
+            }
+        }
+    }
+
     fun onIntent(intent: SettingsIntent) {
         when (intent) {
-            is SettingsIntent.SetRefreshMinutes ->
-                _uiState.update { it.copy(refreshMinutes = intent.minutes) }
-            is SettingsIntent.SetOpenTime ->
-                _uiState.update { it.copy(openHour = intent.hour, openMinute = intent.minute) }
-            is SettingsIntent.SetCloseTime ->
-                _uiState.update { it.copy(closeHour = intent.hour, closeMinute = intent.minute) }
-            is SettingsIntent.ShowTimePicker ->
-                _uiState.update { it.copy(timePickerTarget = intent.target, showTimePicker = true) }
-            is SettingsIntent.DismissTimePicker ->
-                _uiState.update { it.copy(showTimePicker = false) }
-            is SettingsIntent.ShowFreqPicker ->
-                _uiState.update { it.copy(showFreqPicker = intent.show) }
+            is SettingsIntent.SetRefreshMinutes -> viewModelScope.launch {
+                repository.setRefreshMinutes(intent.minutes)
+            }
+            is SettingsIntent.SetOpenTime -> viewModelScope.launch {
+                repository.setOpenTime(intent.hour, intent.minute)
+            }
+            is SettingsIntent.SetCloseTime -> viewModelScope.launch {
+                repository.setCloseTime(intent.hour, intent.minute)
+            }
+            is SettingsIntent.ShowTimePicker -> _uiState.update {
+                it.copy(timePickerTarget = intent.target, showTimePicker = true)
+            }
+            is SettingsIntent.DismissTimePicker -> _uiState.update {
+                it.copy(showTimePicker = false)
+            }
+            is SettingsIntent.ShowFreqPicker -> _uiState.update {
+                it.copy(showFreqPicker = intent.show)
+            }
         }
     }
 }
