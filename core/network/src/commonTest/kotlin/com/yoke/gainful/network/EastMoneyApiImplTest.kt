@@ -121,13 +121,11 @@ class EastMoneyApiImplTest {
         val trend = api.getTrends("1.600519", ndays = 1)
 
         assertNotNull(trend)
-        assertEquals("600519", trend.code)
-        assertEquals(1, trend.market)
-        assertEquals("贵州茅台", trend.name)
-        assertEquals(1291.91, trend.preClose)
-        assertEquals(4, trend.trends.size)
-        assertEquals("2026-06-15 09:30,1292.70,706,1292.700", trend.trends[0])
-        assertEquals("2026-06-15 15:00,1271.10,740,1275.360", trend.trends.last())
+        assertEquals(4, trend.data.size)
+        assertEquals(1, trend.data[0].market)
+        assertEquals(1750000000000L, trend.data[0].timestamp)
+        assertEquals(1292, trend.data[0].price)
+        assertEquals(1271, trend.data.last().price)
     }
 
     @Test
@@ -140,7 +138,9 @@ class EastMoneyApiImplTest {
             )
         })
 
-        assertEquals(null, api.getTrends("1.600519"))
+        val trend = api.getTrends("1.600519")
+        assertNotNull(trend)
+        assertTrue(trend.data.isEmpty())
     }
 
     @Test
@@ -240,15 +240,12 @@ class EastMoneyApiImplTest {
         private val TREND_RESPONSE_JSON = """
         {
           "rc": 0, "rt": 10, "svr": 177617603, "lt": 1, "full": 1, "dlmkts": "", "dsc": "0",
-          "data": {
-            "code": "600519", "market": 1, "name": "贵州茅台", "preClose": 1291.91,
-            "trends": [
-              "2026-06-15 09:30,1292.70,706,1292.700",
-              "2026-06-15 09:31,1284.66,696,1291.103",
-              "2026-06-15 09:32,1280.12,1174,1286.713",
-              "2026-06-15 15:00,1271.10,740,1275.360"
-            ]
-          }
+          "data": [
+            {"f1": 1, "f2": 1750000000000, "f3": 1292},
+            {"f1": 1, "f2": 1750000060000, "f3": 1284},
+            {"f1": 1, "f2": 1750000120000, "f3": 1280},
+            {"f1": 1, "f2": 1750004800000, "f3": 1271}
+          ]
         }
         """.trimIndent()
 

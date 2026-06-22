@@ -42,8 +42,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelNavigation3)
             implementation(libs.kotlinx.serialization.json)
         }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
-        }
+
     }
 }

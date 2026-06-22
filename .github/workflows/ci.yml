@@ -23,11 +23,8 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Run desktop tests
-        run: ./gradlew :shared:jvmTest
-
-      - name: Run Android host tests
-        run: ./gradlew :shared:testAndroidHostTest
+      - name: Run tests
+        run: ./gradlew allTests
 
   build:
     runs-on: ubuntu-latest
