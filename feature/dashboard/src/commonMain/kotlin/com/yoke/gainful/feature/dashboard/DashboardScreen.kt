@@ -39,6 +39,26 @@ import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.HoldingDisplay
+import gainful.feature.dashboard.generated.resources.Res
+import gainful.feature.dashboard.generated.resources.dashboard_title
+import gainful.feature.dashboard.generated.resources.holdings_count
+import gainful.feature.dashboard.generated.resources.holdings_overflow
+import gainful.feature.dashboard.generated.resources.holdings_overview
+import gainful.feature.dashboard.generated.resources.holdings_quantity_label
+import gainful.feature.dashboard.generated.resources.holdings_trend
+import gainful.feature.dashboard.generated.resources.key_metrics
+import gainful.feature.dashboard.generated.resources.live_badge
+import gainful.feature.dashboard.generated.resources.no_trend_data
+import gainful.feature.dashboard.generated.resources.profit_rate
+import gainful.feature.dashboard.generated.resources.today_badge
+import gainful.feature.dashboard.generated.resources.total_assets
+import gainful.feature.dashboard.generated.resources.total_cost
+import gainful.feature.dashboard.generated.resources.total_cost_label
+import gainful.feature.dashboard.generated.resources.total_market_value_label
+import gainful.feature.dashboard.generated.resources.total_pnl
+import gainful.feature.dashboard.generated.resources.total_pnl_label
+import gainful.feature.dashboard.generated.resources.total_profit
+import org.jetbrains.compose.resources.stringResource
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -70,7 +90,7 @@ fun DashboardScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "仪表盘",
+                text = stringResource(Res.string.dashboard_title),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = TextPrimary,
@@ -96,7 +116,7 @@ fun DashboardScreen(
                                 .background(GainGreen),
                         )
                         Text(
-                            text = "实时",
+                            text = stringResource(Res.string.live_badge),
                             fontSize = 12.sp,
                             color = TextSecondary,
                         )
@@ -140,7 +160,7 @@ private fun SummaryCard(state: DashboardUiState) {
             .padding(20.dp),
     ) {
         Text(
-            text = "总盈亏",
+            text = stringResource(Res.string.total_pnl),
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = TextSecondary,
@@ -169,8 +189,8 @@ private fun SummaryCard(state: DashboardUiState) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            DetailText("总市值: ", totalValue.formatCompact())
-            DetailText("总成本: ", totalCost.formatCompact())
+            DetailText(stringResource(Res.string.total_market_value_label), totalValue.formatCompact())
+            DetailText(stringResource(Res.string.total_cost_label), totalCost.formatCompact())
         }
     }
 }
@@ -215,7 +235,7 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "持仓走势",
+                text = stringResource(Res.string.holdings_trend),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextPrimary,
@@ -227,7 +247,7 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                     .padding(horizontal = 12.dp, vertical = 2.dp),
             ) {
                 Text(
-                    text = "今日",
+                    text = stringResource(Res.string.today_badge),
                     fontSize = 11.sp,
                     color = TextMuted,
                 )
@@ -337,7 +357,7 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "暂无走势数据",
+                    text = stringResource(Res.string.no_trend_data),
                     fontSize = 13.sp,
                     color = TextMuted,
                 )
@@ -355,7 +375,7 @@ private fun MetricsSection(state: DashboardUiState) {
 
     Column {
         Text(
-            text = "关键指标",
+            text = stringResource(Res.string.key_metrics),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = TextPrimary,
@@ -367,12 +387,12 @@ private fun MetricsSection(state: DashboardUiState) {
         ) {
             MetricCard(
                 modifier = Modifier.weight(1f),
-                label = "总资产",
+                label = stringResource(Res.string.total_assets),
                 value = totalValue.formatCompact(),
             )
             MetricCard(
                 modifier = Modifier.weight(1f),
-                label = "总成本",
+                label = stringResource(Res.string.total_cost),
                 value = totalCost.formatCompact(),
             )
         }
@@ -383,13 +403,13 @@ private fun MetricsSection(state: DashboardUiState) {
         ) {
             MetricCard(
                 modifier = Modifier.weight(1f),
-                label = "总收益",
+                label = stringResource(Res.string.total_profit),
                 value = if (totalGain >= 0) "+${totalGain.formatCompact()}" else totalGain.formatCompact(),
                 valueColor = if (totalGain >= 0) GainGreen else GainRed,
             )
             MetricCard(
                 modifier = Modifier.weight(1f),
-                label = "收益率",
+                label = stringResource(Res.string.profit_rate),
                 value = totalGainPercent.formatSigned() + "%",
                 valueColor = if (totalGainPercent >= 0) GainGreen else GainRed,
             )
@@ -444,7 +464,7 @@ private fun HoldingsOverviewCard(holdings: List<HoldingDisplay>) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "持仓概览",
+                text = stringResource(Res.string.holdings_overview),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextPrimary,
@@ -456,7 +476,7 @@ private fun HoldingsOverviewCard(holdings: List<HoldingDisplay>) {
                     .padding(horizontal = 10.dp, vertical = 2.dp),
             ) {
                 Text(
-                    text = "${holdings.size} 个标的",
+                    text = stringResource(Res.string.holdings_count, holdings.size),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     color = Gold,
@@ -475,7 +495,7 @@ private fun HoldingsOverviewCard(holdings: List<HoldingDisplay>) {
         if (sorted.size > 5) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "还有 ${sorted.size - 5} 个标的...",
+                text = stringResource(Res.string.holdings_overflow, sorted.size - 5),
                 fontSize = 12.sp,
                 color = TextMuted,
             )
@@ -493,9 +513,9 @@ private fun HoldingsOverviewCard(holdings: List<HoldingDisplay>) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            SummaryBadge("持仓数量: ", "${holdings.size}")
+            SummaryBadge(stringResource(Res.string.holdings_quantity_label), "${holdings.size}")
             SummaryBadge(
-                "合计盈亏: ",
+                stringResource(Res.string.total_pnl_label),
                 if (totalGain >= 0) "+${totalGain.formatDecimal(2)}" else totalGain.formatDecimal(2),
                 isPositive = totalGain >= 0,
             )

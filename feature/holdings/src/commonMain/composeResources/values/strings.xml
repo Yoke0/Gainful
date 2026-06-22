@@ -1,0 +1,43 @@
+<resources>
+    <!-- Holdings Overview -->
+    <string name="chart_trends">分时</string>
+    <string name="chart_trends_5d">五日</string>
+    <string name="chart_daily">日K</string>
+    <string name="chart_weekly">周K</string>
+    <string name="chart_monthly">月K</string>
+    <string name="chart_min_1">1分钟</string>
+    <string name="chart_min_5">5分钟</string>
+    <string name="chart_min_15">15分钟</string>
+    <string name="chart_min_30">30分钟</string>
+    <string name="chart_min_60">60分钟</string>
+    <string name="holdings_title">持仓</string>
+    <string name="holdings_detail_header">持仓明细</string>
+    <string name="total_assets">总资产</string>
+    <string name="investment_weight">投资比重</string>
+    <string name="market_value">市值</string>
+    <string name="cost">成本</string>
+    <string name="shares">股数</string>
+    <string name="profit_loss">盈亏</string>
+    <string name="holding_badge">持仓</string>
+
+    <!-- Stock Detail -->
+    <string name="open_price">开盘</string>
+    <string name="high_price">最高</string>
+    <string name="low_price">最低</string>
+    <string name="volume">成交量</string>
+    <string name="turnover">成交额</string>
+    <string name="trend">走势</string>
+    <string name="minutes_suffix">分钟</string>
+    <string name="no_data">暂无数据</string>
+    <string name="turnover_rate">换手率</string>
+    <string name="amplitude">振幅</string>
+    <string name="holding_quantity">%1$d 股</string>
+    <string name="recent_trades">最近交易</string>
+    <string name="trade_count">%1$d 笔</string>
+    <string name="no_trade_records">暂无交易记录</string>
+    <string name="trade_detail">%1$d 股 @ %2$s</string>
+    <string name="buy">买入</string>
+    <string name="sell">卖出</string>
+    <string name="dividend">股息</string>
+    <string name="quantity_unit">股</string>
+</resources>

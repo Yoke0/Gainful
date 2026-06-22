@@ -1,0 +1,6 @@
+<resources>
+    <string name="nav_dashboard">仪表盘</string>
+    <string name="nav_transactions">记录</string>
+    <string name="nav_holdings">持仓</string>
+    <string name="nav_settings">设置</string>
+</resources>

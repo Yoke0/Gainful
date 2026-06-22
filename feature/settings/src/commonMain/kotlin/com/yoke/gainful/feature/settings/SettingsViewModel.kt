@@ -68,7 +68,6 @@ data class SettingsUiState(
 ) {
     val openTimeDisplay: String get() = "${openHour.pad2()}:${openMinute.pad2()}"
     val closeTimeDisplay: String get() = "${closeHour.pad2()}:${closeMinute.pad2()}"
-    val refreshDisplay: String get() = "$refreshMinutes 分钟"
 }
 
 private fun Int.pad2(): String = if (this < 10) "0$this" else "$this"

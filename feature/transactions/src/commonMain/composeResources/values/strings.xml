@@ -1,0 +1,68 @@
+<resources>
+    <!-- Transactions Overview -->
+    <string name="transactions_title">交易记录</string>
+    <string name="add_button">+ 添加</string>
+    <string name="all">全部</string>
+    <string name="buy">买入</string>
+    <string name="sell">卖出</string>
+    <string name="dividend">股息</string>
+    <string name="summary_total">共</string>
+    <string name="summary_buy">买入</string>
+    <string name="summary_sell">卖出</string>
+    <string name="summary_dividend">股息</string>
+    <string name="trade_quantity_label">数量</string>
+    <string name="trade_price_label">价格</string>
+    <string name="summary_fee">手续费</string>
+    <string name="no_trade_records_empty">暂无交易记录</string>
+    <string name="no_trade_records_hint">点击右上角添加你的第一笔交易</string>
+    <string name="confirm_delete">确认删除</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="delete_confirm_text">确定要删除这笔</string>
+    <string name="delete_confirm_suffix">交易吗？此操作不可撤销。</string>
+    <string name="trade_count_unit">%1$d 笔</string>
+
+    <!-- Add Transaction -->
+    <string name="add_transaction_title">新增交易</string>
+    <string name="back">返回</string>
+    <string name="save">保存</string>
+    <string name="asset_section">标的资产</string>
+    <string name="no_selection">已选：无</string>
+    <string name="search_stock_placeholder">搜索股票名称或代码…</string>
+    <string name="no_match_stock">未找到匹配的股票</string>
+    <string name="holding_badge">持仓</string>
+    <string name="existing_holdings">已有持仓</string>
+    <string name="quantity_unit">股</string>
+    <string name="buy_amount_hint">实际成交总金额（已含手续费）</string>
+    <string name="sell_amount_hint">实际到账金额（已扣手续费）</string>
+    <string name="buy_fee_placeholder">= 金额 − 价×量</string>
+    <string name="sell_fee_placeholder">= 价×量 − 金额</string>
+    <string name="buy_fee_hint">手续费 = 成交金额 − 成交价 × 成交量</string>
+    <string name="sell_fee_hint">手续费 = 成交价 × 成交量 − 成交金额</string>
+    <string name="trade_details_section">交易详情</string>
+    <string name="trade_amount">成交金额</string>
+    <string name="trade_amount_placeholder">输入实际成交总金额</string>
+    <string name="fee_label">手续费（自动计算）</string>
+    <string name="trade_price">成交价</string>
+    <string name="trade_quantity">成交量</string>
+    <string name="trade_date">交易日期</string>
+    <string name="dividend_details_section">股息详情</string>
+    <string name="dividend_amount">股息金额</string>
+    <string name="dividend_amount_placeholder">输入股息金额</string>
+    <string name="dividend_amount_hint">实际到账金额</string>
+    <string name="dividend_date">到账日期</string>
+    <string name="transaction_summary">交易概览</string>
+    <string name="summary_type">类型</string>
+    <string name="summary_asset">标的</string>
+    <string name="summary_amount">金额</string>
+    <string name="summary_pnl">盈亏</string>
+    <string name="summary_date">日期</string>
+
+    <!-- Time Groups -->
+    <string-array name="time_groups">
+        <item>今天</item>
+        <item>最近7天</item>
+        <item>本月</item>
+        <item>更早</item>
+    </string-array>
+</resources>

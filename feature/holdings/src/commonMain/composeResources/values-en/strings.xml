@@ -1,0 +1,43 @@
+<resources>
+    <!-- Holdings Overview -->
+    <string name="chart_trends">Trends</string>
+    <string name="chart_trends_5d">5D</string>
+    <string name="chart_daily">Daily</string>
+    <string name="chart_weekly">Weekly</string>
+    <string name="chart_monthly">Monthly</string>
+    <string name="chart_min_1">1min</string>
+    <string name="chart_min_5">5min</string>
+    <string name="chart_min_15">15min</string>
+    <string name="chart_min_30">30min</string>
+    <string name="chart_min_60">60min</string>
+    <string name="holdings_title">Holdings</string>
+    <string name="holdings_detail_header">Holdings Detail</string>
+    <string name="total_assets">Total Assets</string>
+    <string name="investment_weight">Investment Weight</string>
+    <string name="market_value">Market Value</string>
+    <string name="cost">Cost</string>
+    <string name="shares">Shares</string>
+    <string name="profit_loss">P&amp;L</string>
+    <string name="holding_badge">Holding</string>
+
+    <!-- Stock Detail -->
+    <string name="open_price">Open</string>
+    <string name="high_price">High</string>
+    <string name="low_price">Low</string>
+    <string name="volume">Volume</string>
+    <string name="turnover">Turnover</string>
+    <string name="trend">Trend</string>
+    <string name="minutes_suffix">min</string>
+    <string name="no_data">No data available</string>
+    <string name="turnover_rate">Turnover Rate</string>
+    <string name="amplitude">Amplitude</string>
+    <string name="holding_quantity">%1$d shares</string>
+    <string name="recent_trades">Recent Trades</string>
+    <string name="trade_count">%1$d trades</string>
+    <string name="no_trade_records">No trade records</string>
+    <string name="trade_detail">%1$d shares @ %2$s</string>
+    <string name="buy">Buy</string>
+    <string name="sell">Sell</string>
+    <string name="dividend">Dividend</string>
+    <string name="quantity_unit">shares</string>
+</resources>

@@ -40,6 +40,40 @@ import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
+import gainful.feature.transactions.generated.resources.Res
+import gainful.feature.transactions.generated.resources.add_transaction_title
+import gainful.feature.transactions.generated.resources.asset_section
+import gainful.feature.transactions.generated.resources.back
+import gainful.feature.transactions.generated.resources.buy
+import gainful.feature.transactions.generated.resources.dividend
+import gainful.feature.transactions.generated.resources.dividend_amount
+import gainful.feature.transactions.generated.resources.dividend_amount_hint
+import gainful.feature.transactions.generated.resources.dividend_amount_placeholder
+import gainful.feature.transactions.generated.resources.dividend_date
+import gainful.feature.transactions.generated.resources.dividend_details_section
+import gainful.feature.transactions.generated.resources.existing_holdings
+import gainful.feature.transactions.generated.resources.fee_label
+import gainful.feature.transactions.generated.resources.holding_badge
+import gainful.feature.transactions.generated.resources.no_match_stock
+import gainful.feature.transactions.generated.resources.no_selection
+import gainful.feature.transactions.generated.resources.quantity_unit
+import gainful.feature.transactions.generated.resources.save
+import gainful.feature.transactions.generated.resources.search_stock_placeholder
+import gainful.feature.transactions.generated.resources.sell
+import gainful.feature.transactions.generated.resources.summary_amount
+import gainful.feature.transactions.generated.resources.summary_asset
+import gainful.feature.transactions.generated.resources.summary_date
+import gainful.feature.transactions.generated.resources.summary_fee
+import gainful.feature.transactions.generated.resources.summary_pnl
+import gainful.feature.transactions.generated.resources.summary_type
+import gainful.feature.transactions.generated.resources.trade_amount
+import gainful.feature.transactions.generated.resources.trade_amount_placeholder
+import gainful.feature.transactions.generated.resources.trade_date
+import gainful.feature.transactions.generated.resources.trade_details_section
+import gainful.feature.transactions.generated.resources.trade_price
+import gainful.feature.transactions.generated.resources.trade_quantity
+import gainful.feature.transactions.generated.resources.transaction_summary
+import org.jetbrains.compose.resources.stringResource
 import com.yoke.gainful.ui.components.DateTimePickerDialog
 import com.yoke.gainful.ui.components.DateTimePickerField
 import com.yoke.gainful.ui.theme.Background
@@ -198,7 +232,7 @@ private fun AddTransactionHeader(
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "返回",
+                text = stringResource(Res.string.back),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextSecondary,
@@ -206,7 +240,7 @@ private fun AddTransactionHeader(
         }
 
         Text(
-            text = "新增交易",
+            text = stringResource(Res.string.add_transaction_title),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = TextPrimary,
@@ -220,7 +254,7 @@ private fun AddTransactionHeader(
                 .padding(horizontal = 18.dp, vertical = 6.dp),
         ) {
             Text(
-                text = "保存",
+                text = stringResource(Res.string.save),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = Background,
@@ -239,7 +273,7 @@ private fun TypeSelector(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         TypeButton(
-            label = "买入",
+            label = stringResource(Res.string.buy),
             icon = "📈",
             isSelected = selectedType == TransactionType.BUY,
             activeColor = GainGreen,
@@ -248,7 +282,7 @@ private fun TypeSelector(
             onClick = { onTypeSelected(TransactionType.BUY) },
         )
         TypeButton(
-            label = "卖出",
+            label = stringResource(Res.string.sell),
             icon = "📉",
             isSelected = selectedType == TransactionType.SELL,
             activeColor = GainRed,
@@ -257,7 +291,7 @@ private fun TypeSelector(
             onClick = { onTypeSelected(TransactionType.SELL) },
         )
         TypeButton(
-            label = "股息",
+            label = stringResource(Res.string.dividend),
             icon = "💵",
             isSelected = selectedType == TransactionType.DIVIDEND,
             activeColor = Gold,
@@ -317,7 +351,7 @@ private fun AssetSelectorSection(
     onAssetSelectedFromHolding: (HoldingDisplay) -> Unit,
     onAssetCleared: () -> Unit,
 ) {
-    SectionLabel("标的资产")
+    SectionLabel(stringResource(Res.string.asset_section))
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -378,7 +412,7 @@ private fun StockPlaceholder(
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
-            text = "已选：无",
+            text = stringResource(Res.string.no_selection),
             fontSize = 15.sp,
             color = TextMuted,
         )
@@ -492,7 +526,7 @@ private fun AssetSearchExpandable(
                 decorationBox = { innerTextField ->
                     if (query.isBlank()) {
                         Text(
-                            text = "搜索股票名称或代码…",
+                            text = stringResource(Res.string.search_stock_placeholder),
                             fontSize = 15.sp,
                             color = TextMuted,
                         )
@@ -549,7 +583,7 @@ private fun AssetSearchExpandable(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "未找到匹配的股票",
+                    text = stringResource(Res.string.no_match_stock),
                     fontSize = 15.sp,
                     color = TextMuted,
                 )
@@ -610,7 +644,7 @@ private fun SuggestionItem(
                     if (isHolding) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "持仓",
+                            text = stringResource(Res.string.holding_badge),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
                             color = Gold,
@@ -646,7 +680,7 @@ private fun HoldingsQuickSelect(
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "已有持仓",
+                text = stringResource(Res.string.existing_holdings),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextMuted,
@@ -749,25 +783,25 @@ private fun TradeFields(
         keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
     )
 
-    SectionLabel("交易详情")
+    SectionLabel(stringResource(Res.string.trade_details_section))
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FormField(
-            label = "成交金额",
+            label = stringResource(Res.string.trade_amount),
             value = amount,
             onValueChange = onAmountChanged,
             prefix = "¥",
-            placeholder = "输入实际成交总金额",
+            placeholder = stringResource(Res.string.trade_amount_placeholder),
             modifier = Modifier.weight(1f),
             hint = amountHint,
             isError = amountError,
             keyboardOptions = decimalKeyboard,
         )
         FormField(
-            label = "手续费（自动计算）",
+            label = stringResource(Res.string.fee_label),
             value = fee,
             onValueChange = {},
             prefix = "¥",
@@ -786,7 +820,7 @@ private fun TradeFields(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FormField(
-            label = "成交价",
+            label = stringResource(Res.string.trade_price),
             value = price,
             onValueChange = onPriceChanged,
             prefix = "¥",
@@ -796,10 +830,10 @@ private fun TradeFields(
             keyboardOptions = decimalKeyboard,
         )
         FormField(
-            label = "成交量",
+            label = stringResource(Res.string.trade_quantity),
             value = quantity,
             onValueChange = onQuantityChanged,
-            suffix = "股",
+            suffix = stringResource(Res.string.quantity_unit),
             placeholder = "0",
             modifier = Modifier.weight(1f),
             isError = quantityError,
@@ -810,7 +844,7 @@ private fun TradeFields(
     Spacer(modifier = Modifier.height(12.dp))
 
     DateTimePickerField(
-        label = "交易日期",
+        label = stringResource(Res.string.trade_date),
         dateTimeMillis = dateTimeMillis,
         onClick = onDateClicked,
     )
@@ -828,16 +862,16 @@ private fun DividendFields(
         keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
     )
 
-    SectionLabel("股息详情")
+    SectionLabel(stringResource(Res.string.dividend_details_section))
 
     FormField(
-        label = "股息金额",
+        label = stringResource(Res.string.dividend_amount),
         value = amount,
         onValueChange = onAmountChanged,
         prefix = "¥",
-        placeholder = "输入股息金额",
+        placeholder = stringResource(Res.string.dividend_amount_placeholder),
         modifier = Modifier.fillMaxWidth(),
-        hint = "实际到账金额",
+        hint = stringResource(Res.string.dividend_amount_hint),
         isError = amountError,
         keyboardOptions = decimalKeyboard,
     )
@@ -845,7 +879,7 @@ private fun DividendFields(
     Spacer(modifier = Modifier.height(12.dp))
 
     DateTimePickerField(
-        label = "到账日期",
+        label = stringResource(Res.string.dividend_date),
         dateTimeMillis = dateTimeMillis,
         onClick = onDateClicked,
     )
@@ -947,9 +981,9 @@ private fun TransactionSummary(
     if (!hasContent) return
 
     val typeLabel = when (type) {
-        TransactionType.BUY -> "买入"
-        TransactionType.SELL -> "卖出"
-        TransactionType.DIVIDEND -> "股息"
+        TransactionType.BUY -> stringResource(Res.string.buy)
+        TransactionType.SELL -> stringResource(Res.string.sell)
+        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
     }
 
     val amountVal = amount.toDoubleOrNull() ?: 0.0
@@ -975,7 +1009,7 @@ private fun TransactionSummary(
             .padding(16.dp),
     ) {
         Text(
-            text = "交易概览",
+            text = stringResource(Res.string.transaction_summary),
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = TextMuted,
@@ -985,29 +1019,29 @@ private fun TransactionSummary(
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryItem("类型", typeLabel, Modifier.weight(1f))
+                SummaryItem(stringResource(Res.string.summary_type), typeLabel, Modifier.weight(1f))
                 SummaryItem(
-                    "标的",
+                    stringResource(Res.string.summary_asset),
                     asset?.let { "${it.pinYin.ifBlank { it.code }} ${it.name}" } ?: "—",
                     Modifier.weight(1f),
                 )
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 SummaryItem(
-                    "金额",
+                    stringResource(Res.string.summary_amount),
                     if (amountVal > 0) "¥${amountVal.formatTwoDecimals()}" else "—",
                     Modifier.weight(1f),
                 )
                 SummaryItem(
-                    "手续费",
+                    stringResource(Res.string.summary_fee),
                     if (fee.isNotBlank() && fee != "0.00") "¥$fee" else "—",
                     Modifier.weight(1f),
                 )
             }
             Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryItem("盈亏", pnlText, Modifier.weight(1f), valueColor = pnlColor)
+                SummaryItem(stringResource(Res.string.summary_pnl), pnlText, Modifier.weight(1f), valueColor = pnlColor)
                 SummaryItem(
-                    "日期",
+                    stringResource(Res.string.summary_date),
                     run {
                         val dt = kotlin.time.Instant.fromEpochMilliseconds(dateTimeMillis).toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
                         "${dt.date.year}-${dt.date.month.number.toString().padStart(2, '0')}-${dt.date.day.toString().padStart(2, '0')}"

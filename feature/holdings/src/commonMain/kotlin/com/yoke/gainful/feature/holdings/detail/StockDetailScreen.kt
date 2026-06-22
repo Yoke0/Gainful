@@ -62,6 +62,55 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
+import gainful.feature.holdings.generated.resources.Res
+import gainful.feature.holdings.generated.resources.amplitude
+import gainful.feature.holdings.generated.resources.buy
+import gainful.feature.holdings.generated.resources.cost
+import gainful.feature.holdings.generated.resources.dividend
+import gainful.feature.holdings.generated.resources.high_price
+import gainful.feature.holdings.generated.resources.holding_badge
+import gainful.feature.holdings.generated.resources.holding_quantity
+import gainful.feature.holdings.generated.resources.low_price
+import gainful.feature.holdings.generated.resources.market_value
+import gainful.feature.holdings.generated.resources.chart_daily
+import gainful.feature.holdings.generated.resources.chart_min_1
+import gainful.feature.holdings.generated.resources.chart_min_15
+import gainful.feature.holdings.generated.resources.chart_min_30
+import gainful.feature.holdings.generated.resources.chart_min_5
+import gainful.feature.holdings.generated.resources.chart_min_60
+import gainful.feature.holdings.generated.resources.chart_monthly
+import gainful.feature.holdings.generated.resources.chart_trends
+import gainful.feature.holdings.generated.resources.chart_trends_5d
+import gainful.feature.holdings.generated.resources.chart_weekly
+import gainful.feature.holdings.generated.resources.minutes_suffix
+import gainful.feature.holdings.generated.resources.no_data
+import gainful.feature.holdings.generated.resources.no_trade_records
+import gainful.feature.holdings.generated.resources.open_price
+import gainful.feature.holdings.generated.resources.profit_loss
+import gainful.feature.holdings.generated.resources.recent_trades
+import gainful.feature.holdings.generated.resources.sell
+import gainful.feature.holdings.generated.resources.trade_count
+import gainful.feature.holdings.generated.resources.trade_detail
+import gainful.feature.holdings.generated.resources.trend
+import gainful.feature.holdings.generated.resources.turnover
+import gainful.feature.holdings.generated.resources.turnover_rate
+import gainful.feature.holdings.generated.resources.volume
+import org.jetbrains.compose.resources.stringResource
+
+@Composable
+private fun ChartPeriod.localizedLabel(): String = when (this) {
+    ChartPeriod.TRENDS -> stringResource(Res.string.chart_trends)
+    ChartPeriod.TRENDS_5D -> stringResource(Res.string.chart_trends_5d)
+    ChartPeriod.DAILY -> stringResource(Res.string.chart_daily)
+    ChartPeriod.WEEKLY -> stringResource(Res.string.chart_weekly)
+    ChartPeriod.MONTHLY -> stringResource(Res.string.chart_monthly)
+    ChartPeriod.MIN_1 -> stringResource(Res.string.chart_min_1)
+    ChartPeriod.MIN_5 -> stringResource(Res.string.chart_min_5)
+    ChartPeriod.MIN_15 -> stringResource(Res.string.chart_min_15)
+    ChartPeriod.MIN_30 -> stringResource(Res.string.chart_min_30)
+    ChartPeriod.MIN_60 -> stringResource(Res.string.chart_min_60)
+}
+
 @Composable
 fun StockDetailScreen(
     viewModel: StockDetailViewModel,
@@ -196,9 +245,9 @@ private fun PriceHeroCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            ExtraItem("开盘", uiState.open.formatDecimal(2))
-            ExtraItem("最高", uiState.high.formatDecimal(2))
-            ExtraItem("最低", uiState.low.formatDecimal(2))
+            ExtraItem(stringResource(Res.string.open_price), uiState.open.formatDecimal(2))
+            ExtraItem(stringResource(Res.string.high_price), uiState.high.formatDecimal(2))
+            ExtraItem(stringResource(Res.string.low_price), uiState.low.formatDecimal(2))
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -207,8 +256,8 @@ private fun PriceHeroCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            ExtraItem("成交量", formatVolume(uiState.volume))
-            ExtraItem("成交额", uiState.turnover.formatTurnover())
+            ExtraItem(stringResource(Res.string.volume), formatVolume(uiState.volume))
+            ExtraItem(stringResource(Res.string.turnover), uiState.turnover.formatTurnover())
         }
     }
 }
@@ -253,7 +302,7 @@ private fun ChartCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "走势",
+                text = stringResource(Res.string.trend),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextPrimary,
@@ -280,7 +329,7 @@ private fun ChartCard(
                             .padding(horizontal = 8.dp, vertical = 2.dp),
                     ) {
                         Text(
-                            text = period.label,
+                            text = period.localizedLabel(),
                             fontSize = 10.sp,
                             color = if (isActive) Gold else TextMuted,
                         )
@@ -301,7 +350,7 @@ private fun ChartCard(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = if (isMinuteSelected && !minutesExpanded) selectedPeriod.label else "分钟",
+                                text = if (isMinuteSelected && !minutesExpanded) selectedPeriod.localizedLabel() else stringResource(Res.string.minutes_suffix),
                                 fontSize = 10.sp,
                                 color = if (isMinuteSelected || minutesExpanded) Gold else TextMuted,
                             )
@@ -337,7 +386,7 @@ private fun ChartCard(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        text = period.label,
+                                        text = period.localizedLabel(),
                                         fontSize = 11.sp,
                                         fontFamily = FontFamily.Monospace,
                                         color = if (selectedPeriod == period) Gold else TextSecondary,
@@ -378,7 +427,7 @@ private fun ChartCard(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "暂无数据",
+                    text = stringResource(Res.string.no_data),
                     fontSize = 14.sp,
                     color = TextMuted,
                 )
@@ -458,20 +507,20 @@ private fun MetricsGrid(uiState: StockDetailUiState) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricItem("市值", uiState.totalMarketCap.formatCompact(), Modifier.weight(1f))
-            MetricItem("换手率", "${uiState.turnoverRate.formatDecimal(2)}%", Modifier.weight(1f))
-            MetricItem("振幅", "${uiState.amplitude.formatDecimal(2)}%", Modifier.weight(1f))
+            MetricItem(stringResource(Res.string.market_value), uiState.totalMarketCap.formatCompact(), Modifier.weight(1f))
+            MetricItem(stringResource(Res.string.turnover_rate), "${uiState.turnoverRate.formatDecimal(2)}%", Modifier.weight(1f))
+            MetricItem(stringResource(Res.string.amplitude), "${uiState.amplitude.formatDecimal(2)}%", Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricItem("持仓", "${uiState.quantity.toInt()} 股", Modifier.weight(1f))
+            MetricItem(stringResource(Res.string.holding_badge), stringResource(Res.string.holding_quantity, uiState.quantity.toInt()), Modifier.weight(1f))
             MetricItem(
-                "成本",
+                stringResource(Res.string.cost),
                 uiState.averageCost.formatDecimal(2),
                 Modifier.weight(1f),
                 valueColor = if (uiState.averageCost > uiState.price) GainRed else GainGreen,
             )
             MetricItem(
-                "盈亏",
+                stringResource(Res.string.profit_loss),
                 "${if (uiState.totalGain >= 0) "+" else ""}${uiState.totalGain.formatCompact()}",
                 Modifier.weight(1f),
                 valueColor = if (uiState.totalGain >= 0) GainGreen else GainRed,
@@ -527,13 +576,13 @@ private fun TradesCard(uiState: StockDetailUiState) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "最近交易",
+                text = stringResource(Res.string.recent_trades),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextPrimary,
             )
             Text(
-                text = "${trades.size} 笔",
+                text = stringResource(Res.string.trade_count, trades.size),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = Gold,
@@ -548,7 +597,7 @@ private fun TradesCard(uiState: StockDetailUiState) {
 
         if (trades.isEmpty()) {
             Text(
-                text = "暂无交易记录",
+                text = stringResource(Res.string.no_trade_records),
                 fontSize = 14.sp,
                 color = TextMuted,
                 modifier = Modifier
@@ -574,9 +623,9 @@ private fun TradesCard(uiState: StockDetailUiState) {
 @Composable
 private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
     val typeLabel = when (trade.type) {
-        TransactionType.BUY -> "买入"
-        TransactionType.SELL -> "卖出"
-        TransactionType.DIVIDEND -> "股息"
+        TransactionType.BUY -> stringResource(Res.string.buy)
+        TransactionType.SELL -> stringResource(Res.string.sell)
+        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
     }
     val typeColor = when (trade.type) {
         TransactionType.BUY -> GainGreen
@@ -617,7 +666,7 @@ private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
             )
         } else {
             Text(
-                text = "${trade.quantity.toInt()} 股 @ ${trade.price.formatDecimal(2)}",
+                text = stringResource(Res.string.trade_detail, trade.quantity.toInt(), trade.price.formatDecimal(2)),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,

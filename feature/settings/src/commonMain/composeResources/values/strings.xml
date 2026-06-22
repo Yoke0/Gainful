@@ -1,0 +1,14 @@
+<resources>
+    <string name="settings_title">设置</string>
+    <string name="settings_data_group">数据</string>
+    <string name="refresh_frequency">股票数据刷新频率</string>
+    <string name="trading_hours_group">交易时段</string>
+    <string name="open_time">开盘时间</string>
+    <string name="close_time">收盘时间</string>
+    <string name="about_group">关于</string>
+    <string name="app_version">APP 版本</string>
+    <string name="refresh_frequency_title">刷新频率</string>
+    <string name="minutes_format">%1$d 分钟</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+</resources>

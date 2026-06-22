@@ -49,8 +49,35 @@ import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import gainful.core.ui.generated.resources.Res
+import gainful.core.ui.generated.resources.cancel
+import gainful.core.ui.generated.resources.confirm
+import gainful.core.ui.generated.resources.date_format
+import gainful.core.ui.generated.resources.month_1
+import gainful.core.ui.generated.resources.month_10
+import gainful.core.ui.generated.resources.month_11
+import gainful.core.ui.generated.resources.month_12
+import gainful.core.ui.generated.resources.month_2
+import gainful.core.ui.generated.resources.month_3
+import gainful.core.ui.generated.resources.month_4
+import gainful.core.ui.generated.resources.month_5
+import gainful.core.ui.generated.resources.month_6
+import gainful.core.ui.generated.resources.month_7
+import gainful.core.ui.generated.resources.month_8
+import gainful.core.ui.generated.resources.month_9
+import gainful.core.ui.generated.resources.select_date
+import gainful.core.ui.generated.resources.today
+import gainful.core.ui.generated.resources.weekday_friday
+import gainful.core.ui.generated.resources.weekday_monday
+import gainful.core.ui.generated.resources.weekday_saturday
+import gainful.core.ui.generated.resources.weekday_sunday
+import gainful.core.ui.generated.resources.weekday_thursday
+import gainful.core.ui.generated.resources.weekday_tuesday
+import gainful.core.ui.generated.resources.weekday_wednesday
+import gainful.core.ui.generated.resources.year_month_format
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.stringResource
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
@@ -67,9 +94,9 @@ fun DatePickerField(
 ) {
     val dateStr = dateMillis?.let {
         val d = Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date
-        "${d.year}年${d.month.number}月${d.day}日"
+        stringResource(Res.string.date_format, d.year, d.month.number, d.day)
     }
-    val displayText = dateStr ?: "选择日期"
+    val displayText = dateStr ?: stringResource(Res.string.select_date)
 
     Column {
         Text(
@@ -130,8 +157,20 @@ fun CalendarDialog(
     var month by remember { mutableIntStateOf(initialMonth) }
     var tempSelected by remember { mutableStateOf(selectedDate ?: today) }
 
-    val monthNames = listOf("1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月")
-    val weekdays = listOf("一", "二", "三", "四", "五", "六", "日")
+    val monthNames = listOf(
+        stringResource(Res.string.month_1), stringResource(Res.string.month_2),
+        stringResource(Res.string.month_3), stringResource(Res.string.month_4),
+        stringResource(Res.string.month_5), stringResource(Res.string.month_6),
+        stringResource(Res.string.month_7), stringResource(Res.string.month_8),
+        stringResource(Res.string.month_9), stringResource(Res.string.month_10),
+        stringResource(Res.string.month_11), stringResource(Res.string.month_12),
+    )
+    val weekdays = listOf(
+        stringResource(Res.string.weekday_monday), stringResource(Res.string.weekday_tuesday),
+        stringResource(Res.string.weekday_wednesday), stringResource(Res.string.weekday_thursday),
+        stringResource(Res.string.weekday_friday), stringResource(Res.string.weekday_saturday),
+        stringResource(Res.string.weekday_sunday),
+    )
 
     fun prevMonth() {
         if (month == 0) { month = 11; year-- } else month--
@@ -166,7 +205,7 @@ fun CalendarDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "${year}年${monthNames[month]}",
+                        text = stringResource(Res.string.year_month_format, year, monthNames[month]),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary,
@@ -210,7 +249,7 @@ fun CalendarDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     CalendarFooterButton(
-                        label = "今天",
+                        label = stringResource(Res.string.today),
                         isPrimary = false,
                         modifier = Modifier.weight(1f),
                         onClick = {
@@ -219,9 +258,9 @@ fun CalendarDialog(
                             tempSelected = today
                         },
                     )
-                    CalendarFooterButton(label = "取消", isPrimary = false, modifier = Modifier.weight(1f), onClick = onDismiss)
+                    CalendarFooterButton(label = stringResource(Res.string.cancel), isPrimary = false, modifier = Modifier.weight(1f), onClick = onDismiss)
                     CalendarFooterButton(
-                        label = "确定",
+                        label = stringResource(Res.string.confirm),
                         isPrimary = true,
                         modifier = Modifier.weight(1f),
                         onClick = { onDateSelected(kotlinx.datetime.LocalDateTime(tempSelected, kotlinx.datetime.LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()) },

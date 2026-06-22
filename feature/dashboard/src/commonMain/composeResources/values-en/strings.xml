@@ -1,0 +1,23 @@
+<resources>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="live_badge">Live</string>
+    <string name="total_pnl">Total P&amp;L</string>
+    <string name="total_market_value_label">Market Value: </string>
+    <string name="total_cost_label">Total Cost: </string>
+    <string name="holdings_trend">Holdings Trend</string>
+    <string name="today_badge">Today</string>
+    <string name="no_trend_data">No trend data available</string>
+    <string name="key_metrics">Key Metrics</string>
+    <string name="total_assets">Total Assets</string>
+    <string name="total_cost">Total Cost</string>
+    <string name="total_profit">Total Profit</string>
+    <string name="profit_rate">Return Rate</string>
+    <string name="holdings_overview">Holdings Overview</string>
+    <string name="holdings_count">%1$d holdings</string>
+    <string name="holdings_overflow">%1$d more holdings…</string>
+    <string name="holdings_quantity_label">Quantity: </string>
+    <string name="total_pnl_label">Total P&amp;L: </string>
+    <string name="buy">Buy</string>
+    <string name="sell">Sell</string>
+    <string name="dividend">Dividend</string>
+</resources>

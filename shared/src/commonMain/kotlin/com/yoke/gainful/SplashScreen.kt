@@ -38,8 +38,10 @@ import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
 import gainful.shared.generated.resources.Res
 import gainful.shared.generated.resources.app_icon
+import gainful.shared.generated.resources.splash_subtitle
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SplashScreen(onSplashFinished: () -> Unit) {
@@ -91,7 +93,7 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
             // Subtitle
             Text(
-                text = "智能投资，数据驱动",
+                text = stringResource(Res.string.splash_subtitle),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
                 color = TextSecondary,

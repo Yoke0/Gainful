@@ -1,5 +1,16 @@
 package com.yoke.gainful.feature.holdings.overview
 
+import gainful.feature.holdings.generated.resources.Res
+import gainful.feature.holdings.generated.resources.cost
+import gainful.feature.holdings.generated.resources.holdings_detail_header
+import gainful.feature.holdings.generated.resources.holdings_title
+import gainful.feature.holdings.generated.resources.investment_weight
+import gainful.feature.holdings.generated.resources.market_value
+import gainful.feature.holdings.generated.resources.profit_loss
+import gainful.feature.holdings.generated.resources.shares
+import gainful.feature.holdings.generated.resources.total_assets
+import org.jetbrains.compose.resources.stringResource
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -87,7 +98,7 @@ fun HoldingsScreen(
         Spacer(modifier = Modifier.height(14.dp))
 
         Text(
-            text = "持仓明细",
+            text = stringResource(Res.string.holdings_detail_header),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = TextSecondary,
@@ -103,7 +114,7 @@ fun HoldingsScreen(
 @Composable
 private fun PortfolioHeader() {
     Text(
-        text = "持仓",
+        text = stringResource(Res.string.holdings_title),
         fontSize = 28.sp,
         fontWeight = FontWeight.ExtraBold,
         color = TextPrimary,
@@ -120,7 +131,7 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
             .padding(20.dp),
     ) {
         Text(
-            text = "总资产",
+            text = stringResource(Res.string.total_assets),
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
             color = TextMuted,
@@ -182,7 +193,7 @@ private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
             modifier = Modifier.padding(bottom = 12.dp),
         ) {
             Text(
-                text = "投资比重",
+                text = stringResource(Res.string.investment_weight),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextMuted,
@@ -365,16 +376,16 @@ private fun HoldingCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                MetaText("市值", holding.totalMarketValue.formatCompact(), Modifier.weight(1f))
-                MetaText("成本", holding.averageCost.formatDecimal(2), Modifier.weight(1f))
-                MetaText("股数", "${holding.quantity.toInt()}", Modifier.weight(1f))
+                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatCompact(), Modifier.weight(1f))
+                MetaText(stringResource(Res.string.cost), holding.averageCost.formatDecimal(2), Modifier.weight(1f))
+                MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}", Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(2.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 MetaText(
-                    "盈亏",
+                    stringResource(Res.string.profit_loss),
                     holding.totalGain.formatDecimal(2),
                     valueColor = if (holding.totalGain > 0) GainGreen else GainRed,
                 )

@@ -24,7 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +52,33 @@ import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import gainful.feature.transactions.generated.resources.Res
+import gainful.feature.transactions.generated.resources.add_button
+import gainful.feature.transactions.generated.resources.all
+import gainful.feature.transactions.generated.resources.buy
+import gainful.feature.transactions.generated.resources.cancel
+import gainful.feature.transactions.generated.resources.confirm_delete
+import gainful.feature.transactions.generated.resources.delete
+import gainful.feature.transactions.generated.resources.delete_confirm_suffix
+import gainful.feature.transactions.generated.resources.delete_confirm_text
+import gainful.feature.transactions.generated.resources.dividend
+import gainful.feature.transactions.generated.resources.no_trade_records_empty
+import gainful.feature.transactions.generated.resources.no_trade_records_hint
+import gainful.feature.transactions.generated.resources.sell
+import gainful.feature.transactions.generated.resources.summary_buy
+import gainful.feature.transactions.generated.resources.summary_dividend
+import gainful.feature.transactions.generated.resources.summary_fee
+import gainful.feature.transactions.generated.resources.summary_sell
+import gainful.feature.transactions.generated.resources.summary_total
+import gainful.feature.transactions.generated.resources.trade_count_unit
+import gainful.feature.transactions.generated.resources.trade_price_label
+import gainful.feature.transactions.generated.resources.trade_quantity_label
+import gainful.feature.transactions.generated.resources.transactions_title
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.stringArrayResource
+import gainful.feature.transactions.generated.resources.time_groups
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -77,9 +101,9 @@ fun TransactionsScreen(
     val divCount = uiState.transactions.count { it.type == TransactionType.DIVIDEND }
 
     val groups = remember(filteredTrades) {
-        filteredTrades.groupBy { getTimeGroup(it.tradeDate) }
+        filteredTrades.groupBy { getTimeGroupIndex(it.tradeDate) }
     }
-    val groupOrder = listOf("今天", "最近7天", "本月", "更早")
+    val groupOrder = stringArrayResource(Res.array.time_groups)
 
     val showDeleteDialog = remember { mutableStateOf(false) }
     val deleteTarget = remember { mutableStateOf<TransactionItem?>(null) }
@@ -112,7 +136,7 @@ fun TransactionsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "交易记录",
+                text = stringResource(Res.string.transactions_title),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = TextPrimary,
@@ -125,7 +149,7 @@ fun TransactionsScreen(
                     .padding(horizontal = 16.dp, vertical = 6.dp),
             ) {
                 Text(
-                    text = "+ 添加",
+                    text = stringResource(Res.string.add_button),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Background,
@@ -139,16 +163,16 @@ fun TransactionsScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            FilterTab("全部", uiState.filterType == null, null) {
+            FilterTab(stringResource(Res.string.all), uiState.filterType == null, null) {
                 viewModel.onIntent(TransactionsIntent.SetFilter(null))
             }
-            FilterTab("买入", uiState.filterType == TransactionType.BUY, GainGreen) {
+            FilterTab(stringResource(Res.string.buy), uiState.filterType == TransactionType.BUY, GainGreen) {
                 viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.BUY))
             }
-            FilterTab("卖出", uiState.filterType == TransactionType.SELL, GainRed) {
+            FilterTab(stringResource(Res.string.sell), uiState.filterType == TransactionType.SELL, GainRed) {
                 viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.SELL))
             }
-            FilterTab("股息", uiState.filterType == TransactionType.DIVIDEND, Gold) {
+            FilterTab(stringResource(Res.string.dividend), uiState.filterType == TransactionType.DIVIDEND, Gold) {
                 viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.DIVIDEND))
             }
         }
@@ -158,10 +182,10 @@ fun TransactionsScreen(
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            SummaryItem("共", "${uiState.transactions.size} 笔")
-            SummaryItem("买入", "$buyCount", GainGreen)
-            SummaryItem("卖出", "$sellCount", GainRed)
-            SummaryItem("股息", "$divCount", Gold)
+            SummaryItem(stringResource(Res.string.summary_total), stringResource(Res.string.trade_count_unit, uiState.transactions.size))
+            SummaryItem(stringResource(Res.string.summary_buy), "$buyCount", GainGreen)
+            SummaryItem(stringResource(Res.string.summary_sell), "$sellCount", GainRed)
+            SummaryItem(stringResource(Res.string.summary_dividend), "$divCount", Gold)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -169,8 +193,8 @@ fun TransactionsScreen(
         if (filteredTrades.isEmpty()) {
             EmptyState()
         } else {
-            groupOrder.forEach { groupName ->
-                val items = groups[groupName]
+            groupOrder.forEachIndexed { index, groupName ->
+                val items = groups[index]
                 if (!items.isNullOrEmpty()) {
                     TimeGroupHeader(groupName, items.size)
                     items.forEach { trade ->
@@ -264,7 +288,7 @@ private fun TimeGroupHeader(title: String, count: Int) {
                 .padding(horizontal = 10.dp, vertical = 2.dp),
         ) {
             Text(
-                text = "$count 笔",
+                text = stringResource(Res.string.trade_count_unit, count),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextMuted,
@@ -295,9 +319,9 @@ private fun TradeCard(
         else -> GoldDim
     }
     val typeLabel = when {
-        isBuy -> "买入"
-        isSell -> "卖出"
-        else -> "股息"
+        isBuy -> stringResource(Res.string.buy)
+        isSell -> stringResource(Res.string.sell)
+        else -> stringResource(Res.string.dividend)
     }
     val amountPrefix = if (isBuy) "-" else "+"
     val dateStr = Instant.fromEpochMilliseconds(trade.tradeDate)
@@ -408,7 +432,7 @@ private fun TradeCard(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
-                            text = "数量",
+                            text = stringResource(Res.string.trade_quantity_label),
                             fontSize = 11.sp,
                             color = TextMuted,
                         )
@@ -425,12 +449,12 @@ private fun TradeCard(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
-                            text = "价格",
+                            text = stringResource(Res.string.trade_price_label),
                             fontSize = 11.sp,
                             color = TextMuted,
                         )
                         Text(
-                            text = "\u00A5${trade.price.formatDecimal(2)}",
+                            text = trade.price.formatDecimal(2),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,
@@ -442,12 +466,12 @@ private fun TradeCard(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
-                            text = "手续费",
+                            text = stringResource(Res.string.summary_fee),
                             fontSize = 11.sp,
                             color = TextMuted,
                         )
                         Text(
-                            text = "\u00A5${trade.fee.formatDecimal(2)}",
+                            text = trade.fee.formatDecimal(2),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,
@@ -487,27 +511,27 @@ private fun EmptyState() {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "暂无交易记录",
+            text = stringResource(Res.string.no_trade_records_empty),
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             color = TextSecondary,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "点击右上角添加你的第一笔交易",
+            text = stringResource(Res.string.no_trade_records_hint),
             fontSize = 14.sp,
             color = TextMuted,
         )
     }
 }
 
-private fun getTimeGroup(timestamp: Long): String {
+private fun getTimeGroupIndex(timestamp: Long): Int {
     val days = getDaysAgo(timestamp)
     return when {
-        days == 0 -> "今天"
-        days <= 7 -> "最近7天"
-        days <= 30 -> "本月"
-        else -> "更早"
+        days == 0 -> 0
+        days <= 7 -> 1
+        days <= 30 -> 2
+        else -> 3
     }
 }
 
@@ -527,9 +551,9 @@ private fun DeleteConfirmDialog(
     onDismiss: () -> Unit,
 ) {
     val typeLabel = when (transaction.type) {
-        TransactionType.BUY -> "买入"
-        TransactionType.SELL -> "卖出"
-        TransactionType.DIVIDEND -> "股息"
+        TransactionType.BUY -> stringResource(Res.string.buy)
+        TransactionType.SELL -> stringResource(Res.string.sell)
+        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -542,7 +566,7 @@ private fun DeleteConfirmDialog(
                 .padding(24.dp),
         ) {
             Text(
-                text = "确认删除",
+                text = stringResource(Res.string.confirm_delete),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
@@ -558,7 +582,7 @@ private fun DeleteConfirmDialog(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    text = "确定要删除这笔",
+                    text = stringResource(Res.string.delete_confirm_text),
                     fontSize = 14.sp,
                     color = TextSecondary,
                     textAlign = TextAlign.Center,
@@ -599,7 +623,7 @@ private fun DeleteConfirmDialog(
                     )
                 }
                 Text(
-                    text = "交易吗？此操作不可撤销。",
+                    text = stringResource(Res.string.delete_confirm_suffix),
                     fontSize = 14.sp,
                     color = TextSecondary,
                     textAlign = TextAlign.Center,
@@ -623,7 +647,7 @@ private fun DeleteConfirmDialog(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "取消",
+                        text = stringResource(Res.string.cancel),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TextSecondary,
@@ -639,7 +663,7 @@ private fun DeleteConfirmDialog(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "删除",
+                        text = stringResource(Res.string.delete),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White,

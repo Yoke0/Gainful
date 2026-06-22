@@ -122,7 +122,7 @@ private fun BottomBar(
             ) {
                 tab.icon(selected)
                 Text(
-                    text = tab.label,
+                    text = tab.label(),
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Medium,
                     color = if (selected) Gold else TextMuted,

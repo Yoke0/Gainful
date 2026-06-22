@@ -1,5 +1,18 @@
 package com.yoke.gainful.feature.settings
 
+import gainful.feature.settings.generated.resources.Res
+import gainful.feature.settings.generated.resources.about_group
+import gainful.feature.settings.generated.resources.app_version
+import gainful.feature.settings.generated.resources.cancel
+import gainful.feature.settings.generated.resources.close_time
+import gainful.feature.settings.generated.resources.confirm
+import gainful.feature.settings.generated.resources.minutes_format
+import gainful.feature.settings.generated.resources.open_time
+import gainful.feature.settings.generated.resources.refresh_frequency
+import gainful.feature.settings.generated.resources.refresh_frequency_title
+import gainful.feature.settings.generated.resources.settings_data_group
+import gainful.feature.settings.generated.resources.settings_title
+import gainful.feature.settings.generated.resources.trading_hours_group
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +53,7 @@ import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SettingsScreen(
@@ -55,7 +69,7 @@ fun SettingsScreen(
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Text(
-            text = "设置",
+            text = stringResource(Res.string.settings_title),
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
             color = TextPrimary,
@@ -63,25 +77,25 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SettingsGroup(title = "数据") {
+        SettingsGroup(title = stringResource(Res.string.settings_data_group)) {
             SettingRow(
-                label = "股票数据刷新频率",
-                value = uiState.refreshDisplay,
+                label = stringResource(Res.string.refresh_frequency),
+                value = stringResource(Res.string.minutes_format, uiState.refreshMinutes),
                 onClick = { viewModel.onIntent(SettingsIntent.ShowFreqPicker(true)) },
             )
         }
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        SettingsGroup(title = "交易时段") {
+        SettingsGroup(title = stringResource(Res.string.trading_hours_group)) {
             SettingRow(
-                label = "开盘时间",
+                label = stringResource(Res.string.open_time),
                 value = uiState.openTimeDisplay,
                 valueColor = Gold,
                 onClick = { viewModel.onIntent(SettingsIntent.ShowTimePicker(TimePickerTarget.OPEN)) },
             )
             SettingRow(
-                label = "收盘时间",
+                label = stringResource(Res.string.close_time),
                 value = uiState.closeTimeDisplay,
                 valueColor = Gold,
                 onClick = { viewModel.onIntent(SettingsIntent.ShowTimePicker(TimePickerTarget.CLOSE)) },
@@ -91,9 +105,9 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        SettingsGroup(title = "关于") {
+        SettingsGroup(title = stringResource(Res.string.about_group)) {
             SettingRow(
-                label = "APP 版本",
+                label = stringResource(Res.string.app_version),
                 value = "v${BuildConfig.APP_VERSION}",
                 showArrow = false,
                 showBorder = false,
@@ -227,7 +241,7 @@ private fun FrequencyPickerDialog(
                 .padding(20.dp),
         ) {
             Text(
-                text = "刷新频率",
+                text = stringResource(Res.string.refresh_frequency_title),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
@@ -254,7 +268,7 @@ private fun FrequencyPickerDialog(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "$minutes 分钟",
+                        text = stringResource(Res.string.minutes_format, minutes),
                         fontSize = 15.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                         color = if (isSelected) Gold else TextPrimary,
@@ -279,7 +293,7 @@ private fun FrequencyPickerDialog(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "取消",
+                        text = stringResource(Res.string.cancel),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TextSecondary,
@@ -295,7 +309,7 @@ private fun FrequencyPickerDialog(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "确认",
+                        text = stringResource(Res.string.confirm),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Background,

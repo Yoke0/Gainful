@@ -5,18 +5,24 @@ import com.yoke.gainful.ui.components.DashboardIcon
 import com.yoke.gainful.ui.components.HoldingsIcon
 import com.yoke.gainful.ui.components.RecordsIcon
 import com.yoke.gainful.ui.components.SettingsIcon
+import gainful.core.navigation.generated.resources.Res
+import gainful.core.navigation.generated.resources.nav_dashboard
+import gainful.core.navigation.generated.resources.nav_holdings
+import gainful.core.navigation.generated.resources.nav_settings
+import gainful.core.navigation.generated.resources.nav_transactions
+import org.jetbrains.compose.resources.stringResource
 
 internal data class NavItem(
     val screen: Screen,
-    val label: String,
+    val label: @Composable () -> String,
     val icon: @Composable (isSelected: Boolean) -> Unit,
 )
 
 internal val navItems = listOf(
-    NavItem(Dashboard, "仪表盘") { DashboardIcon(isSelected = it) },
-    NavItem(Transactions, "记录") { RecordsIcon(isSelected = it) },
-    NavItem(Holdings, "持仓") { HoldingsIcon(isSelected = it) },
-    NavItem(Settings, "设置") { SettingsIcon(isSelected = it) },
+    NavItem(Dashboard, { stringResource(Res.string.nav_dashboard) }) { DashboardIcon(isSelected = it) },
+    NavItem(Transactions, { stringResource(Res.string.nav_transactions) }) { RecordsIcon(isSelected = it) },
+    NavItem(Holdings, { stringResource(Res.string.nav_holdings) }) { HoldingsIcon(isSelected = it) },
+    NavItem(Settings, { stringResource(Res.string.nav_settings) }) { SettingsIcon(isSelected = it) },
 )
 
 internal val navScreens = navItems.map { it.screen }

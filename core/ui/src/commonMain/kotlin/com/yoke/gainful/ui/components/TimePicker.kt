@@ -41,6 +41,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.yoke.gainful.ui.theme.Background
+import gainful.core.ui.generated.resources.Res
+import gainful.core.ui.generated.resources.cancel
+import gainful.core.ui.generated.resources.confirm
+import gainful.core.ui.generated.resources.hour_label
+import gainful.core.ui.generated.resources.minute_label
+import gainful.core.ui.generated.resources.now
+import gainful.core.ui.generated.resources.select_time
+import org.jetbrains.compose.resources.stringResource
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainfulTheme
@@ -73,7 +81,7 @@ fun TimePickerField(
         Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
     }
     val hasValue = time != null
-    val displayText = if (hasValue) "${time.hour.pad2()}:${time.minute.pad2()}" else "选择时间"
+    val displayText = if (hasValue) "${time.hour.pad2()}:${time.minute.pad2()}" else stringResource(Res.string.select_time)
 
     Column {
         Text(
@@ -150,7 +158,7 @@ fun TimePickerDialog(
                     .padding(20.dp),
             ) {
                 Text(
-                    text = "选择时间",
+                    text = stringResource(Res.string.select_time),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary,
@@ -165,7 +173,7 @@ fun TimePickerDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     WheelColumn(
-                        label = "时",
+                        label = stringResource(Res.string.hour_label),
                         valueRange = 0..23,
                         initialValue = workingHour,
                         onValueChanged = { workingHour = it },
@@ -181,7 +189,7 @@ fun TimePickerDialog(
                     )
 
                     WheelColumn(
-                        label = "分",
+                        label = stringResource(Res.string.minute_label),
                         valueRange = 0..59,
                         initialValue = workingMinute,
                         onValueChanged = { workingMinute = it },
@@ -195,7 +203,7 @@ fun TimePickerDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TimeFooterButton(
-                        label = "现在",
+                        label = stringResource(Res.string.now),
                         isPrimary = false,
                         modifier = Modifier.weight(1f),
                         onClick = {
@@ -205,13 +213,13 @@ fun TimePickerDialog(
                         },
                     )
                     TimeFooterButton(
-                        label = "取消",
+                        label = stringResource(Res.string.cancel),
                         isPrimary = false,
                         modifier = Modifier.weight(1f),
                         onClick = onDismiss,
                     )
                     TimeFooterButton(
-                        label = "确认",
+                        label = stringResource(Res.string.confirm),
                         isPrimary = true,
                         modifier = Modifier.weight(1f),
                         onClick = { onTimeSelected(workingHour, workingMinute) },

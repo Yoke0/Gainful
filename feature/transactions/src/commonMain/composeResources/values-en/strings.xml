@@ -1,0 +1,68 @@
+<resources>
+    <!-- Transactions Overview -->
+    <string name="transactions_title">Transactions</string>
+    <string name="add_button">+ Add</string>
+    <string name="all">All</string>
+    <string name="buy">Buy</string>
+    <string name="sell">Sell</string>
+    <string name="dividend">Dividend</string>
+    <string name="summary_total">Total</string>
+    <string name="summary_buy">Buy</string>
+    <string name="summary_sell">Sell</string>
+    <string name="summary_dividend">Dividend</string>
+    <string name="trade_quantity_label">Quantity</string>
+    <string name="trade_price_label">Price</string>
+    <string name="summary_fee">Fee</string>
+    <string name="no_trade_records_empty">No trade records</string>
+    <string name="no_trade_records_hint">Tap the top right to add your first trade</string>
+    <string name="confirm_delete">Confirm Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirm_text">Are you sure you want to delete this</string>
+    <string name="delete_confirm_suffix">trade? This action cannot be undone.</string>
+    <string name="trade_count_unit">%1$d trades</string>
+
+    <!-- Add Transaction -->
+    <string name="add_transaction_title">New Transaction</string>
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="asset_section">Asset</string>
+    <string name="no_selection">Selected: None</string>
+    <string name="search_stock_placeholder">Search stock name or code…</string>
+    <string name="no_match_stock">No matching stock found</string>
+    <string name="holding_badge">Holding</string>
+    <string name="existing_holdings">Existing Holdings</string>
+    <string name="quantity_unit">shares</string>
+    <string name="buy_amount_hint">Actual trade amount (including fees)</string>
+    <string name="sell_amount_hint">Actual received amount (after fees)</string>
+    <string name="buy_fee_placeholder">= Amount − Price×Qty</string>
+    <string name="sell_fee_placeholder">= Price×Qty − Amount</string>
+    <string name="buy_fee_hint">Fee = Trade Amount − Price × Quantity</string>
+    <string name="sell_fee_hint">Fee = Price × Quantity − Trade Amount</string>
+    <string name="trade_details_section">Trade Details</string>
+    <string name="trade_amount">Trade Amount</string>
+    <string name="trade_amount_placeholder">Enter actual trade amount</string>
+    <string name="fee_label">Fee (auto-calculated)</string>
+    <string name="trade_price">Trade Price</string>
+    <string name="trade_quantity">Trade Quantity</string>
+    <string name="trade_date">Trade Date</string>
+    <string name="dividend_details_section">Dividend Details</string>
+    <string name="dividend_amount">Dividend Amount</string>
+    <string name="dividend_amount_placeholder">Enter dividend amount</string>
+    <string name="dividend_amount_hint">Actual received amount</string>
+    <string name="dividend_date">Payment Date</string>
+    <string name="transaction_summary">Transaction Summary</string>
+    <string name="summary_type">Type</string>
+    <string name="summary_asset">Asset</string>
+    <string name="summary_amount">Amount</string>
+    <string name="summary_pnl">P&amp;L</string>
+    <string name="summary_date">Date</string>
+
+    <!-- Time Groups -->
+    <string-array name="time_groups">
+        <item>Today</item>
+        <item>Last 7 days</item>
+        <item>This month</item>
+        <item>Older</item>
+    </string-array>
+</resources>

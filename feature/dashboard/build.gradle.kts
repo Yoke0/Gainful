@@ -28,6 +28,9 @@ kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
         }
+        androidResources {
+            enable = true
+        }
     }
 
     sourceSets {
@@ -43,6 +46,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
+            implementation(libs.compose.components.resources)
         }
 
     }
