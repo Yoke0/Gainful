@@ -5,7 +5,6 @@ import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsUseCase
 import com.yoke.gainful.domain.usecase.holding.GetStockDetailUseCase
-import com.yoke.gainful.domain.usecase.portfolio.GetPortfolioSummaryUseCase
 import com.yoke.gainful.domain.usecase.transaction.AddTransactionUseCase
 import com.yoke.gainful.domain.usecase.transaction.DeleteTransactionUseCase
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsUseCase
@@ -13,7 +12,6 @@ import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsUseC
 import org.koin.dsl.module
 
 val domainModule = module {
-    factory { GetPortfolioSummaryUseCase(get()) }
     factory { GetHoldingsUseCase(get()) }
     factory { GetHoldingsDisplayUseCase(get(), get(), get()) }
     factory { GetStockDetailUseCase(get(), get(), get()) }
