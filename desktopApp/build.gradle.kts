@@ -22,12 +22,17 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "Gainful"
-            packageVersion = "1.0.0"
+            packageVersion = property("VERSION_NAME").toString()
             description = "Gainful Desktop Application"
             macOS {
                 bundleID = "com.yoke.gainful"
                 iconFile.set(project.file("src/main/resources/icon.icns"))
             }
+        }
+
+        buildTypes.release.proguard {
+            obfuscate.set(true)
+            configurationFiles.from(project.file("proguard-rules.pro"))
         }
     }
 }
