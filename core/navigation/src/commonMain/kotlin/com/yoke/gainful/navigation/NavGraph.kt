@@ -38,7 +38,8 @@ fun GainfulNavGraph(
     screenContent: @Composable (Screen, onNavigate: (Screen) -> Unit, onBack: () -> Unit) -> Unit,
 ) {
     val topLevelBackStack = remember { TopLevelBackStack<Screen>(Dashboard) }
-    val isBottomBarVisible = topLevelBackStack.topLevelKey in navScreens
+    val currentScreen = topLevelBackStack.backStack.lastOrNull()
+    val isBottomBarVisible = currentScreen in navScreens
 
     val onNavigate: (Screen) -> Unit = lambda@{ target ->
         if (target == topLevelBackStack.backStack.lastOrNull()) return@lambda
@@ -85,7 +86,7 @@ fun GainfulNavGraph(
 
         if (isBottomBarVisible) {
             BottomBar(
-                topLevelBackStack = topLevelBackStack,
+                currentScreen = currentScreen,
                 onNavigate = onNavigate,
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
@@ -95,11 +96,10 @@ fun GainfulNavGraph(
 
 @Composable
 private fun BottomBar(
-    topLevelBackStack: TopLevelBackStack<Screen>,
+    currentScreen: Screen?,
     onNavigate: (Screen) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val currentScreen = topLevelBackStack.topLevelKey
     Row(
         modifier = modifier
             .fillMaxWidth()

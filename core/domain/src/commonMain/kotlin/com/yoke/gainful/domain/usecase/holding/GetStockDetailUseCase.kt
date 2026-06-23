@@ -39,19 +39,25 @@ class GetStockDetailUseCase(
         var quantity = 0.0
         var totalCost = 0.0
         var avgCost = 0.0
+        var totalBuys = 0.0
+        var totalSells = 0.0
+        var totalDividends = 0.0
 
         assetTransactions.sortedBy { it.timestamp }.forEach { tx ->
             when (tx.type) {
                 TransactionType.BUY -> {
+                    totalBuys += tx.amount
                     totalCost += tx.amount
                     quantity += tx.quantity
                 }
                 TransactionType.SELL -> {
+                    totalSells += tx.amount
                     avgCost = if (quantity > 0) totalCost / quantity else 0.0
                     totalCost -= avgCost * tx.quantity
                     quantity -= tx.quantity
                 }
                 TransactionType.DIVIDEND -> {
+                    totalDividends += tx.amount
                     totalCost -= tx.amount
                 }
             }
@@ -72,10 +78,14 @@ class GetStockDetailUseCase(
         return StockDetailResult(
             code = stockCode,
             name = asset?.name ?: stockCode,
+            pinYin = asset?.pinYin ?: "",
             quoteId = asset?.quoteId,
             quote = quote,
             quantity = quantity,
             averageCost = avgCost,
+            totalBuys = totalBuys,
+            totalSells = totalSells,
+            totalDividends = totalDividends,
             transactions = assetTransactions.sortedByDescending { it.timestamp },
             kLines = kLines,
         )
@@ -106,10 +116,14 @@ class GetStockDetailUseCase(
 data class StockDetailResult(
     val code: String,
     val name: String,
+    val pinYin: String,
     val quoteId: String?,
     val quote: StockQuote?,
     val quantity: Double,
     val averageCost: Double,
+    val totalBuys: Double,
+    val totalSells: Double,
+    val totalDividends: Double,
     val transactions: List<Transaction>,
     val kLines: List<KLine>,
 )

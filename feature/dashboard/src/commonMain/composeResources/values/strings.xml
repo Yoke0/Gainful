@@ -8,7 +8,7 @@
     <string name="today_badge">今日</string>
     <string name="no_trend_data">暂无走势数据</string>
     <string name="key_metrics">关键指标</string>
-    <string name="total_assets">总资产</string>
+    <string name="total_assets">总市值</string>
     <string name="total_cost">总成本</string>
     <string name="total_profit">总收益</string>
     <string name="profit_rate">收益率</string>

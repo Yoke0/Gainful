@@ -155,7 +155,7 @@ fun StockDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = uiState.name,
+                text = if (uiState.pinYin.isNotBlank()) "${uiState.name} ${uiState.pinYin}" else uiState.name,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
@@ -648,7 +648,7 @@ private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
                 color = typeColor,
             )
             Text(
-                text = Instant.fromEpochMilliseconds(trade.timestamp)
+                text = Instant.fromEpochMilliseconds(trade.tradeDate)
                     .toLocalDateTime(TimeZone.currentSystemDefault())
                     .date
                     .toString(),

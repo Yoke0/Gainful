@@ -43,10 +43,14 @@ class StockDetailViewModel(
                 _uiState.value = StockDetailUiState(
                     code = result.code,
                     name = result.quote?.name ?: result.name,
+                    pinYin = result.pinYin,
                     fullName = result.quote?.name ?: result.name,
                     quote = result.quote,
                     quantity = result.quantity,
                     averageCost = result.averageCost,
+                    totalBuys = result.totalBuys,
+                    totalSells = result.totalSells,
+                    totalDividends = result.totalDividends,
                     transactions = result.transactions,
                     kLines = result.kLines,
                     isLoading = false,
@@ -82,10 +86,14 @@ class StockDetailViewModel(
 data class StockDetailUiState(
     val code: String = "",
     val name: String = "",
+    val pinYin: String = "",
     val fullName: String = "",
     val quote: StockQuote? = null,
     val quantity: Double = 0.0,
     val averageCost: Double = 0.0,
+    val totalBuys: Double = 0.0,
+    val totalSells: Double = 0.0,
+    val totalDividends: Double = 0.0,
     val transactions: List<Transaction> = emptyList(),
     val kLines: List<KLine> = emptyList(),
     val isLoading: Boolean = false,
@@ -125,10 +133,10 @@ data class StockDetailUiState(
         get() = price * quantity
 
     val totalGain: Double
-        get() = totalMarketValue - (averageCost * quantity)
+        get() = -totalBuys + totalSells + totalDividends + totalMarketValue
 
     val totalGainPercent: Double
-        get() = if (averageCost > 0) ((price - averageCost) / averageCost) * 100 else 0.0
+        get() = if (totalBuys > 0) (totalGain / totalBuys) * 100 else 0.0
 
     val pb: Double
         get() = quote?.pb ?: 0.0

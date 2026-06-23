@@ -420,7 +420,7 @@ private fun TradeCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(Border.copy(alpha = 0.3f)),
+                        .background(Border),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(

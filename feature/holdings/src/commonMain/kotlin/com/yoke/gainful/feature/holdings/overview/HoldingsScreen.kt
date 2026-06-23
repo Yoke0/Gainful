@@ -73,9 +73,9 @@ fun HoldingsScreen(
     val totalPnl = remember(uiState.holdings) {
         uiState.holdings.sumOf { it.totalGain }
     }
-    val totalPnlPct = remember(uiState.holdings, totalValue) {
-        val totalCost = uiState.holdings.sumOf { it.totalCost }
-        if (totalCost > 0) (totalPnl / totalCost) * 100 else 0.0
+    val totalPnlPct = remember(uiState.holdings) {
+        val totalBuys = uiState.holdings.sumOf { it.totalBuys }
+        if (totalBuys > 0) (totalPnl / totalBuys) * 100 else 0.0
     }
 
     Column(
@@ -222,7 +222,7 @@ private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
 
                         HeatmapItem(
                             name = holding.name,
-                            code = holding.code,
+                            code = holding.pinYin.ifBlank { holding.code },
                             pct = pct,
                             amount = holding.totalMarketValue,
                             gradientColors = colors,
@@ -259,15 +259,28 @@ private fun HeatmapItem(
                 .padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = name,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
+            Row(
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                Text(
+                    text = name,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.alignByBaseline(),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = code,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color.White.copy(alpha = 0.5f),
+                    modifier = Modifier.alignByBaseline(),
+                )
+            }
             Column {
                 Text(
-                    text = "${pct.formatDecimal(1)}%",
+                    text = "${pct.formatDecimal(2)}%",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.Monospace,
@@ -281,15 +294,6 @@ private fun HeatmapItem(
                 )
             }
         }
-        Text(
-            text = code,
-            fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
-            color = Color.White.copy(alpha = 0.5f),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(8.dp),
-        )
     }
 }
 
@@ -339,7 +343,7 @@ private fun HoldingCard(
                     modifier = Modifier.alignByBaseline(),
                 )
                 Text(
-                    text = holding.code,
+                    text = holding.pinYin.ifBlank { holding.code },
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     color = TextMuted,
@@ -376,7 +380,7 @@ private fun HoldingCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatCompact(), Modifier.weight(1f))
+                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatDecimal(2), Modifier.weight(1f))
                 MetaText(stringResource(Res.string.cost), holding.averageCost.formatDecimal(2), Modifier.weight(1f))
                 MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}", Modifier.weight(1f))
             }

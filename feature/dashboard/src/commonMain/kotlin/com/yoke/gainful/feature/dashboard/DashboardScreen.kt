@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.HoldingDisplay
@@ -177,27 +176,38 @@ private fun SummaryCard(state: DashboardUiState) {
                 fontWeight = FontWeight.ExtraBold,
                 color = if (totalGain >= 0) Gold else GainRed,
                 letterSpacing = (-0.5).sp,
+                modifier = Modifier.alignByBaseline(),
             )
             Text(
                 text = totalGainPercent.formatSigned() + "%",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (totalGainPercent >= 0) GainGreen else GainRed,
+                modifier = Modifier.alignByBaseline(),
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
+            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            DetailText(stringResource(Res.string.total_market_value_label), totalValue.formatCompact())
-            DetailText(stringResource(Res.string.total_cost_label), totalCost.formatCompact())
+            DetailText(
+                stringResource(Res.string.total_market_value_label),
+                totalValue.formatDecimal(2),
+                Modifier.alignByBaseline(),
+            )
+            DetailText(
+                stringResource(Res.string.total_cost_label),
+                totalCost.formatDecimal(2),
+                Modifier.alignByBaseline(),
+            )
         }
     }
 }
 
 @Composable
-private fun DetailText(label: String, value: String) {
-    Row {
+private fun DetailText(label: String, value: String, modifier: Modifier = Modifier) {
+    Row(modifier = modifier) {
         Text(
             text = label,
             fontSize = 13.sp,
@@ -388,12 +398,12 @@ private fun MetricsSection(state: DashboardUiState) {
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_assets),
-                value = totalValue.formatCompact(),
+                value = totalValue.formatDecimal(2),
             )
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_cost),
-                value = totalCost.formatCompact(),
+                value = totalCost.formatDecimal(2),
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -404,7 +414,7 @@ private fun MetricsSection(state: DashboardUiState) {
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_profit),
-                value = if (totalGain >= 0) "+${totalGain.formatCompact()}" else totalGain.formatCompact(),
+                value = if (totalGain >= 0) "+${totalGain.formatDecimal(2)}" else totalGain.formatDecimal(2),
                 valueColor = if (totalGain >= 0) GainGreen else GainRed,
             )
             MetricCard(
@@ -487,7 +497,7 @@ private fun HoldingsOverviewCard(holdings: List<HoldingDisplay>) {
 
         sorted.take(5).forEach { holding ->
             HoldingRow(
-                name = "${holding.name} ${holding.code}",
+                name = "${holding.name} ${holding.pinYin.ifBlank { holding.code }}",
                 gain = holding.totalGain,
             )
         }

@@ -8,7 +8,7 @@
     <string name="today_badge">Today</string>
     <string name="no_trend_data">No trend data available</string>
     <string name="key_metrics">Key Metrics</string>
-    <string name="total_assets">Total Assets</string>
+    <string name="total_assets">Total Market Value</string>
     <string name="total_cost">Total Cost</string>
     <string name="total_profit">Total Profit</string>
     <string name="profit_rate">Return Rate</string>

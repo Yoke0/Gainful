@@ -11,6 +11,9 @@ data class HoldingDisplay(
     val currentPrice: Double,
     val changePercent: Double,
     val changeAmount: Double,
+    val totalBuys: Double = 0.0,
+    val totalSells: Double = 0.0,
+    val totalDividends: Double = 0.0,
     val trendPrices: List<Double> = emptyList(),
 ) {
     val totalMarketValue: Double
@@ -20,8 +23,8 @@ data class HoldingDisplay(
         get() = averageCost * quantity
 
     val totalGain: Double
-        get() = totalMarketValue - totalCost
+        get() = -totalBuys + totalSells + totalDividends + totalMarketValue
 
     val totalGainPercent: Double
-        get() = if (totalCost > 0) (totalGain / totalCost) * 100 else 0.0
+        get() = if (totalBuys > 0) (totalGain / totalBuys) * 100 else 0.0
 }

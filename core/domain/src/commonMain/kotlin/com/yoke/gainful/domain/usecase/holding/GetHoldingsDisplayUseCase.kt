@@ -27,19 +27,25 @@ class GetHoldingsDisplayUseCase(
                 .mapNotNull { (assetId, assetTransactions) ->
                     var quantity = 0.0
                     var totalCost = 0.0
+                    var totalBuys = 0.0
+                    var totalSells = 0.0
+                    var totalDividends = 0.0
 
                     assetTransactions.sortedBy { it.timestamp }.forEach { tx ->
                         when (tx.type) {
                             TransactionType.BUY -> {
+                                totalBuys += tx.amount
                                 totalCost += tx.amount
                                 quantity += tx.quantity
                             }
                             TransactionType.SELL -> {
+                                totalSells += tx.amount
                                 val avgCost = if (quantity > 0) totalCost / quantity else 0.0
                                 totalCost -= avgCost * tx.quantity
                                 quantity -= tx.quantity
                             }
                             TransactionType.DIVIDEND -> {
+                                totalDividends += tx.amount
                                 totalCost -= tx.amount
                             }
                         }
@@ -59,6 +65,9 @@ class GetHoldingsDisplayUseCase(
                             currentPrice = 0.0,
                             changePercent = 0.0,
                             changeAmount = 0.0,
+                            totalBuys = totalBuys,
+                            totalSells = totalSells,
+                            totalDividends = totalDividends,
                         )
                     } else {
                         null
