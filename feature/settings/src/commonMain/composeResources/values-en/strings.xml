@@ -2,6 +2,7 @@
     <string name="settings_title">Settings</string>
     <string name="settings_data_group">Data</string>
     <string name="refresh_frequency">Stock Data Refresh Frequency</string>
+    <string name="gain_loss_color">Gain/Loss Color</string>
     <string name="trading_hours_group">Trading Hours</string>
     <string name="open_time">Market Open</string>
     <string name="close_time">Market Close</string>
@@ -9,6 +10,11 @@
     <string name="app_version">APP Version</string>
     <string name="refresh_frequency_title">Refresh Frequency</string>
     <string name="minutes_format">%1$d minutes</string>
+    <string name="gain_loss_color_title">Gain/Loss Color Scheme</string>
+    <string name="color_red_up">Red Up, Green Down</string>
+    <string name="color_green_up">Green Up, Red Down</string>
+    <string name="color_demo_up">▲ +2.5%%</string>
+    <string name="color_demo_down">▼ -1.2%%</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
 </resources>

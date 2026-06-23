@@ -3,6 +3,7 @@ package com.yoke.gainful.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.data.repository.UserPreferencesRepository
+import com.yoke.gainful.model.GainLossColorScheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +27,7 @@ class SettingsViewModel(
                         openMinute = prefs.openMinute,
                         closeHour = prefs.closeHour,
                         closeMinute = prefs.closeMinute,
+                        gainLossColorScheme = prefs.gainLossColorScheme,
                     )
                 }
             }
@@ -52,6 +54,12 @@ class SettingsViewModel(
             is SettingsIntent.ShowFreqPicker -> _uiState.update {
                 it.copy(showFreqPicker = intent.show)
             }
+            is SettingsIntent.SetGainLossColorScheme -> viewModelScope.launch {
+                repository.setGainLossColorScheme(intent.scheme)
+            }
+            is SettingsIntent.ShowColorPicker -> _uiState.update {
+                it.copy(showColorPicker = intent.show)
+            }
         }
     }
 }
@@ -62,9 +70,11 @@ data class SettingsUiState(
     val openMinute: Int = 30,
     val closeHour: Int = 15,
     val closeMinute: Int = 0,
+    val gainLossColorScheme: GainLossColorScheme = GainLossColorScheme.RED_UP,
     val showTimePicker: Boolean = false,
     val timePickerTarget: TimePickerTarget = TimePickerTarget.OPEN,
     val showFreqPicker: Boolean = false,
+    val showColorPicker: Boolean = false,
 ) {
     val openTimeDisplay: String get() = "${openHour.pad2()}:${openMinute.pad2()}"
     val closeTimeDisplay: String get() = "${closeHour.pad2()}:${closeMinute.pad2()}"

@@ -1,16 +1,5 @@
 package com.yoke.gainful.feature.holdings.overview
 
-import gainful.feature.holdings.generated.resources.Res
-import gainful.feature.holdings.generated.resources.cost
-import gainful.feature.holdings.generated.resources.holdings_detail_header
-import gainful.feature.holdings.generated.resources.holdings_title
-import gainful.feature.holdings.generated.resources.investment_weight
-import gainful.feature.holdings.generated.resources.market_value
-import gainful.feature.holdings.generated.resources.profit_loss
-import gainful.feature.holdings.generated.resources.shares
-import gainful.feature.holdings.generated.resources.total_assets
-import org.jetbrains.compose.resources.stringResource
-
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,11 +41,21 @@ import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainGreen
-import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.ui.theme.gainColor
+import com.yoke.gainful.ui.theme.lossColor
+import gainful.feature.holdings.generated.resources.Res
+import gainful.feature.holdings.generated.resources.cost
+import gainful.feature.holdings.generated.resources.holdings_detail_header
+import gainful.feature.holdings.generated.resources.holdings_title
+import gainful.feature.holdings.generated.resources.investment_weight
+import gainful.feature.holdings.generated.resources.market_value
+import gainful.feature.holdings.generated.resources.profit_loss
+import gainful.feature.holdings.generated.resources.shares
+import gainful.feature.holdings.generated.resources.total_assets
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -155,14 +154,14 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
-                color = if (totalPnl >= 0) GainGreen else GainRed,
+                color = if (totalPnl >= 0) gainColor else lossColor,
             )
             Text(
                 text = totalPnlPct.formatSigned() + "%",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
-                color = if (totalPnlPct >= 0) GainGreen else GainRed,
+                color = if (totalPnlPct >= 0) gainColor else lossColor,
             )
         }
     }
@@ -318,7 +317,7 @@ private fun HoldingCard(
 ) {
     val isPositive = holding.changeAmount >= 0
     val change = holding.changeAmount
-    val strokeColor = if (isPositive) GainGreen else GainRed
+    val strokeColor = if (isPositive) gainColor else lossColor
 
     Row(
         modifier = Modifier
@@ -370,7 +369,7 @@ private fun HoldingCard(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = FontFamily.Monospace,
-                    color = if (isPositive) GainGreen else GainRed,
+                    color = if (isPositive) gainColor else lossColor,
                 )
             }
 
@@ -391,7 +390,7 @@ private fun HoldingCard(
                 MetaText(
                     stringResource(Res.string.profit_loss),
                     holding.totalGain.formatDecimal(2),
-                    valueColor = if (holding.totalGain > 0) GainGreen else GainRed,
+                    valueColor = if (holding.totalGain > 0) gainColor else lossColor,
                 )
             }
         }
@@ -430,7 +429,7 @@ private fun Sparkline(
     trendPrices: List<Double>,
     changeAmount: Double,
     modifier: Modifier = Modifier,
-    strokeColor: Color = GainGreen,
+    strokeColor: Color = gainColor,
 ) {
     val reversedPrices = remember(trendPrices) { trendPrices.reversed() }
     val points = remember(reversedPrices, changeAmount) {

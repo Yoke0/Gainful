@@ -41,12 +41,13 @@ import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.GreenDim
-import com.yoke.gainful.ui.theme.RedDim
+import com.yoke.gainful.ui.theme.gainColor
+import com.yoke.gainful.ui.theme.gainDimColor
+import com.yoke.gainful.ui.theme.lossColor
+import com.yoke.gainful.ui.theme.lossDimColor
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
@@ -166,10 +167,10 @@ fun TransactionsScreen(
             FilterTab(stringResource(Res.string.all), uiState.filterType == null, null) {
                 viewModel.onIntent(TransactionsIntent.SetFilter(null))
             }
-            FilterTab(stringResource(Res.string.buy), uiState.filterType == TransactionType.BUY, GainGreen) {
+            FilterTab(stringResource(Res.string.buy), uiState.filterType == TransactionType.BUY, gainColor) {
                 viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.BUY))
             }
-            FilterTab(stringResource(Res.string.sell), uiState.filterType == TransactionType.SELL, GainRed) {
+            FilterTab(stringResource(Res.string.sell), uiState.filterType == TransactionType.SELL, lossColor) {
                 viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.SELL))
             }
             FilterTab(stringResource(Res.string.dividend), uiState.filterType == TransactionType.DIVIDEND, Gold) {
@@ -183,8 +184,8 @@ fun TransactionsScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SummaryItem(stringResource(Res.string.summary_total), stringResource(Res.string.trade_count_unit, uiState.transactions.size))
-            SummaryItem(stringResource(Res.string.summary_buy), "$buyCount", GainGreen)
-            SummaryItem(stringResource(Res.string.summary_sell), "$sellCount", GainRed)
+            SummaryItem(stringResource(Res.string.summary_buy), "$buyCount", gainColor)
+            SummaryItem(stringResource(Res.string.summary_sell), "$sellCount", lossColor)
             SummaryItem(stringResource(Res.string.summary_dividend), "$divCount", Gold)
         }
 
@@ -309,13 +310,13 @@ private fun TradeCard(
     val scale by animateFloatAsState(if (isPressed.value) 0.97f else 1f, label = "scale")
 
     val typeColor = when {
-        isBuy -> GainGreen
-        isSell -> GainRed
+        isBuy -> gainColor
+        isSell -> lossColor
         else -> Gold
     }
     val typeBgColor = when {
-        isBuy -> GreenDim
-        isSell -> RedDim
+        isBuy -> gainDimColor
+        isSell -> lossDimColor
         else -> GoldDim
     }
     val typeLabel = when {
@@ -596,8 +597,8 @@ private fun DeleteConfirmDialog(
                             .clip(RoundedCornerShape(8.dp))
                             .background(
                                 when (transaction.type) {
-                                    TransactionType.BUY -> GreenDim
-                                    TransactionType.SELL -> RedDim
+                                    TransactionType.BUY -> gainDimColor
+                                    TransactionType.SELL -> lossDimColor
                                     else -> GoldDim
                                 },
                             )
@@ -608,8 +609,8 @@ private fun DeleteConfirmDialog(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = when (transaction.type) {
-                                TransactionType.BUY -> GainGreen
-                                TransactionType.SELL -> GainRed
+                                TransactionType.BUY -> gainColor
+                                TransactionType.SELL -> lossColor
                                 else -> Gold
                             },
                         )

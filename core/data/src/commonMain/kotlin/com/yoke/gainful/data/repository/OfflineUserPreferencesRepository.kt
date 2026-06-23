@@ -1,6 +1,7 @@
 package com.yoke.gainful.data.repository
 
 import com.yoke.gainful.datastore.UserPreferencesDataSource
+import com.yoke.gainful.model.GainLossColorScheme
 import com.yoke.gainful.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
@@ -20,5 +21,9 @@ class OfflineUserPreferencesRepository(
 
     override suspend fun setCloseTime(hour: Int, minute: Int) {
         dataSource.setCloseTime(hour, minute)
+    }
+
+    override suspend fun setGainLossColorScheme(scheme: GainLossColorScheme) {
+        dataSource.setGainLossColorScheme(scheme)
     }
 }

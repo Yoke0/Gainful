@@ -79,12 +79,13 @@ import com.yoke.gainful.ui.components.DateTimePickerField
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.GreenDim
-import com.yoke.gainful.ui.theme.RedDim
+import com.yoke.gainful.ui.theme.gainColor
+import com.yoke.gainful.ui.theme.gainDimColor
+import com.yoke.gainful.ui.theme.lossColor
+import com.yoke.gainful.ui.theme.lossDimColor
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
@@ -276,8 +277,8 @@ private fun TypeSelector(
             label = stringResource(Res.string.buy),
             icon = "📈",
             isSelected = selectedType == TransactionType.BUY,
-            activeColor = GainGreen,
-            activeBackground = GreenDim,
+            activeColor = gainColor,
+            activeBackground = gainDimColor,
             modifier = Modifier.weight(1f),
             onClick = { onTypeSelected(TransactionType.BUY) },
         )
@@ -285,8 +286,8 @@ private fun TypeSelector(
             label = stringResource(Res.string.sell),
             icon = "📉",
             isSelected = selectedType == TransactionType.SELL,
-            activeColor = GainRed,
-            activeBackground = RedDim,
+            activeColor = lossColor,
+            activeBackground = lossDimColor,
             modifier = Modifier.weight(1f),
             onClick = { onTypeSelected(TransactionType.SELL) },
         )
@@ -995,9 +996,9 @@ private fun TransactionSummary(
     }
     val pnlColor = when {
         amountVal <= 0 -> TextPrimary
-        type == TransactionType.SELL -> GainGreen
-        type == TransactionType.DIVIDEND -> GainGreen
-        else -> GainRed
+        type == TransactionType.SELL -> gainColor
+        type == TransactionType.DIVIDEND -> gainColor
+        else -> lossColor
     }
 
     Column(

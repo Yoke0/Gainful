@@ -5,7 +5,13 @@ import gainful.feature.settings.generated.resources.about_group
 import gainful.feature.settings.generated.resources.app_version
 import gainful.feature.settings.generated.resources.cancel
 import gainful.feature.settings.generated.resources.close_time
+import gainful.feature.settings.generated.resources.color_demo_down
+import gainful.feature.settings.generated.resources.color_demo_up
+import gainful.feature.settings.generated.resources.color_green_up
+import gainful.feature.settings.generated.resources.color_red_up
 import gainful.feature.settings.generated.resources.confirm
+import gainful.feature.settings.generated.resources.gain_loss_color
+import gainful.feature.settings.generated.resources.gain_loss_color_title
 import gainful.feature.settings.generated.resources.minutes_format
 import gainful.feature.settings.generated.resources.open_time
 import gainful.feature.settings.generated.resources.refresh_frequency
@@ -25,28 +31,35 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.BuildConfig
+import com.yoke.gainful.model.GainLossColorScheme
 import com.yoke.gainful.ui.components.TimePickerDialog
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
+import com.yoke.gainful.ui.theme.GainGreen
+import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
@@ -82,6 +95,11 @@ fun SettingsScreen(
                 label = stringResource(Res.string.refresh_frequency),
                 value = stringResource(Res.string.minutes_format, uiState.refreshMinutes),
                 onClick = { viewModel.onIntent(SettingsIntent.ShowFreqPicker(true)) },
+            )
+            ColorSettingRow(
+                label = stringResource(Res.string.gain_loss_color),
+                scheme = uiState.gainLossColorScheme,
+                onClick = { viewModel.onIntent(SettingsIntent.ShowColorPicker(true)) },
             )
         }
 
@@ -137,6 +155,208 @@ fun SettingsScreen(
             onConfirm = { viewModel.onIntent(SettingsIntent.SetRefreshMinutes(it)) },
             onDismiss = { viewModel.onIntent(SettingsIntent.ShowFreqPicker(false)) },
         )
+    }
+
+    if (uiState.showColorPicker) {
+        ColorPickerDialog(
+            selected = uiState.gainLossColorScheme,
+            onConfirm = { viewModel.onIntent(SettingsIntent.SetGainLossColorScheme(it)) },
+            onDismiss = { viewModel.onIntent(SettingsIntent.ShowColorPicker(false)) },
+        )
+    }
+}
+
+@Composable
+private fun ColorSettingRow(
+    label: String,
+    scheme: GainLossColorScheme,
+    onClick: () -> Unit,
+) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary,
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    val upColor = if (scheme == GainLossColorScheme.RED_UP) GainRed else GainGreen
+                    val downColor = if (scheme == GainLossColorScheme.RED_UP) GainGreen else GainRed
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(upColor),
+                    )
+                    Text(
+                        text = "涨",
+                        fontSize = 13.sp,
+                        color = TextSecondary,
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(downColor),
+                    )
+                    Text(
+                        text = "跌",
+                        fontSize = 13.sp,
+                        color = TextSecondary,
+                    )
+                }
+                Text(
+                    text = "\u25BE",
+                    fontSize = 12.sp,
+                    color = TextMuted,
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Border),
+        )
+    }
+}
+
+@Composable
+private fun ColorPickerDialog(
+    selected: GainLossColorScheme,
+    onConfirm: (GainLossColorScheme) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var workingSelection by remember { mutableStateOf(selected) }
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(20.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.gain_loss_color_title),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            GainLossColorScheme.entries.forEach { scheme ->
+                val isSelected = scheme == workingSelection
+                val upColor = if (scheme == GainLossColorScheme.RED_UP) GainRed else GainGreen
+                val downColor = if (scheme == GainLossColorScheme.RED_UP) GainGreen else GainRed
+                val label = if (scheme == GainLossColorScheme.RED_UP) {
+                    stringResource(Res.string.color_red_up)
+                } else {
+                    stringResource(Res.string.color_green_up)
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(if (isSelected) GoldDim else Surface)
+                        .border(
+                            width = 1.dp,
+                            color = if (isSelected) Gold else Border,
+                            shape = RoundedCornerShape(6.dp),
+                        )
+                        .clickable { workingSelection = scheme }
+                        .padding(vertical = 12.dp, horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = label,
+                        fontSize = 15.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) Gold else TextPrimary,
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.color_demo_up),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = FontFamily.Monospace,
+                            color = upColor,
+                        )
+                        Text(
+                            text = stringResource(Res.string.color_demo_down),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = FontFamily.Monospace,
+                            color = downColor,
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Surface)
+                        .border(1.dp, Border, RoundedCornerShape(50))
+                        .clickable(onClick = onDismiss),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.cancel),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextSecondary,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Gold)
+                        .clickable { onConfirm(workingSelection); onDismiss() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.confirm),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Background,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -229,7 +449,7 @@ private fun FrequencyPickerDialog(
     onConfirm: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var workingSelection by remember { mutableIntStateOf(selected) }
+    var workingSelection by remember { mutableStateOf(selected) }
 
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         Column(

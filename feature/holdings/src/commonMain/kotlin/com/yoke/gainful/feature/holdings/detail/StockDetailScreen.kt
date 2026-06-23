@@ -50,8 +50,8 @@ import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainGreen
-import com.yoke.gainful.ui.theme.GainRed
+import com.yoke.gainful.ui.theme.gainColor
+import com.yoke.gainful.ui.theme.lossColor
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
@@ -122,7 +122,7 @@ fun StockDetailScreen(
     val change = uiState.changeAmount
     val changePct = uiState.changePercent
     val isPositive = change >= 0
-    val changeColor = if (isPositive) GainGreen else GainRed
+    val changeColor = if (isPositive) gainColor else lossColor
 
     Column(
         modifier = Modifier
@@ -438,6 +438,7 @@ private fun ChartCard(
 
 @Composable
 private fun ChartArea(data: List<Double>) {
+    val lineColor = gainColor
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
@@ -475,7 +476,6 @@ private fun ChartArea(data: List<Double>) {
         fillPath.lineTo(w, h)
         fillPath.close()
 
-        val lineColor = GainGreen
         drawPath(
             path = fillPath,
             brush = Brush.verticalGradient(
@@ -517,13 +517,13 @@ private fun MetricsGrid(uiState: StockDetailUiState) {
                 stringResource(Res.string.cost),
                 uiState.averageCost.formatDecimal(2),
                 Modifier.weight(1f),
-                valueColor = if (uiState.averageCost > uiState.price) GainRed else GainGreen,
+                valueColor = if (uiState.averageCost > uiState.price) lossColor else gainColor,
             )
             MetricItem(
                 stringResource(Res.string.profit_loss),
                 "${if (uiState.totalGain >= 0) "+" else ""}${uiState.totalGain.formatCompact()}",
                 Modifier.weight(1f),
-                valueColor = if (uiState.totalGain >= 0) GainGreen else GainRed,
+                valueColor = if (uiState.totalGain >= 0) gainColor else lossColor,
             )
         }
     }
@@ -628,8 +628,8 @@ private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
         TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
     }
     val typeColor = when (trade.type) {
-        TransactionType.BUY -> GainGreen
-        TransactionType.SELL -> GainRed
+        TransactionType.BUY -> gainColor
+        TransactionType.SELL -> lossColor
         TransactionType.DIVIDEND -> Gold
     }
 

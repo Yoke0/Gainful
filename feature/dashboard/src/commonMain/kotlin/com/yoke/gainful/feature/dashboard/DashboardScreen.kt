@@ -62,7 +62,8 @@ import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainGreen
-import com.yoke.gainful.ui.theme.GainRed
+import com.yoke.gainful.ui.theme.gainColor
+import com.yoke.gainful.ui.theme.lossColor
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
@@ -174,7 +175,7 @@ private fun SummaryCard(state: DashboardUiState) {
                 text = if (totalGain >= 0) "+${totalGain.formatDecimal(2)}" else totalGain.formatDecimal(2),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = if (totalGain >= 0) Gold else GainRed,
+                color = if (totalGain >= 0) Gold else lossColor,
                 letterSpacing = (-0.5).sp,
                 modifier = Modifier.alignByBaseline(),
             )
@@ -182,7 +183,7 @@ private fun SummaryCard(state: DashboardUiState) {
                 text = totalGainPercent.formatSigned() + "%",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (totalGainPercent >= 0) GainGreen else GainRed,
+                color = if (totalGainPercent >= 0) gainColor else lossColor,
                 modifier = Modifier.alignByBaseline(),
             )
         }
@@ -415,13 +416,13 @@ private fun MetricsSection(state: DashboardUiState) {
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_profit),
                 value = if (totalGain >= 0) "+${totalGain.formatDecimal(2)}" else totalGain.formatDecimal(2),
-                valueColor = if (totalGain >= 0) GainGreen else GainRed,
+                valueColor = if (totalGain >= 0) gainColor else lossColor,
             )
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.profit_rate),
                 value = totalGainPercent.formatSigned() + "%",
-                valueColor = if (totalGainPercent >= 0) GainGreen else GainRed,
+                valueColor = if (totalGainPercent >= 0) gainColor else lossColor,
             )
         }
     }
@@ -552,7 +553,7 @@ private fun HoldingRow(name: String, gain: Double) {
             text = if (gain >= 0) "+${gain.formatDecimal(2)}" else gain.formatDecimal(2),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (gain >= 0) GainGreen else GainRed,
+            color = if (gain >= 0) gainColor else lossColor,
         )
     }
 }
@@ -569,7 +570,7 @@ private fun SummaryBadge(label: String, value: String, isPositive: Boolean = fal
             text = value,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (isPositive) GainGreen else TextPrimary,
+            color = if (isPositive) gainColor else TextPrimary,
         )
     }
 }
