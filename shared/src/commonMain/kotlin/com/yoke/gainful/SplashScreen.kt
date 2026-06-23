@@ -38,6 +38,7 @@ import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
 import gainful.shared.generated.resources.Res
 import gainful.shared.generated.resources.app_icon
+import gainful.shared.generated.resources.app_name
 import gainful.shared.generated.resources.splash_subtitle
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
@@ -72,7 +73,7 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             // App icon
             Image(
                 painter = painterResource(Res.drawable.app_icon),
-                contentDescription = "Gainful",
+                contentDescription = stringResource(Res.string.app_name),
                 modifier = Modifier
                     .size(88.dp)
                     .clip(RoundedCornerShape(22.dp)),
@@ -82,7 +83,7 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
             // Title
             Text(
-                text = "Gainful",
+                text = stringResource(Res.string.app_name),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,

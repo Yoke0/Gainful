@@ -1,3 +1,4 @@
 <resources>
+    <string name="app_name">Gainful</string>
     <string name="splash_subtitle">Smart Investing, Data Driven</string>
 </resources>

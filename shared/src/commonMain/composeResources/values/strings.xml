@@ -1,3 +1,4 @@
 <resources>
+    <string name="app_name">盈迹</string>
     <string name="splash_subtitle">智能投资，数据驱动</string>
 </resources>
