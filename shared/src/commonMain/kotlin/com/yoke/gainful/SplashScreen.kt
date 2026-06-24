@@ -3,7 +3,6 @@ package com.yoke.gainful
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -23,9 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,22 +37,26 @@ import gainful.shared.generated.resources.app_icon
 import gainful.shared.generated.resources.app_name
 import gainful.shared.generated.resources.splash_subtitle
 import kotlinx.coroutines.delay
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-@Composable
-fun SplashScreen(onSplashFinished: () -> Unit) {
-    var startFadeOut by remember { mutableStateOf(false) }
-    val alpha by animateFloatAsState(
-        targetValue = if (startFadeOut) 0f else 1f,
-        animationSpec = tween(durationMillis = 400, easing = LinearEasing),
-        label = "fade",
-    )
+private const val MIN_SPLASH_DURATION_MS = 1500L
 
+@Composable
+fun SplashScreen(
+    onInit: (suspend () -> Unit)? = null,
+    onSplashFinished: () -> Unit,
+) {
     LaunchedEffect(Unit) {
-        delay(1800)
-        startFadeOut = true
-        delay(400)
+        val startTime = Clock.System.now().toEpochMilliseconds()
+        onInit?.invoke()
+        val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
+        val remaining = MIN_SPLASH_DURATION_MS - elapsed
+        if (remaining > 0) {
+            delay(remaining.milliseconds)
+        }
         onSplashFinished()
     }
 
@@ -70,7 +70,6 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            // App icon
             Image(
                 painter = painterResource(Res.drawable.app_icon),
                 contentDescription = stringResource(Res.string.app_name),
@@ -81,7 +80,6 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Title
             Text(
                 text = stringResource(Res.string.app_name),
                 fontSize = 28.sp,
@@ -92,7 +90,6 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Subtitle
             Text(
                 text = stringResource(Res.string.splash_subtitle),
                 fontSize = 14.sp,
@@ -103,7 +100,6 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Loading dots
             LoadingDots()
         }
     }

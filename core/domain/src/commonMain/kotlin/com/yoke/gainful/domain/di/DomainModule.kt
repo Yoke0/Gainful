@@ -13,7 +13,7 @@ import org.koin.dsl.module
 
 val domainModule = module {
     factory { GetHoldingsUseCase(get()) }
-    factory { GetHoldingsDisplayUseCase(get(), get(), get()) }
+    factory { GetHoldingsDisplayUseCase(get(), get(), get(), get()) }
     factory { GetStockDetailUseCase(get(), get(), get()) }
     factory { GetTransactionsUseCase(get()) }
     factory { GetTransactionsWithAssetsUseCase(get(), get()) }

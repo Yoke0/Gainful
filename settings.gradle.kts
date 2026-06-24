@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 rootProject.name = "Gainful"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
@@ -45,8 +47,7 @@ include(":core:domain")
 include(":core:ui")
 include(":core:navigation")
 include(":core:datastore")
-
-
+include(":core:sync")
 
 include(":feature:dashboard")
 include(":feature:holdings")

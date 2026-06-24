@@ -29,7 +29,7 @@ class EastMoneyMarketRepository(
     }
 
     override suspend fun getTrends(secId: String, ndays: Int): List<StockTrend> {
-        return api.getTrends(secId, ndays)?.toStockTrendList() ?: emptyList()
+        return api.getTrends(secId, ndays).toStockTrendList()
     }
 
     override suspend fun getKLines(

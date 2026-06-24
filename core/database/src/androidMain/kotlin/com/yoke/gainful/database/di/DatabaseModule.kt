@@ -16,4 +16,5 @@ val databaseModule = module {
     }
     single { get<GainfulDatabase>().assetDao() }
     single { get<GainfulDatabase>().transactionDao() }
+    single { get<GainfulDatabase>().quoteSnapshotDao() }
 }

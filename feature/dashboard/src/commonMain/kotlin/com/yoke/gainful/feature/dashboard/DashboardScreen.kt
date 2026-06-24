@@ -227,8 +227,8 @@ private fun DetailText(label: String, value: String, modifier: Modifier = Modifi
 private fun ChartCard(holdings: List<HoldingDisplay>) {
     val chartData = remember(holdings) {
         holdings
-            .filter { it.trendPrices.isNotEmpty() }
-            .flatMap { it.trendPrices }
+            .filter { it.trends.isNotEmpty() }
+            .flatMap { it.trends.map { trend -> trend.price } }
             .takeIf { it.isNotEmpty() }
             ?: emptyList()
     }

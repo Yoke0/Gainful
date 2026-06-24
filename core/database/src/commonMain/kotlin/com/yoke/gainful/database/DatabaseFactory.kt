@@ -6,6 +6,10 @@ const val DATABASE_NAME = "gainful.db"
 
 fun createDatabase(builder: RoomDatabase.Builder<GainfulDatabase>): GainfulDatabase {
     return builder
-        .addMigrations(GainfulDatabase.MIGRATION_1_2, GainfulDatabase.MIGRATION_2_3)
+        .addMigrations(
+            GainfulDatabase.MIGRATION_1_2,
+            GainfulDatabase.MIGRATION_2_3,
+            GainfulDatabase.MIGRATION_3_4,
+        )
         .build()
 }

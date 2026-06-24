@@ -32,7 +32,7 @@ internal class EastMoneyApiImpl(
         return resp.data?.diff ?: emptyList()
     }
 
-    override suspend fun getTrends(secId: String, ndays: Int): TrendData? {
+    override suspend fun getTrends(secId: String, ndays: Int): TrendData {
         val resp: ApiResponse<List<TrendItem>> = client.get(TREND_URL) {
             parameter("secid", secId)
             parameter("iscr", 0)
@@ -58,16 +58,13 @@ internal class EastMoneyApiImpl(
     }
 
     override suspend fun search(query: String, count: Int): List<SearchItemDto> {
-        println("[EastMoneyApi] search query=$query, url=$SEARCH_URL")
         val resp: SearchResponse = client.get(SEARCH_URL) {
             parameter("input", query)
             parameter("type", 14)
             parameter("token", SEARCH_TOKEN)
             parameter("count", count)
         }.body()
-        val data = resp.codeTable?.data
-        println("[EastMoneyApi] search results=${data?.size ?: 0}")
-        return data ?: emptyList()
+        return resp.codeTable?.data ?: emptyList()
     }
 
     private fun HttpRequestBuilder.quoteParams(secId: String? = null, secIds: List<String>? = null) {
@@ -93,7 +90,6 @@ internal class EastMoneyApiImpl(
         private const val BATCH_QUOTE_FIELDS =
             "f2,f3,f4,f5,f6,f7,f8,f9,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f100"
         private const val COMMON_FIELDS1 = "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"
-        private const val TREND_FIELDS2 = "f51,f53,f56,f58"
         private const val KLINE_FIELDS2 = "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"
     }
 }

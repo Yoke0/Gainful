@@ -396,7 +396,7 @@ private fun HoldingCard(
         }
 
         Sparkline(
-            trendPrices = holding.trendPrices,
+            trends = holding.trends,
             changeAmount = holding.changeAmount,
             modifier = Modifier
                 .width(72.dp)
@@ -426,12 +426,12 @@ private fun MetaText(label: String, value: String, modifier: Modifier = Modifier
 
 @Composable
 private fun Sparkline(
-    trendPrices: List<Double>,
+    trends: List<com.yoke.gainful.model.StockTrend>,
     changeAmount: Double,
     modifier: Modifier = Modifier,
     strokeColor: Color = gainColor,
 ) {
-    val reversedPrices = remember(trendPrices) { trendPrices.reversed() }
+    val reversedPrices = remember(trends) { trends.map { it.price }.reversed() }
     val points = remember(reversedPrices, changeAmount) {
         if (reversedPrices.size >= 2) {
             val min = reversedPrices.min()
