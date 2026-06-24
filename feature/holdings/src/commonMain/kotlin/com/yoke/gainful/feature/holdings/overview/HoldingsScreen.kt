@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.common.extensions.formatSigned
+import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
@@ -47,10 +48,12 @@ import com.yoke.gainful.ui.theme.TextSecondary
 import com.yoke.gainful.ui.theme.gainColor
 import com.yoke.gainful.ui.theme.lossColor
 import gainful.feature.holdings.generated.resources.Res
+import gainful.feature.holdings.generated.resources.closed_positions
 import gainful.feature.holdings.generated.resources.cost
 import gainful.feature.holdings.generated.resources.holdings_detail_header
 import gainful.feature.holdings.generated.resources.holdings_title
 import gainful.feature.holdings.generated.resources.investment_weight
+import gainful.feature.holdings.generated.resources.liquidation_price
 import gainful.feature.holdings.generated.resources.market_value
 import gainful.feature.holdings.generated.resources.profit_loss
 import gainful.feature.holdings.generated.resources.shares
@@ -83,30 +86,29 @@ fun HoldingsScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         PortfolioHeader()
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         TotalCard(totalValue, totalPnl, totalPnlPct)
-
-        Spacer(modifier = Modifier.height(14.dp))
 
         HeatmapCard(uiState.holdings, totalValue)
 
-        Spacer(modifier = Modifier.height(14.dp))
+        ListSection(
+            title = stringResource(Res.string.holdings_detail_header),
+            items = uiState.holdings.sortedByDescending { it.quantity },
+        ) { holding ->
+            HoldingCard(holding, onStockClick)
+        }
 
-        Text(
-            text = stringResource(Res.string.holdings_detail_header),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextSecondary,
-            modifier = Modifier.padding(bottom = 12.dp),
-        )
-
-        HoldingList(uiState.holdings, onStockClick)
-
-        Spacer(modifier = Modifier.height(80.dp))
+        if (uiState.closedPositions.isNotEmpty()) {
+            ListSection(
+                title = stringResource(Res.string.closed_positions),
+                items = uiState.closedPositions,
+            ) { position ->
+                ClosedPositionItem(position, onStockClick)
+            }
+        }
     }
 }
 
@@ -118,6 +120,28 @@ private fun PortfolioHeader() {
         fontWeight = FontWeight.ExtraBold,
         color = TextPrimary,
     )
+}
+
+@Composable
+private fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = TextSecondary,
+    )
+}
+
+@Composable
+private fun <T> ListSection(
+    title: String,
+    items: List<T>,
+    itemContent: @Composable (T) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionHeader(title)
+        items.forEach { itemContent(it) }
+    }
 }
 
 @Composable
@@ -297,20 +321,6 @@ private fun HeatmapItem(
 }
 
 @Composable
-private fun HoldingList(
-    holdings: List<HoldingDisplay>,
-    onStockClick: (String) -> Unit,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        holdings.sortedByDescending { it.quantity }.forEach { holding ->
-            HoldingCard(holding, onStockClick)
-        }
-    }
-}
-
-@Composable
 private fun HoldingCard(
     holding: HoldingDisplay,
     onStockClick: (String) -> Unit,
@@ -377,11 +387,11 @@ private fun HoldingCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatDecimal(2), Modifier.weight(1f))
-                MetaText(stringResource(Res.string.cost), holding.averageCost.formatDecimal(2), Modifier.weight(1f))
-                MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}", Modifier.weight(1f))
+                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatDecimal(2))
+                MetaText(stringResource(Res.string.cost), holding.averageCost.formatDecimal(2))
+                MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}")
             }
             Spacer(modifier = Modifier.height(2.dp))
             Row(
@@ -420,6 +430,68 @@ private fun MetaText(label: String, value: String, modifier: Modifier = Modifier
             fontWeight = FontWeight.SemiBold,
             fontFamily = FontFamily.Monospace,
             color = valueColor,
+        )
+    }
+}
+
+@Composable
+private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String) -> Unit) {
+    val isPositive = position.realizedGain >= 0
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(Card)
+            .clickable { onStockClick(position.code) }
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = position.name,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    modifier = Modifier.alignByBaseline(),
+                )
+                Text(
+                    text = position.pinYin.ifBlank { position.code },
+                    fontSize = 10.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextMuted,
+                    modifier = Modifier.alignByBaseline(),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                MetaText(
+                    stringResource(Res.string.liquidation_price),
+                    position.lastSellPrice.formatDecimal(2),
+                )
+                MetaText(
+                    stringResource(Res.string.profit_loss),
+                    position.realizedGainPercent.formatDecimal(2) + "%",
+                    valueColor = if (isPositive) gainColor else lossColor,
+                )
+            }
+        }
+        Text(
+            text = "${if (isPositive) "+" else ""}${position.realizedGain.formatDecimal(2)}",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            color = if (isPositive) gainColor else lossColor,
         )
     }
 }

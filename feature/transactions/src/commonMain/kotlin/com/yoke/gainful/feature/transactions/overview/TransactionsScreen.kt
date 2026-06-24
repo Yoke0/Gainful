@@ -35,27 +35,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.components.ConfirmDialog
-import com.yoke.gainful.ui.components.TransactionCard
-import com.yoke.gainful.ui.components.TransactionDisplayItem
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.gainColor
-import com.yoke.gainful.ui.theme.gainDimColor
-import com.yoke.gainful.ui.theme.lossColor
-import com.yoke.gainful.ui.theme.lossDimColor
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.Surface2
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.ui.theme.gainColor
+import com.yoke.gainful.ui.theme.gainDimColor
+import com.yoke.gainful.ui.theme.lossColor
+import com.yoke.gainful.ui.theme.lossDimColor
 import gainful.feature.transactions.generated.resources.Res
 import gainful.feature.transactions.generated.resources.add_button
 import gainful.feature.transactions.generated.resources.all
@@ -74,15 +71,15 @@ import gainful.feature.transactions.generated.resources.summary_dividend
 import gainful.feature.transactions.generated.resources.summary_fee
 import gainful.feature.transactions.generated.resources.summary_sell
 import gainful.feature.transactions.generated.resources.summary_total
+import gainful.feature.transactions.generated.resources.time_groups
 import gainful.feature.transactions.generated.resources.trade_count_unit
 import gainful.feature.transactions.generated.resources.trade_price_label
 import gainful.feature.transactions.generated.resources.trade_quantity_label
 import gainful.feature.transactions.generated.resources.transactions_title
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.stringArrayResource
-import gainful.feature.transactions.generated.resources.time_groups
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -265,21 +262,20 @@ fun TransactionsScreen(
                 val items = groups[index]
                 if (!items.isNullOrEmpty()) {
                     TimeGroupHeader(groupName, items.size)
-                    items.forEach { trade ->
-                        TradeCard(
-                            trade = trade,
-                            onLongPress = {
-                                deleteTarget.value = trade
-                                showDeleteDialog.value = true
-                            },
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items.forEach { trade ->
+                            TradeCard(
+                                trade = trade,
+                                onLongPress = {
+                                    deleteTarget.value = trade
+                                    showDeleteDialog.value = true
+                                },
+                            )
+                        }
                     }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(80.dp))
     }
 }
 

@@ -40,4 +40,6 @@
     <string name="sell">Sell</string>
     <string name="dividend">Dividend</string>
     <string name="quantity_unit">shares</string>
+    <string name="closed_positions">Closed</string>
+    <string name="liquidation_price">Close Price</string>
 </resources>

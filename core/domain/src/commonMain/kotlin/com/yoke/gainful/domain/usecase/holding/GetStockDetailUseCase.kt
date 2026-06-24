@@ -86,7 +86,7 @@ class GetStockDetailUseCase(
             totalBuys = totalBuys,
             totalSells = totalSells,
             totalDividends = totalDividends,
-            transactions = assetTransactions.sortedByDescending { it.timestamp },
+            transactions = assetTransactions.sortedByDescending { it.tradeDate },
             kLines = kLines,
         )
     }

@@ -140,8 +140,6 @@ fun DashboardScreen(
         Spacer(modifier = Modifier.height(14.dp))
 
         HoldingsOverviewCard(uiState.holdings)
-
-        Spacer(modifier = Modifier.height(80.dp))
     }
 }
 

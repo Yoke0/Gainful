@@ -180,8 +180,6 @@ fun SettingsScreen(
                 onClick = {},
             )
         }
-
-        Spacer(modifier = Modifier.height(80.dp))
     }
 
     if (uiState.showTimePicker) {

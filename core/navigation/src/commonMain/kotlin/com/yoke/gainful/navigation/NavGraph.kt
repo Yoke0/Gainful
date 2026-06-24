@@ -80,7 +80,9 @@ fun GainfulNavGraph(
             modifier = Modifier
                 .fillMaxSize()
                 .then(
-                    if (isBottomBarVisible) Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                    if (isBottomBarVisible) Modifier
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .padding(bottom = 80.dp)
                     else Modifier
                 ),
         )

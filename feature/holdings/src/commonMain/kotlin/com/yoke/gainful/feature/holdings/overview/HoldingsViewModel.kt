@@ -2,7 +2,9 @@ package com.yoke.gainful.feature.holdings.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yoke.gainful.domain.usecase.holding.GetClosedPositionsUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
+import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,6 +13,7 @@ import kotlinx.coroutines.launch
 
 class HoldingsViewModel(
     private val getHoldingsDisplayUseCase: GetHoldingsDisplayUseCase,
+    private val getClosedPositionsUseCase: GetClosedPositionsUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HoldingsUiState())
@@ -31,10 +34,15 @@ class HoldingsViewModel(
         _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch {
             getHoldingsDisplayUseCase().collect { holdings ->
-                _uiState.value = HoldingsUiState(
+                _uiState.value = _uiState.value.copy(
                     holdings = holdings,
                     isLoading = false,
                 )
+            }
+        }
+        viewModelScope.launch {
+            getClosedPositionsUseCase().collect { closed ->
+                _uiState.value = _uiState.value.copy(closedPositions = closed)
             }
         }
     }
@@ -43,5 +51,6 @@ class HoldingsViewModel(
 data class HoldingsUiState(
     val isLoading: Boolean = false,
     val holdings: List<HoldingDisplay> = emptyList(),
+    val closedPositions: List<ClosedPosition> = emptyList(),
     val error: String? = null,
 )

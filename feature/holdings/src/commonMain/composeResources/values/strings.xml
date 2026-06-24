@@ -40,4 +40,6 @@
     <string name="sell">卖出</string>
     <string name="dividend">股息</string>
     <string name="quantity_unit">股</string>
+    <string name="closed_positions">已清仓</string>
+    <string name="liquidation_price">清仓价</string>
 </resources>
