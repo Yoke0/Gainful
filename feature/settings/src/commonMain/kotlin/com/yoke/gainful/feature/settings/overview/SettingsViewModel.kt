@@ -1,17 +1,25 @@
-package com.yoke.gainful.feature.settings
+package com.yoke.gainful.feature.settings.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.data.repository.UserPreferencesRepository
+import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnceUseCase
+import com.yoke.gainful.feature.settings.model.CsvConfig
+import com.yoke.gainful.feature.settings.util.CsvUtil
 import com.yoke.gainful.model.GainLossColorScheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 class SettingsViewModel(
     private val repository: UserPreferencesRepository,
+    private val getTransactionsWithAssetsOnceUseCase: GetTransactionsWithAssetsOnceUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -60,6 +68,66 @@ class SettingsViewModel(
             is SettingsIntent.ShowColorPicker -> _uiState.update {
                 it.copy(showColorPicker = intent.show)
             }
+            is SettingsIntent.ShowExportDialog -> showExportDialog(intent.show)
+            is SettingsIntent.ConfirmExport -> confirmExport(intent.csvConfig)
+            is SettingsIntent.DismissExportResult -> _uiState.update {
+                it.copy(showExportResult = false, exportResult = null)
+            }
+        }
+    }
+
+    private fun generateFileName(): String {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        return "trades_${now.date.year}${now.date.month.number.pad2()}${now.date.day.pad2()}${now.hour.pad2()}${now.minute.pad2()}"
+    }
+
+    private fun showExportDialog(show: Boolean) {
+        if (!show) {
+            _uiState.update { it.copy(showExportDialog = false) }
+            return
+        }
+        viewModelScope.launch {
+            val txsWithAssets = getTransactionsWithAssetsOnceUseCase()
+            val fileName = generateFileName()
+            _uiState.update {
+                it.copy(
+                    showExportDialog = true,
+                    exportRecordCount = txsWithAssets.size,
+                    exportFileName = fileName,
+                )
+            }
+        }
+    }
+
+    private fun confirmExport(csvConfig: CsvConfig) {
+        viewModelScope.launch {
+            val txsWithAssets = getTransactionsWithAssetsOnceUseCase()
+            val csv = CsvUtil.generateCsv(txsWithAssets, csvConfig)
+            val fileName = generateFileName()
+            _uiState.update {
+                it.copy(
+                    exportCsvContent = csv,
+                    exportFileName = fileName,
+                    showExportDialog = false,
+                )
+            }
+        }
+    }
+
+    fun onExportFileSaved(success: Boolean) {
+        if (success) {
+            _uiState.update {
+                it.copy(
+                    exportCsvContent = null,
+                    showExportResult = true,
+                    exportResult = ExportResult(
+                        fileName = it.exportFileName,
+                        recordCount = it.exportRecordCount,
+                    ),
+                )
+            }
+        } else {
+            _uiState.update { it.copy(exportCsvContent = null) }
         }
     }
 }
@@ -75,9 +143,20 @@ data class SettingsUiState(
     val timePickerTarget: TimePickerTarget = TimePickerTarget.OPEN,
     val showFreqPicker: Boolean = false,
     val showColorPicker: Boolean = false,
+    val showExportDialog: Boolean = false,
+    val exportRecordCount: Int = 0,
+    val exportFileName: String = "",
+    val exportCsvContent: String? = null,
+    val showExportResult: Boolean = false,
+    val exportResult: ExportResult? = null,
 ) {
     val openTimeDisplay: String get() = "${openHour.pad2()}:${openMinute.pad2()}"
     val closeTimeDisplay: String get() = "${closeHour.pad2()}:${closeMinute.pad2()}"
 }
+
+data class ExportResult(
+    val fileName: String,
+    val recordCount: Int,
+)
 
 private fun Int.pad2(): String = if (this < 10) "0$this" else "$this"

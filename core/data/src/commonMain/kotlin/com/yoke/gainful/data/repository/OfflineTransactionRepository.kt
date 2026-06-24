@@ -19,12 +19,24 @@ class OfflineTransactionRepository(
         return dao.getByAssetId(assetId).map { entities -> entities.map { it.toDomain() } }
     }
 
+    override suspend fun getAllTransactions(): List<Transaction> {
+        return dao.getAllList().map { it.toDomain() }
+    }
+
+    override suspend fun getTransactionsByDateRange(startDate: Long, endDate: Long): List<Transaction> {
+        return dao.getAllByDateRange(startDate, endDate).map { it.toDomain() }
+    }
+
     override suspend fun getTransactionById(id: String): Transaction? {
         return dao.getById(id)?.toDomain()
     }
 
     override suspend fun insertTransaction(transaction: Transaction) {
         dao.insert(transaction.toEntity())
+    }
+
+    override suspend fun insertTransactions(transactions: List<Transaction>) {
+        dao.insertAll(transactions.map { it.toEntity() })
     }
 
     override suspend fun deleteTransaction(id: String) {

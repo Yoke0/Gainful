@@ -1,4 +1,4 @@
-package com.yoke.gainful.feature.settings
+package com.yoke.gainful.feature.settings.overview
 
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.about_group
@@ -10,8 +10,17 @@ import gainful.feature.settings.generated.resources.color_demo_up
 import gainful.feature.settings.generated.resources.color_green_up
 import gainful.feature.settings.generated.resources.color_red_up
 import gainful.feature.settings.generated.resources.confirm
+import gainful.feature.settings.generated.resources.data_management_group
+import gainful.feature.settings.generated.resources.export_confirm
+import gainful.feature.settings.generated.resources.export_dialog_title
+import gainful.feature.settings.generated.resources.export_done
+import gainful.feature.settings.generated.resources.export_record_count
+import gainful.feature.settings.generated.resources.export_success
+import gainful.feature.settings.generated.resources.export_success_msg
+import gainful.feature.settings.generated.resources.export_transactions
 import gainful.feature.settings.generated.resources.gain_loss_color
 import gainful.feature.settings.generated.resources.gain_loss_color_title
+import gainful.feature.settings.generated.resources.import_transactions
 import gainful.feature.settings.generated.resources.minutes_format
 import gainful.feature.settings.generated.resources.open_time
 import gainful.feature.settings.generated.resources.refresh_frequency
@@ -32,13 +41,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,12 +56,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.BuildConfig
+import com.yoke.gainful.file.rememberCsvFileUtil
+import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.model.GainLossColorScheme
 import com.yoke.gainful.ui.components.TimePickerDialog
 import com.yoke.gainful.ui.theme.Background
@@ -62,17 +72,39 @@ import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
+import com.yoke.gainful.ui.theme.GreenDim
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.stringArrayResource
+import gainful.feature.settings.generated.resources.csv_headers
+import gainful.feature.settings.generated.resources.csv_type_values
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    onNavigateToImport: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val fileUtil = rememberCsvFileUtil()
+    val csvHeaders = stringArrayResource(Res.array.csv_headers)
+    val csvTypeValues = stringArrayResource(Res.array.csv_type_values)
+    val csvConfig = remember(csvHeaders, csvTypeValues) {
+        CsvConfig(headers = csvHeaders, typeValues = csvTypeValues)
+    }
+
+    LaunchedEffect(uiState.exportCsvContent) {
+        uiState.exportCsvContent?.let { csv ->
+            fileUtil.saveFile(
+                fileName = "${uiState.exportFileName}.csv",
+                content = csv,
+            ) { success ->
+                viewModel.onExportFileSaved(success)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -123,6 +155,22 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
+        SettingsGroup(title = stringResource(Res.string.data_management_group)) {
+            SettingRow(
+                label = stringResource(Res.string.export_transactions),
+                value = "CSV",
+                onClick = { viewModel.onIntent(SettingsIntent.ShowExportDialog(true)) },
+            )
+            SettingRow(
+                label = stringResource(Res.string.import_transactions),
+                value = "CSV",
+                showBorder = false,
+                onClick = onNavigateToImport,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
         SettingsGroup(title = stringResource(Res.string.about_group)) {
             SettingRow(
                 label = stringResource(Res.string.app_version),
@@ -163,6 +211,180 @@ fun SettingsScreen(
             onConfirm = { viewModel.onIntent(SettingsIntent.SetGainLossColorScheme(it)) },
             onDismiss = { viewModel.onIntent(SettingsIntent.ShowColorPicker(false)) },
         )
+    }
+
+    if (uiState.showExportDialog) {
+        ExportDialog(
+            recordCount = uiState.exportRecordCount,
+            fileName = uiState.exportFileName,
+            onConfirm = { viewModel.onIntent(SettingsIntent.ConfirmExport(csvConfig)) },
+            onDismiss = { viewModel.onIntent(SettingsIntent.ShowExportDialog(false)) },
+        )
+    }
+
+    if (uiState.showExportResult && uiState.exportResult != null) {
+        ExportResultDialog(
+            fileName = uiState.exportResult!!.fileName,
+            recordCount = uiState.exportResult!!.recordCount,
+            onDone = { viewModel.onIntent(SettingsIntent.DismissExportResult) },
+        )
+    }
+}
+
+@Composable
+private fun ExportDialog(
+    recordCount: Int,
+    fileName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(20.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.export_dialog_title),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(Res.string.export_record_count, recordCount),
+                fontSize = 15.sp,
+                color = TextSecondary,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "文件名: $fileName.csv",
+                fontSize = 14.sp,
+                color = TextMuted,
+                fontFamily = FontFamily.Monospace,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Surface)
+                        .border(1.dp, Border, RoundedCornerShape(50))
+                        .clickable(onClick = onDismiss),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.cancel),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextSecondary,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Gold)
+                        .clickable(onClick = onConfirm),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.export_confirm),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Background,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExportResultDialog(
+    fileName: String,
+    recordCount: Int,
+    onDone: () -> Unit,
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDone) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(GreenDim),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "\u2713",
+                    fontSize = 24.sp,
+                    color = GainGreen,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = stringResource(Res.string.export_success),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(Res.string.export_success_msg, fileName),
+                fontSize = 14.sp,
+                color = TextSecondary,
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Gold)
+                    .clickable(onClick = onDone),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(Res.string.export_done),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Background,
+                )
+            }
+        }
     }
 }
 

@@ -15,11 +15,20 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE asset_id = :assetId ORDER BY trade_date DESC")
     fun getByAssetId(assetId: String): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactions ORDER BY trade_date DESC")
+    suspend fun getAllList(): List<TransactionEntity>
+
+    @Query("SELECT * FROM transactions WHERE trade_date BETWEEN :startDate AND :endDate ORDER BY trade_date DESC")
+    suspend fun getAllByDateRange(startDate: Long, endDate: Long): List<TransactionEntity>
+
     @Query("SELECT * FROM transactions WHERE id = :id")
     suspend fun getById(id: String): TransactionEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transaction: TransactionEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(transactions: List<TransactionEntity>)
 
     @Query("DELETE FROM transactions WHERE id = :id")
     suspend fun deleteById(id: String)

@@ -17,4 +17,57 @@
     <string name="color_demo_down">▼ -1.2%%</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
+    <string name="data_management_group">数据管理</string>
+    <string name="export_transactions">导出交易记录</string>
+    <string name="export_format_label">CSV</string>
+    <string name="import_transactions">导入交易记录</string>
+    <string name="import_format_label">CSV</string>
+    <string name="export_dialog_title">导出交易记录</string>
+    <string name="export_format_group">导出格式</string>
+    <string name="export_time_range">时间范围</string>
+    <string name="export_start_date">开始</string>
+    <string name="export_end_date">结束</string>
+    <string name="export_record_count">共 %1$d 条记录</string>
+    <string name="export_confirm">导出</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_success_msg">文件 %1$s.csv 已保存</string>
+    <string name="export_done">完成</string>
+    <string name="import_dialog_title">导入交易记录</string>
+    <string name="import_upload_hint">点击或拖拽选择文件</string>
+    <string name="import_file_types">支持 CSV 格式</string>
+    <string name="import_preview">预览</string>
+    <string name="import_stat_total">总行数</string>
+    <string name="import_stat_valid">有效</string>
+    <string name="import_stat_duplicate">重复</string>
+    <string name="import_confirm">导入</string>
+    <string name="import_success">导入成功</string>
+    <string name="import_success_msg">成功导入 %1$d 条交易记录</string>
+    <string name="import_done">完成</string>
+    <string name="import_error_format">CSV 格式不正确\n\n正确格式: 日期,资产代码,股票名称,交易类型,股数,成交价格,成交金额\n\n示例:\n2024-01-15 09:30,SH600000,浦发银行,买入,100,10.50,1060.00</string>
+    <string name="import_summary_total">共 %1$d 笔</string>
+    <string name="import_summary_buy">买入</string>
+    <string name="import_summary_sell">卖出</string>
+    <string name="import_summary_dividend">股息</string>
+    <string name="import_duplicate_count">%1$d 条重复</string>
+    <string name="import_confirm_title">确认导入</string>
+    <string name="import_confirm_duplicate_message">包含 %1$d 条重复记录，确定要导入吗？</string>
+    <string name="import_confirm_delete_title">确认删除</string>
+    <string name="import_confirm_delete_text">确定要删除这笔</string>
+    <string name="import_confirm_delete_suffix">记录吗？此操作不可撤销。</string>
+    <string name="import_delete">删除</string>
+    <string name="import_loading">正在解析资产信息…</string>
+    <string-array name="csv_headers">
+        <item>日期</item>
+        <item>资产代码</item>
+        <item>股票名称</item>
+        <item>交易类型</item>
+        <item>股数</item>
+        <item>成交价格</item>
+        <item>成交金额</item>
+    </string-array>
+    <string-array name="csv_type_values">
+        <item>买入</item>
+        <item>卖出</item>
+        <item>股息</item>
+    </string-array>
 </resources>

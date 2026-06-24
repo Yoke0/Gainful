@@ -51,6 +51,7 @@ kotlin {
             implementation(projects.core.datastore)
             implementation(projects.core.network)
             implementation(projects.core.sync)
+            implementation(projects.core.file)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.holdings)
             implementation(projects.feature.transactions)

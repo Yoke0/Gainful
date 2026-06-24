@@ -74,6 +74,7 @@ fun GainfulNavGraph(
                 entry<Holdings> { screenContent(Holdings, onNavigate, onBack) }
                 entry<Settings> { screenContent(Settings, onNavigate, onBack) }
                 entry<AddTransaction> { screenContent(AddTransaction, onNavigate, onBack) }
+                entry<ImportTransactions> { screenContent(ImportTransactions, onNavigate, onBack) }
                 entry<StockDetail> { key -> screenContent(StockDetail(key.code), onNavigate, onBack) }
             },
             modifier = Modifier

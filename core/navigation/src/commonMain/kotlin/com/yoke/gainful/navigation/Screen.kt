@@ -22,4 +22,7 @@ data object Settings : Screen
 data object AddTransaction : Screen
 
 @Serializable
+data object ImportTransactions : Screen
+
+@Serializable
 data class StockDetail(val code: String) : Screen

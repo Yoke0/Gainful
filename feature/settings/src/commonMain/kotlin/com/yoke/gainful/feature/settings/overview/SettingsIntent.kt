@@ -1,5 +1,6 @@
-package com.yoke.gainful.feature.settings
+package com.yoke.gainful.feature.settings.overview
 
+import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.model.GainLossColorScheme
 
 sealed interface SettingsIntent {
@@ -11,6 +12,9 @@ sealed interface SettingsIntent {
     data class ShowFreqPicker(val show: Boolean) : SettingsIntent
     data class SetGainLossColorScheme(val scheme: GainLossColorScheme) : SettingsIntent
     data class ShowColorPicker(val show: Boolean) : SettingsIntent
+    data class ShowExportDialog(val show: Boolean) : SettingsIntent
+    data class ConfirmExport(val csvConfig: CsvConfig) : SettingsIntent
+    data object DismissExportResult : SettingsIntent
 }
 
 enum class TimePickerTarget { OPEN, CLOSE }

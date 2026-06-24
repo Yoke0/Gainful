@@ -37,8 +37,10 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.common)
             implementation(projects.core.data)
+            implementation(projects.core.domain)
             implementation(projects.core.model)
             implementation(projects.core.ui)
+            implementation(projects.core.file)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -47,6 +49,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
             implementation(libs.compose.components.resources)
+            implementation(libs.kotlinx.datetime)
         }
 
     }

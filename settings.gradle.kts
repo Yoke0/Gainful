@@ -48,6 +48,7 @@ include(":core:ui")
 include(":core:navigation")
 include(":core:datastore")
 include(":core:sync")
+include(":core:file")
 
 include(":feature:dashboard")
 include(":feature:holdings")

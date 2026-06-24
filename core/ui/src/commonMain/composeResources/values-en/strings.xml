@@ -35,4 +35,11 @@
     <string name="weekday_friday">Fri</string>
     <string name="weekday_saturday">Sat</string>
     <string name="weekday_sunday">Sun</string>
+    <string name="trade_type_buy">Buy</string>
+    <string name="trade_type_sell">Sell</string>
+    <string name="trade_type_dividend">Dividend</string>
+    <string name="trade_quantity_label">Quantity</string>
+    <string name="trade_price_label">Price</string>
+    <string name="trade_fee_label">Fee</string>
+    <string name="trade_shares_format">%1$d shares</string>
 </resources>

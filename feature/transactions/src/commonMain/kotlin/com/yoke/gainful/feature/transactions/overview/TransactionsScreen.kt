@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.components.ConfirmDialog
+import com.yoke.gainful.ui.components.TransactionCard
+import com.yoke.gainful.ui.components.TransactionDisplayItem
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -110,16 +113,80 @@ fun TransactionsScreen(
     val deleteTarget = remember { mutableStateOf<TransactionItem?>(null) }
 
     if (showDeleteDialog.value && deleteTarget.value != null) {
-        DeleteConfirmDialog(
-            transaction = deleteTarget.value!!,
+        val target = deleteTarget.value!!
+        val typeLabel = when (target.type) {
+            TransactionType.BUY -> stringResource(Res.string.buy)
+            TransactionType.SELL -> stringResource(Res.string.sell)
+            TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
+        }
+        val typeColor = when (target.type) {
+            TransactionType.BUY -> gainColor
+            TransactionType.SELL -> lossColor
+            else -> Gold
+        }
+        val typeBgColor = when (target.type) {
+            TransactionType.BUY -> gainDimColor
+            TransactionType.SELL -> lossDimColor
+            else -> GoldDim
+        }
+
+        ConfirmDialog(
+            title = stringResource(Res.string.confirm_delete),
+            confirmText = stringResource(Res.string.delete),
+            dismissText = stringResource(Res.string.cancel),
             onConfirm = {
-                viewModel.onIntent(TransactionsIntent.DeleteTransaction(deleteTarget.value!!.id))
+                viewModel.onIntent(TransactionsIntent.DeleteTransaction(target.id))
                 deleteTarget.value = null
                 showDeleteDialog.value = false
             },
             onDismiss = {
                 showDeleteDialog.value = false
                 deleteTarget.value = null
+            },
+            content = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.delete_confirm_text),
+                        fontSize = 14.sp,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center,
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(typeBgColor)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                        ) {
+                            Text(
+                                text = typeLabel,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = typeColor,
+                            )
+                        }
+                        Text(
+                            text = target.name,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = FontFamily.Monospace,
+                            color = TextPrimary,
+                        )
+                    }
+                    Text(
+                        text = stringResource(Res.string.delete_confirm_suffix),
+                        fontSize = 14.sp,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             },
         )
     }
@@ -543,134 +610,4 @@ private fun getDaysAgo(timestamp: Long): Int {
     val now = Clock.System.now()
     val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
     return (today.toEpochDays() - tradeDate.toEpochDays()).toInt()
-}
-
-@Composable
-private fun DeleteConfirmDialog(
-    transaction: TransactionItem,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val typeLabel = when (transaction.type) {
-        TransactionType.BUY -> stringResource(Res.string.buy)
-        TransactionType.SELL -> stringResource(Res.string.sell)
-        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
-    }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(24.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.confirm_delete),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.delete_confirm_text),
-                    fontSize = 14.sp,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                when (transaction.type) {
-                                    TransactionType.BUY -> gainDimColor
-                                    TransactionType.SELL -> lossDimColor
-                                    else -> GoldDim
-                                },
-                            )
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                    ) {
-                        Text(
-                            text = typeLabel,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = when (transaction.type) {
-                                TransactionType.BUY -> gainColor
-                                TransactionType.SELL -> lossColor
-                                else -> Gold
-                            },
-                        )
-                    }
-                    Text(
-                        text = transaction.name,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = FontFamily.Monospace,
-                        color = TextPrimary,
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.delete_confirm_suffix),
-                    fontSize = 14.sp,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Surface)
-                        .border(1.dp, Border, RoundedCornerShape(12.dp))
-                        .clickable(onClick = onDismiss)
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.cancel),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextSecondary,
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(GainRed)
-                        .clickable(onClick = onConfirm)
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.delete),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
-                    )
-                }
-            }
-        }
-    }
 }

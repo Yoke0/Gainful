@@ -35,4 +35,11 @@
     <string name="weekday_friday">五</string>
     <string name="weekday_saturday">六</string>
     <string name="weekday_sunday">日</string>
+    <string name="trade_type_buy">买入</string>
+    <string name="trade_type_sell">卖出</string>
+    <string name="trade_type_dividend">股息</string>
+    <string name="trade_quantity_label">数量</string>
+    <string name="trade_price_label">成交价</string>
+    <string name="trade_fee_label">手续费</string>
+    <string name="trade_shares_format">%1$d 股</string>
 </resources>

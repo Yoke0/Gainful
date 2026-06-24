@@ -18,13 +18,15 @@ import com.yoke.gainful.di.initKoin
 import com.yoke.gainful.feature.dashboard.DashboardRoute
 import com.yoke.gainful.feature.holdings.detail.StockDetailRoute
 import com.yoke.gainful.feature.holdings.overview.HoldingsRoute
-import com.yoke.gainful.feature.settings.SettingsRoute
+import com.yoke.gainful.feature.settings.overview.SettingsRoute
+import com.yoke.gainful.feature.settings.`import`.ImportRoute
 import com.yoke.gainful.feature.transactions.add.AddTransactionRoute
 import com.yoke.gainful.feature.transactions.overview.TransactionsRoute
 import com.yoke.gainful.navigation.AddTransaction
 import com.yoke.gainful.navigation.Dashboard
 import com.yoke.gainful.navigation.GainfulNavGraph
 import com.yoke.gainful.navigation.Holdings
+import com.yoke.gainful.navigation.ImportTransactions
 import com.yoke.gainful.navigation.Settings
 import com.yoke.gainful.navigation.StockDetail
 import com.yoke.gainful.navigation.Transactions
@@ -83,8 +85,11 @@ fun App() {
                                 Holdings -> HoldingsRoute(
                                     onStockClick = { code -> onNavigate(StockDetail(code)) },
                                 )
-                                Settings -> SettingsRoute()
+                                Settings -> SettingsRoute(
+                                    onNavigateToImport = { onNavigate(ImportTransactions) },
+                                )
                                 AddTransaction -> AddTransactionRoute(onBack = onBack)
+                                ImportTransactions -> ImportRoute(onBack = onBack)
                                 is StockDetail -> StockDetailRoute(
                                     code = screen.code,
                                     onBack = onBack,
