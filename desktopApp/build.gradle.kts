@@ -29,10 +29,5 @@ compose.desktop {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
             }
         }
-
-        buildTypes.release.proguard {
-            obfuscate.set(true)
-            configurationFiles.from(project.file("proguard-rules.pro"))
-        }
     }
 }
