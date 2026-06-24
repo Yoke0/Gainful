@@ -11,6 +11,8 @@ import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.feature.settings.model.toDisplayItems
 import com.yoke.gainful.feature.settings.util.CsvUtil
 import com.yoke.gainful.ui.components.TransactionDisplayItem
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,21 +70,39 @@ class ImportViewModel(
 
         val displayItems = preview.toDisplayItems(csvConfig).toMutableList()
 
+        val codesToEnrich = displayItems
+            .filter { it.name.isBlank() || it.pinYin.isBlank() }
+            .map { it.code }
+            .distinct()
+
+        val dbAssets = codesToEnrich.mapNotNull { code ->
+            val assets = assetRepository.searchAssets(code)
+            assets.find { it.innerCode == code || it.code == code }?.let { code to it }
+        }.toMap()
+
+        val codesToSearch = codesToEnrich.filter { it !in dbAssets }
+
+        val searchResults = codesToSearch.map { code ->
+            viewModelScope.async {
+                runCatching {
+                    val results = searchAssetsUseCase(code)
+                    code to results.find { it.innerCode == code || it.code == code }
+                }.getOrNull() ?: (code to null)
+            }
+        }.awaitAll().toMap()
+
+        searchResults.forEach { (_, asset) ->
+            if (asset != null) {
+                assetRepository.insertAsset(asset)
+            }
+        }
+
+        val assetMap = dbAssets + searchResults.filterValues { it != null }.mapValues { it.value!! }
+
         for ((index, item) in displayItems.withIndex()) {
             if (item.name.isNotBlank() && item.pinYin.isNotBlank()) continue
-
-            val asset = assetRepository.getAssetByInnerCode(item.code)
-            if (asset != null) {
-                displayItems[index] = item.copy(name = asset.name, pinYin = asset.pinYin)
-            } else {
-                runCatching {
-                    val results = searchAssetsUseCase(item.code)
-                    results.find { it.innerCode == item.code || it.code == item.code }
-                }.getOrNull()?.let { matched ->
-                    assetRepository.insertAsset(matched)
-                    displayItems[index] = item.copy(name = matched.name, pinYin = matched.pinYin)
-                }
-            }
+            val asset = assetMap[item.code] ?: continue
+            displayItems[index] = item.copy(name = asset.name, pinYin = asset.pinYin)
         }
 
         _uiState.update {
@@ -95,8 +115,8 @@ class ImportViewModel(
             val preview = it.preview ?: return@update it
             val deletedIndices = preview.deletedIndices.toMutableSet()
             deletedIndices.add(index)
-            val newDuplicateCount = preview.duplicateCount -
-                deletedIndices.count { idx -> idx in preview.duplicateIndices }
+            val wasDuplicate = index in preview.duplicateIndices
+            val newDuplicateCount = if (wasDuplicate) preview.duplicateCount - 1 else preview.duplicateCount
             it.copy(
                 preview = preview.copy(
                     deletedIndices = deletedIndices,

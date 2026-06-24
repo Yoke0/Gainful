@@ -19,8 +19,8 @@ class OfflineAssetRepository(
         return dao.getByInnerCode(innerCode)?.toDomain()
     }
 
-    override fun searchAssets(keyword: String): Flow<List<Asset>> {
-        return dao.search(keyword).map { entities -> entities.map { it.toDomain() } }
+    override suspend fun searchAssets(keyword: String): List<Asset> {
+        return dao.search(keyword).map { it.toDomain() }
     }
 
     override suspend fun insertAssets(assets: List<Asset>) {
