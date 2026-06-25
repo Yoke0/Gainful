@@ -45,7 +45,7 @@ fun GainfulNavGraph(
         if (target == topLevelBackStack.backStack.lastOrNull()) return@lambda
 
         if (target in navScreens) {
-            topLevelBackStack.addTopLevel(target)
+            topLevelBackStack.switchTab(target)
         } else {
             topLevelBackStack.add(target)
         }

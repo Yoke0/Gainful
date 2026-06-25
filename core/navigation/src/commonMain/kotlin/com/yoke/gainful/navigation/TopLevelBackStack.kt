@@ -8,44 +8,44 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 
 class TopLevelBackStack<T : Any>(startKey: T) {
 
-    private var topLevelStacks: LinkedHashMap<T, SnapshotStateList<T>> = linkedMapOf(
-        startKey to mutableStateListOf(startKey)
-    )
+    private val topLevelStacks = mutableMapOf<T, SnapshotStateList<T>>()
 
-    var topLevelKey by mutableStateOf(startKey)
+    init {
+        topLevelStacks[startKey] = mutableStateListOf(startKey)
+    }
+
+    var activeTab by mutableStateOf(startKey)
         private set
 
     val backStack = mutableStateListOf(startKey)
 
-    private fun updateBackStack() =
-        backStack.apply {
-            clear()
-            addAll(topLevelStacks.flatMap { it.value })
-        }
+    private fun updateBackStack() {
+        backStack.clear()
+        backStack.addAll(topLevelStacks.flatMap { it.value })
+    }
 
-    fun addTopLevel(key: T) {
+    fun switchTab(key: T) {
         if (topLevelStacks[key] == null) {
             topLevelStacks[key] = mutableStateListOf(key)
         } else {
             topLevelStacks.apply {
-                remove(key)?.let {
-                    put(key, it)
-                }
+                remove(key)?.let { put(key, it) }
             }
         }
-        topLevelKey = key
+        activeTab = key
         updateBackStack()
     }
 
     fun add(key: T) {
-        topLevelStacks[topLevelKey]?.add(key)
+        topLevelStacks[activeTab]?.add(key)
         updateBackStack()
     }
 
     fun removeLast() {
-        val removedKey = topLevelStacks[topLevelKey]?.removeLastOrNull()
-        topLevelStacks.remove(removedKey)
-        topLevelKey = topLevelStacks.keys.last()
-        updateBackStack()
+        val stack = topLevelStacks[activeTab] ?: return
+        if (stack.size > 1) {
+            stack.removeLast()
+            updateBackStack()
+        }
     }
 }

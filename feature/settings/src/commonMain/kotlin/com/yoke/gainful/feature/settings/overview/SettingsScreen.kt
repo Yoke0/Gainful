@@ -223,7 +223,6 @@ fun SettingsScreen(
     if (uiState.showExportResult && uiState.exportResult != null) {
         ExportResultDialog(
             fileName = uiState.exportResult!!.fileName,
-            recordCount = uiState.exportResult!!.recordCount,
             onDone = { viewModel.onIntent(SettingsIntent.DismissExportResult) },
         )
     }
@@ -317,7 +316,6 @@ private fun ExportDialog(
 @Composable
 private fun ExportResultDialog(
     fileName: String,
-    recordCount: Int,
     onDone: () -> Unit,
 ) {
     androidx.compose.ui.window.Dialog(onDismissRequest = onDone) {
