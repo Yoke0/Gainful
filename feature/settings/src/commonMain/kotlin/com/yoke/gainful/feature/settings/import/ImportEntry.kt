@@ -27,7 +27,7 @@ import org.jetbrains.compose.resources.stringArrayResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ImportRoute(
+fun ImportEntry(
     onBack: () -> Unit,
 ) {
     val viewModel = koinViewModel<ImportViewModel>()

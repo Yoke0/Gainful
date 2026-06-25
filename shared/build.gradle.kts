@@ -47,6 +47,7 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.navigation)
             implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.kotlinx.serialization.json)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
             implementation(projects.core.network)

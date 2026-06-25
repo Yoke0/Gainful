@@ -48,4 +48,10 @@ class TopLevelBackStack<T : Any>(startKey: T) {
             updateBackStack()
         }
     }
+
+    val canPop: Boolean
+        get() {
+            val stack = topLevelStacks[activeTab] ?: return false
+            return stack.size > 1
+        }
 }

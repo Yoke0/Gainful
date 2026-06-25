@@ -11,25 +11,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.entryProvider
 import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.di.initKoin
-import com.yoke.gainful.feature.dashboard.DashboardRoute
-import com.yoke.gainful.feature.holdings.detail.StockDetailRoute
-import com.yoke.gainful.feature.holdings.overview.HoldingsRoute
-import com.yoke.gainful.feature.settings.overview.SettingsRoute
-import com.yoke.gainful.feature.settings.`import`.ImportRoute
-import com.yoke.gainful.feature.transactions.add.AddTransactionRoute
-import com.yoke.gainful.feature.transactions.overview.TransactionsRoute
-import com.yoke.gainful.navigation.AddTransaction
-import com.yoke.gainful.navigation.Dashboard
+import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
+import com.yoke.gainful.feature.dashboard.navigation.dashboardEntry
+import com.yoke.gainful.feature.holdings.navigation.holdingsEntry
+import com.yoke.gainful.feature.settings.navigation.settingsEntry
+import com.yoke.gainful.feature.transactions.navigation.transactionsEntry
 import com.yoke.gainful.navigation.GainfulNavGraph
-import com.yoke.gainful.navigation.Holdings
-import com.yoke.gainful.navigation.ImportTransactions
-import com.yoke.gainful.navigation.Settings
-import com.yoke.gainful.navigation.StockDetail
-import com.yoke.gainful.navigation.Transactions
+import com.yoke.gainful.navigation.Navigator
+import com.yoke.gainful.navigation.TOP_LEVEL_NAV_ITEMS
+import com.yoke.gainful.navigation.rememberNavigationState
+import com.yoke.gainful.navigation.serializersConfig
 import com.yoke.gainful.sync.StockPriceFetchService
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.GainfulTheme
@@ -54,7 +51,7 @@ fun App() {
             )
 
             ProvideGainLossColors(scheme = userPreferences.gainLossColorScheme) {
-                var showSplash by remember { mutableStateOf(true) }
+                var showSplash by rememberSaveable { mutableStateOf(true) }
 
                 DisposableEffect(Unit) {
                     onDispose {
@@ -76,26 +73,25 @@ fun App() {
                             },
                         )
                     } else {
-                        GainfulNavGraph { screen, onNavigate, onBack ->
-                            when (screen) {
-                                Dashboard -> DashboardRoute()
-                                Transactions -> TransactionsRoute(
-                                    onAddTransaction = { onNavigate(AddTransaction) },
-                                )
-                                Holdings -> HoldingsRoute(
-                                    onStockClick = { code -> onNavigate(StockDetail(code)) },
-                                )
-                                Settings -> SettingsRoute(
-                                    onNavigateToImport = { onNavigate(ImportTransactions) },
-                                )
-                                AddTransaction -> AddTransactionRoute(onBack = onBack)
-                                ImportTransactions -> ImportRoute(onBack = onBack)
-                                is StockDetail -> StockDetailRoute(
-                                    code = screen.code,
-                                    onBack = onBack,
-                                )
-                            }
+                        val navigationState = rememberNavigationState(
+                            startKey = DashboardNavKey,
+                            topLevelKeys = TOP_LEVEL_NAV_ITEMS.keys,
+                            configuration = serializersConfig,
+                        )
+                        val navigator = remember { Navigator(navigationState) }
+
+                        val entryProvider = entryProvider {
+                            dashboardEntry()
+                            transactionsEntry(navigator)
+                            holdingsEntry(navigator)
+                            settingsEntry(navigator)
                         }
+
+                        GainfulNavGraph(
+                            navigationState = navigationState,
+                            navigator = navigator,
+                            entryProvider = entryProvider,
+                        )
                     }
                 }
             }

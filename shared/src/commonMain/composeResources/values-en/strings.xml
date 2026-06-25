@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Gainful</string>
-    <string name="splash_subtitle">Smart Investing, Data Driven</string>
+    <string name="splash_subtitle">Your Portfolio Tracker</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_transactions">Records</string>
+    <string name="nav_holdings">Holdings</string>
+    <string name="nav_settings">Settings</string>
 </resources>

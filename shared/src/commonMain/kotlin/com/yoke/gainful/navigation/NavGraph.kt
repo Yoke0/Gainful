@@ -16,16 +16,14 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Gold
@@ -35,25 +33,11 @@ import com.yoke.gainful.ui.theme.TextMuted
 
 @Composable
 fun GainfulNavGraph(
-    screenContent: @Composable (Screen, onNavigate: (Screen) -> Unit, onBack: () -> Unit) -> Unit,
+    navigationState: NavigationState,
+    navigator: Navigator,
+    entryProvider: (NavKey) -> NavEntry<NavKey>,
 ) {
-    val topLevelBackStack = remember { TopLevelBackStack<Screen>(Dashboard) }
-    val currentScreen = topLevelBackStack.backStack.lastOrNull()
-    val isBottomBarVisible = currentScreen in navScreens
-
-    val onNavigate: (Screen) -> Unit = lambda@{ target ->
-        if (target == topLevelBackStack.backStack.lastOrNull()) return@lambda
-
-        if (target in navScreens) {
-            topLevelBackStack.switchTab(target)
-        } else {
-            topLevelBackStack.add(target)
-        }
-    }
-
-    val onBack: () -> Unit = {
-        topLevelBackStack.removeLast()
-    }
+    val isTopLevel = navigationState.currentKey == navigationState.currentTopLevelKey
 
     Box(
         modifier = Modifier
@@ -62,35 +46,24 @@ fun GainfulNavGraph(
             .statusBarsPadding(),
     ) {
         NavDisplay(
-            backStack = topLevelBackStack.backStack,
-            onBack = onBack,
-            entryDecorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator()
-            ),
-            entryProvider = entryProvider {
-                entry<Dashboard> { screenContent(Dashboard, onNavigate, onBack) }
-                entry<Transactions> { screenContent(Transactions, onNavigate, onBack) }
-                entry<Holdings> { screenContent(Holdings, onNavigate, onBack) }
-                entry<Settings> { screenContent(Settings, onNavigate, onBack) }
-                entry<AddTransaction> { screenContent(AddTransaction, onNavigate, onBack) }
-                entry<ImportTransactions> { screenContent(ImportTransactions, onNavigate, onBack) }
-                entry<StockDetail> { key -> screenContent(StockDetail(key.code), onNavigate, onBack) }
-            },
             modifier = Modifier
                 .fillMaxSize()
                 .then(
-                    if (isBottomBarVisible) Modifier
+                    if (isTopLevel) Modifier
                         .windowInsetsPadding(WindowInsets.navigationBars)
                         .padding(bottom = 80.dp)
                     else Modifier
                 ),
+            onBack = {
+                navigator.goBack()
+            },
+            entries = navigationState.toEntries(entryProvider),
         )
 
-        if (isBottomBarVisible) {
+        if (isTopLevel) {
             BottomBar(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate,
+                selectedKey = navigationState.currentTopLevelKey,
+                onSelectKey = { navigator.navigate(it) },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
@@ -99,8 +72,8 @@ fun GainfulNavGraph(
 
 @Composable
 private fun BottomBar(
-    currentScreen: Screen?,
-    onNavigate: (Screen) -> Unit,
+    selectedKey: NavKey,
+    onSelectKey: (NavKey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -112,20 +85,20 @@ private fun BottomBar(
             .background(Surface.copy(alpha = 0.88f))
             .padding(horizontal = 4.dp, vertical = 4.dp),
     ) {
-        navItems.forEach { tab ->
-            val selected = currentScreen == tab.screen
+        TOP_LEVEL_NAV_ITEMS.forEach { (key, item) ->
+            val selected = key == selectedKey
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(16.dp))
-                    .clickable { onNavigate(tab.screen) }
+                    .clickable { onSelectKey(key) }
                     .then(if (selected) Modifier.background(GoldDim) else Modifier)
                     .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                tab.icon(selected)
+                item.icon(selected)
                 Text(
-                    text = tab.label(),
+                    text = item.label(),
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Medium,
                     color = if (selected) Gold else TextMuted,

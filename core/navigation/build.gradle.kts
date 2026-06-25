@@ -36,15 +36,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.model)
-            implementation(projects.core.ui)
             implementation(libs.compose.runtime)
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.androidx.lifecycle.viewmodelNavigation3)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.compose.components.resources)
         }
 
     }
