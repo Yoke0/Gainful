@@ -8,16 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +47,7 @@ fun GainfulNavGraph(
     navigator: Navigator,
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ) {
-    val isTopLevel = navigationState.currentKey == navigationState.currentTopLevelKey
+    val entries = navigationState.toEntries(entryProvider)
 
     Box(
         modifier = Modifier
@@ -59,22 +56,15 @@ fun GainfulNavGraph(
             .statusBarsPadding(),
     ) {
         NavDisplay(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(
-                    if (isTopLevel) Modifier
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .padding(bottom = 80.dp)
-                    else Modifier,
-                ),
+            modifier = Modifier.fillMaxSize(),
             onBack = { navigator.goBack() },
-            entries = navigationState.toEntries(entryProvider),
+            entries = entries,
         )
 
         BottomBar(
+            currentKey = navigationState.currentKey,
             selectedKey = navigationState.currentTopLevelKey,
             onSelectKey = { navigator.navigate(it) },
-            visible = isTopLevel,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
@@ -82,11 +72,12 @@ fun GainfulNavGraph(
 
 @Composable
 private fun BottomBar(
+    currentKey: NavKey,
     selectedKey: NavKey,
     onSelectKey: (NavKey) -> Unit,
-    visible: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val visible = currentKey == selectedKey
     val keys = TOP_LEVEL_NAV_ITEMS.keys.toList()
     val selectedIndex = keys.indexOf(selectedKey).coerceAtLeast(0)
     val tabsCount = TOP_LEVEL_NAV_ITEMS.size
