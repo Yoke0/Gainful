@@ -59,6 +59,7 @@ import gainful.feature.dashboard.generated.resources.total_pnl
 import gainful.feature.dashboard.generated.resources.total_pnl_label
 import gainful.feature.dashboard.generated.resources.total_profit
 import org.jetbrains.compose.resources.stringResource
+import com.yoke.gainful.ui.components.BottomBarHeight
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -84,8 +85,7 @@ fun DashboardScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .padding(bottom = 80.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -143,6 +143,8 @@ fun DashboardScreen(
         Spacer(modifier = Modifier.height(14.dp))
 
         HoldingsOverviewCard(uiState.holdings)
+
+        Spacer(modifier = Modifier.height(BottomBarHeight))
     }
 }
 

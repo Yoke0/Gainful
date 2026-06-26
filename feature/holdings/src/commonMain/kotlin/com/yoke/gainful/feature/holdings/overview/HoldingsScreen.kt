@@ -40,6 +40,7 @@ import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
+import com.yoke.gainful.ui.components.BottomBarHeight
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -87,8 +88,7 @@ fun HoldingsScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .padding(bottom = 80.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         PortfolioHeader()
@@ -112,6 +112,8 @@ fun HoldingsScreen(
                 ClosedPositionItem(position, onStockClick)
             }
         }
+
+        Spacer(modifier = Modifier.height(BottomBarHeight))
     }
 }
 

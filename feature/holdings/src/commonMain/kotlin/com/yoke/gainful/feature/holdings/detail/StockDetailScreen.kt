@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -129,46 +130,47 @@ fun StockDetailScreen(
             .fillMaxSize()
             .background(Background)
             .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Card)
-                .clickable(onClick = onBack),
-            contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = "\u2039",
-                fontSize = 20.sp,
-                color = TextSecondary,
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = if (uiState.pinYin.isNotBlank()) "${uiState.name} ${uiState.pinYin}" else uiState.name,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.alignByBaseline(),
-            )
-            Text(
-                text = uiState.code,
-                fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace,
-                color = TextMuted,
-                modifier = Modifier.alignByBaseline(),
-            )
-        }
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Card)
+                    .clickable(onClick = onBack),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "\u2039",
+                    fontSize = 20.sp,
+                    color = TextSecondary,
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = if (uiState.pinYin.isNotBlank()) "${uiState.name} ${uiState.pinYin}" else uiState.name,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    modifier = Modifier.alignByBaseline(),
+                )
+                Text(
+                    text = uiState.code,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextMuted,
+                    modifier = Modifier.alignByBaseline(),
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -189,8 +191,6 @@ fun StockDetailScreen(
         Spacer(modifier = Modifier.height(14.dp))
 
         TradesCard(uiState)
-
-        Spacer(modifier = Modifier.height(80.dp))
     }
 }
 
@@ -512,7 +512,11 @@ private fun MetricsGrid(uiState: StockDetailUiState) {
             MetricItem(stringResource(Res.string.amplitude), "${uiState.amplitude.formatDecimal(2)}%", Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricItem(stringResource(Res.string.holding_badge), stringResource(Res.string.holding_quantity, uiState.quantity.toInt()), Modifier.weight(1f))
+            MetricItem(
+                stringResource(Res.string.holding_badge),
+                stringResource(Res.string.holding_quantity, uiState.quantity.toInt()),
+                Modifier.weight(1f)
+            )
             MetricItem(
                 stringResource(Res.string.cost),
                 uiState.averageCost.formatDecimal(2),

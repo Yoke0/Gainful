@@ -65,6 +65,7 @@ import com.yoke.gainful.common.BuildConfig
 import com.yoke.gainful.file.rememberCsvFileUtil
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.model.GainLossColorScheme
+import com.yoke.gainful.ui.components.BottomBarHeight
 import com.yoke.gainful.ui.components.TimePickerDialog
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
@@ -113,8 +114,7 @@ fun SettingsScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .padding(bottom = 80.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Text(
             text = stringResource(Res.string.settings_title),
@@ -183,6 +183,8 @@ fun SettingsScreen(
                 onClick = {},
             )
         }
+
+        Spacer(modifier = Modifier.height(BottomBarHeight))
     }
 
     if (uiState.showTimePicker) {

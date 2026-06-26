@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.components.BottomBarHeight
 import com.yoke.gainful.ui.components.ConfirmDialog
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
@@ -195,8 +196,7 @@ fun TransactionsScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .padding(bottom = 80.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -279,6 +279,8 @@ fun TransactionsScreen(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(BottomBarHeight))
     }
 }
 
