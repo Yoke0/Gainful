@@ -67,7 +67,7 @@ import kotlin.math.sin
 @Composable
 fun HoldingsScreen(
     viewModel: HoldingsViewModel,
-    onStockClick: (String) -> Unit = {},
+    onStockClick: (String, String, String) -> Unit = { _, _, _ -> },
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -328,7 +328,7 @@ private fun HeatmapItem(
 @Composable
 private fun HoldingCard(
     holding: HoldingDisplay,
-    onStockClick: (String) -> Unit,
+    onStockClick: (String, String, String) -> Unit,
 ) {
     val isPositive = holding.changeAmount >= 0
     val change = holding.changeAmount
@@ -339,7 +339,7 @@ private fun HoldingCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(Card)
-            .clickable { onStockClick(holding.code) }
+            .clickable { onStockClick(holding.code, holding.name, holding.pinYin) }
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -440,7 +440,7 @@ private fun MetaText(label: String, value: String, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String) -> Unit) {
+private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String, String, String) -> Unit) {
     val isPositive = position.realizedGain >= 0
 
     Row(
@@ -448,7 +448,7 @@ private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String) 
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(Card)
-            .clickable { onStockClick(position.code) }
+            .clickable { onStockClick(position.code, position.name, position.pinYin) }
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,

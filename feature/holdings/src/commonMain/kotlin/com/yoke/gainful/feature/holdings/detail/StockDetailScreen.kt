@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
@@ -41,6 +43,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
@@ -48,9 +51,12 @@ import com.yoke.gainful.common.extensions.formatDecimal
 import com.yoke.gainful.common.extensions.formatTurnover
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.components.LoadingDots
+import com.yoke.gainful.ui.components.LoadingSpinner
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
+import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.gainColor
 import com.yoke.gainful.ui.theme.lossColor
 import com.yoke.gainful.ui.theme.Gold
@@ -71,7 +77,13 @@ import gainful.feature.holdings.generated.resources.dividend
 import gainful.feature.holdings.generated.resources.high_price
 import gainful.feature.holdings.generated.resources.holding_badge
 import gainful.feature.holdings.generated.resources.holding_quantity
+import gainful.feature.holdings.generated.resources.loading_hint
+import gainful.feature.holdings.generated.resources.loading_quote
 import gainful.feature.holdings.generated.resources.low_price
+import gainful.feature.holdings.generated.resources.error_title
+import gainful.feature.holdings.generated.resources.error_desc
+import gainful.feature.holdings.generated.resources.retry
+import gainful.feature.holdings.generated.resources.back_to_holdings
 import gainful.feature.holdings.generated.resources.market_value
 import gainful.feature.holdings.generated.resources.chart_daily
 import gainful.feature.holdings.generated.resources.chart_min_1
@@ -117,24 +129,17 @@ fun StockDetailScreen(
     viewModel: StockDetailViewModel,
     onBack: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    var selectedPeriod by remember { mutableStateOf(ChartPeriod.DAILY) }
-
-    val change = uiState.changeAmount
-    val changePct = uiState.changePercent
-    val isPositive = change >= 0
-    val changeColor = if (isPositive) gainColor else lossColor
+    val uiState = viewModel.uiState.collectAsState().value
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
-            .verticalScroll(rememberScrollState())
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .background(Background),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -173,34 +178,237 @@ fun StockDetailScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        PriceHeroCard(uiState, change, changePct, changeColor)
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        ChartCard(selectedPeriod, uiState.kLines.map { it.close }) {
-            selectedPeriod = it
-            viewModel.onIntent(StockDetailIntent.LoadChart(selectedPeriod))
+        when (uiState) {
+            is StockDetailUiState.Loading -> LoadingCenterArea(uiState.pinYin, uiState.name)
+            is StockDetailUiState.Error -> ErrorCenterArea(
+                pinYin = uiState.pinYin,
+                name = uiState.name,
+                onRetry = { viewModel.onIntent(StockDetailIntent.Retry) },
+                onBack = onBack,
+            )
+            is StockDetailUiState.Success -> StockDetailContent(uiState) {
+                viewModel.onIntent(StockDetailIntent.SelectPeriod(it))
+            }
         }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        MetricsGrid(uiState)
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        TradesCard(uiState)
     }
 }
 
 @Composable
-private fun PriceHeroCard(
-    uiState: StockDetailUiState,
-    change: Double,
-    changePct: Double,
-    changeColor: Color,
+private fun StockDetailContent(
+    uiState: StockDetailUiState.Success,
+    onPeriodSelected: (ChartPeriod) -> Unit,
 ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp),
+    ) {
+        Spacer(modifier = Modifier.height(4.dp))
+        PriceHeroCard(uiState)
+        Spacer(modifier = Modifier.height(14.dp))
+        ChartCard(uiState.selectedPeriod, uiState.kLines.map { it.close }, onPeriodSelected)
+        Spacer(modifier = Modifier.height(14.dp))
+        MetricsGrid(uiState)
+        Spacer(modifier = Modifier.height(14.dp))
+        TradesCard(uiState)
+        Spacer(modifier = Modifier.navigationBarsPadding())
+    }
+}
+
+@Composable
+private fun LoadingCenterArea(pinYin: String, name: String) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = pinYin,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextPrimary,
+                    letterSpacing = 0.4.sp,
+                )
+                Text(
+                    text = name,
+                    fontSize = 13.sp,
+                    color = TextMuted,
+                )
+            }
+
+            LoadingSpinner()
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.loading_quote),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextSecondary,
+                )
+                LoadingDots()
+                Text(
+                    text = stringResource(Res.string.loading_hint),
+                    fontSize = 11.sp,
+                    color = TextMuted,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorCenterArea(
+    pinYin: String,
+    name: String,
+    onRetry: () -> Unit,
+    onBack: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = pinYin,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextPrimary,
+                    letterSpacing = 0.4.sp,
+                )
+                Text(
+                    text = name,
+                    fontSize = 13.sp,
+                    color = TextMuted,
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(CircleShape)
+                    .background(GainRed.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(modifier = Modifier.size(40.dp)) {
+                    val stroke = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+                    drawCircle(color = GainRed, style = stroke)
+                    drawLine(
+                        color = GainRed,
+                        start = Offset(size.width / 2, size.height * 0.33f),
+                        end = Offset(size.width / 2, size.height * 0.58f),
+                        strokeWidth = 2.dp.toPx(),
+                        cap = StrokeCap.Round,
+                    )
+                    drawCircle(
+                        color = GainRed,
+                        radius = 1.2.dp.toPx(),
+                        center = Offset(size.width / 2, size.height * 0.73f),
+                    )
+                }
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.error_title),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                )
+                Text(
+                    text = stringResource(Res.string.error_desc),
+                    fontSize = 13.sp,
+                    color = TextMuted,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 18.sp,
+                    modifier = Modifier.widthIn(max = 260.dp),
+                )
+            }
+
+            Text(
+                text = "ERR_TIMEOUT · NET_ERR",
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                color = TextMuted,
+                letterSpacing = 0.3.sp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(9999.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(9999.dp))
+                    .padding(horizontal = 14.dp, vertical = 4.dp),
+            )
+
+            Column(
+                modifier = Modifier.widthIn(max = 240.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(9999.dp))
+                        .background(Gold)
+                        .clickable(onClick = onRetry)
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.retry),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF070B15),
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(9999.dp))
+                        .border(1.dp, Border, RoundedCornerShape(9999.dp))
+                        .clickable(onClick = onBack)
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.back_to_holdings),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextSecondary,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PriceHeroCard(uiState: StockDetailUiState.Success) {
+    val change = uiState.changeAmount
+    val changePct = uiState.changePercent
+    val changeColor = if (change >= 0) gainColor else lossColor
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -502,7 +710,7 @@ private fun ChartArea(data: List<Double>) {
 }
 
 @Composable
-private fun MetricsGrid(uiState: StockDetailUiState) {
+private fun MetricsGrid(uiState: StockDetailUiState.Success) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -564,7 +772,7 @@ private fun MetricItem(
 }
 
 @Composable
-private fun TradesCard(uiState: StockDetailUiState) {
+private fun TradesCard(uiState: StockDetailUiState.Success) {
     val trades = uiState.transactions
 
     Column(

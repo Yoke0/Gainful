@@ -24,11 +24,7 @@ class GetStockDetailUseCase(
         val asset = matches.firstOrNull { it.quoteId.isNotBlank() } ?: matches.firstOrNull()
 
         val quote = if (asset?.quoteId != null) {
-            try {
-                marketRepository.getQuote(asset.quoteId)
-            } catch (_: Exception) {
-                null
-            }
+            marketRepository.getQuote(asset.quoteId)
         } else null
 
         val transactions = transactionRepository.getTransactions().firstOrNull() ?: emptyList()

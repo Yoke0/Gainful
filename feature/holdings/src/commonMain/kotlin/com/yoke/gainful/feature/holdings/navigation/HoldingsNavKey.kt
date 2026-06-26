@@ -7,4 +7,8 @@ import kotlinx.serialization.Serializable
 data object HoldingsNavKey : NavKey
 
 @Serializable
-data class StockDetailNavKey(val code: String) : NavKey
+data class StockDetailNavKey(
+    val code: String,
+    val name: String = "",
+    val pinYin: String = "",
+) : NavKey

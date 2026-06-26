@@ -7,5 +7,5 @@ import org.koin.dsl.module
 
 val holdingsViewModelModule = module {
     viewModel { HoldingsViewModel(get(), get()) }
-    viewModel { params -> StockDetailViewModel(get(), params.get()) }
+    viewModel { params -> StockDetailViewModel(get(), params.get(), params.get(), params.get()) }
 }

@@ -42,4 +42,10 @@
     <string name="quantity_unit">shares</string>
     <string name="closed_positions">Closed</string>
     <string name="liquidation_price">Close Price</string>
+    <string name="loading_quote">Fetching market data</string>
+    <string name="loading_hint">Please wait, data is on its way</string>
+    <string name="error_title">Failed to load market data</string>
+    <string name="error_desc">Connection timed out. Please check your network and try again</string>
+    <string name="retry">Retry</string>
+    <string name="back_to_holdings">Back to Holdings</string>
 </resources>

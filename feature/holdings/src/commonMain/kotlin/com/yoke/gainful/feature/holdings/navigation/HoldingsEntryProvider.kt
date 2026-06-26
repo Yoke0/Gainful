@@ -15,11 +15,11 @@ fun EntryProviderScope<NavKey>.holdingsEntry(navigator: Navigator) {
         val viewModel = koinViewModel<HoldingsViewModel>()
         HoldingsScreen(
             viewModel = viewModel,
-            onStockClick = { code -> navigator.navigate(StockDetailNavKey(code)) },
+            onStockClick = { code, name, pinYin -> navigator.navigate(StockDetailNavKey(code, name, pinYin)) },
         )
     }
     entry<StockDetailNavKey> { key ->
-        val viewModel = koinViewModel<StockDetailViewModel> { parametersOf(key.code) }
+        val viewModel = koinViewModel<StockDetailViewModel> { parametersOf(key.code, key.name, key.pinYin) }
         StockDetailScreen(
             viewModel = viewModel,
             onBack = { navigator.goBack() },
