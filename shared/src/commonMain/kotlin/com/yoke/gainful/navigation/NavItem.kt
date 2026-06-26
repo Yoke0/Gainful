@@ -1,6 +1,7 @@
 package com.yoke.gainful.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavKey
 import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
 import com.yoke.gainful.feature.holdings.navigation.HoldingsNavKey
 import com.yoke.gainful.feature.settings.navigation.SettingsNavKey
@@ -21,7 +22,7 @@ data class TopLevelNavItem(
     val icon: @Composable (isSelected: Boolean) -> Unit,
 )
 
-val TOP_LEVEL_NAV_ITEMS = mapOf(
+val TOP_LEVEL_NAV_ITEMS: Map<NavKey, TopLevelNavItem> = mapOf(
     DashboardNavKey to TopLevelNavItem(
         label = { stringResource(Res.string.nav_dashboard) },
         icon = { DashboardIcon(isSelected = it) },
