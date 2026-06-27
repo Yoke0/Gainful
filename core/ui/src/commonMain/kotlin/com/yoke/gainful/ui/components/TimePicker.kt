@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,7 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.yoke.gainful.ui.theme.Background
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
@@ -138,93 +136,82 @@ fun TimePickerDialog(
     var workingHour by remember { mutableIntStateOf(initialTime.hour.coerceIn(0, 23)) }
     var workingMinute by remember { mutableIntStateOf(initialTime.minute.coerceIn(0, 59)) }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        Box(
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
             modifier = Modifier
-                .padding(16.dp)
-                .widthIn(max = 340.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center,
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(20.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Card)
-                    .border(1.dp, Border, RoundedCornerShape(14.dp))
-                    .padding(20.dp),
+            Text(
+                text = stringResource(Res.string.select_time),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = stringResource(Res.string.select_time),
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.fillMaxWidth(),
+                WheelColumn(
+                    label = stringResource(Res.string.hour_label),
+                    valueRange = 0..23,
+                    initialValue = workingHour,
+                    onValueChanged = { workingHour = it },
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = ":",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextSecondary,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    WheelColumn(
-                        label = stringResource(Res.string.hour_label),
-                        valueRange = 0..23,
-                        initialValue = workingHour,
-                        onValueChanged = { workingHour = it },
-                    )
+                WheelColumn(
+                    label = stringResource(Res.string.minute_label),
+                    valueRange = 0..59,
+                    initialValue = workingMinute,
+                    onValueChanged = { workingMinute = it },
+                )
+            }
 
-                    Text(
-                        text = ":",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextSecondary,
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    )
+            Spacer(modifier = Modifier.height(20.dp))
 
-                    WheelColumn(
-                        label = stringResource(Res.string.minute_label),
-                        valueRange = 0..59,
-                        initialValue = workingMinute,
-                        onValueChanged = { workingMinute = it },
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TimeFooterButton(
-                        label = stringResource(Res.string.now),
-                        isPrimary = false,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            val currentNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                            workingHour = currentNow.hour
-                            workingMinute = currentNow.minute
-                        },
-                    )
-                    TimeFooterButton(
-                        label = stringResource(Res.string.cancel),
-                        isPrimary = false,
-                        modifier = Modifier.weight(1f),
-                        onClick = onDismiss,
-                    )
-                    TimeFooterButton(
-                        label = stringResource(Res.string.confirm),
-                        isPrimary = true,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onTimeSelected(workingHour, workingMinute) },
-                    )
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TimeFooterButton(
+                    label = stringResource(Res.string.now),
+                    isPrimary = false,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        val currentNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                        workingHour = currentNow.hour
+                        workingMinute = currentNow.minute
+                    },
+                )
+                TimeFooterButton(
+                    label = stringResource(Res.string.cancel),
+                    isPrimary = false,
+                    modifier = Modifier.weight(1f),
+                    onClick = onDismiss,
+                )
+                TimeFooterButton(
+                    label = stringResource(Res.string.confirm),
+                    isPrimary = true,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onTimeSelected(workingHour, workingMinute) },
+                )
             }
         }
     }

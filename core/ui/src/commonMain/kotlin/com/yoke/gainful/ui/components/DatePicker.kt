@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -38,7 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -180,92 +178,81 @@ fun CalendarDialog(
         if (month == 11) { month = 0; year++ } else month++
     }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        Box(
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
             modifier = Modifier
-                .padding(16.dp)
-                .widthIn(max = 400.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center,
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(20.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Card)
-                    .border(1.dp, Border, RoundedCornerShape(14.dp))
-                    .padding(20.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.year_month_format, year, monthNames[month]),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        CalendarNavButton("‹") { prevMonth() }
-                        CalendarNavButton("›") { nextMonth() }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    weekdays.forEach { day ->
-                        Text(
-                            text = day,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextMuted,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f).padding(vertical = 4.dp),
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                CalendarGrid(
-                    year = year,
-                    month = month,
-                    today = today,
-                    tempSelected = tempSelected,
-                    selectableToTodayOnly = selectableToTodayOnly,
-                    onDayClick = { tempSelected = it },
+                Text(
+                    text = stringResource(Res.string.year_month_format, year, monthNames[month]),
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
                 )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    CalendarNavButton("‹") { prevMonth() }
+                    CalendarNavButton("›") { nextMonth() }
+                }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    CalendarFooterButton(
-                        label = stringResource(Res.string.today),
-                        isPrimary = false,
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            year = today.year
-                            month = today.month.number - 1
-                            tempSelected = today
-                        },
-                    )
-                    CalendarFooterButton(label = stringResource(Res.string.cancel), isPrimary = false, modifier = Modifier.weight(1f), onClick = onDismiss)
-                    CalendarFooterButton(
-                        label = stringResource(Res.string.confirm),
-                        isPrimary = true,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onDateSelected(kotlinx.datetime.LocalDateTime(tempSelected, kotlinx.datetime.LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()) },
+            Row(modifier = Modifier.fillMaxWidth()) {
+                weekdays.forEach { day ->
+                    Text(
+                        text = day,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextMuted,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f).padding(vertical = 4.dp),
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            CalendarGrid(
+                year = year,
+                month = month,
+                today = today,
+                tempSelected = tempSelected,
+                selectableToTodayOnly = selectableToTodayOnly,
+                onDayClick = { tempSelected = it },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CalendarFooterButton(
+                    label = stringResource(Res.string.today),
+                    isPrimary = false,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        year = today.year
+                        month = today.month.number - 1
+                        tempSelected = today
+                    },
+                )
+                CalendarFooterButton(label = stringResource(Res.string.cancel), isPrimary = false, modifier = Modifier.weight(1f), onClick = onDismiss)
+                CalendarFooterButton(
+                    label = stringResource(Res.string.confirm),
+                    isPrimary = true,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onDateSelected(kotlinx.datetime.LocalDateTime(tempSelected, kotlinx.datetime.LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()) },
+                )
             }
         }
     }

@@ -67,10 +67,10 @@ import com.yoke.gainful.file.rememberCsvFileUtil
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.model.GainLossColorScheme
 import com.yoke.gainful.ui.components.BottomBarHeight
+import com.yoke.gainful.ui.components.GainfulDialog
 import com.yoke.gainful.ui.components.TimePickerDialog
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainGreen
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Gold
@@ -238,42 +238,24 @@ private fun ExportDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.export_dialog_title),
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+    GainfulDialog(
+        onDismiss = onDismiss,
+        title = stringResource(Res.string.export_dialog_title),
+        content = {
             Text(
                 text = stringResource(Res.string.export_record_count, recordCount),
                 fontSize = 15.sp,
                 color = TextSecondary,
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = "文件名: $fileName.csv",
                 fontSize = 14.sp,
                 color = TextMuted,
                 fontFamily = FontFamily.Monospace,
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+        },
+        buttons = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -312,8 +294,8 @@ private fun ExportDialog(
                     )
                 }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable
@@ -321,52 +303,44 @@ private fun ExportResultDialog(
     fileName: String,
     onDone: () -> Unit,
 ) {
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDone) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(GreenDim),
-                contentAlignment = Alignment.Center,
+    GainfulDialog(
+        onDismiss = onDone,
+        title = "",
+        content = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(GreenDim),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "\u2713",
+                        fontSize = 24.sp,
+                        color = GainGreen,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "\u2713",
-                    fontSize = 24.sp,
-                    color = GainGreen,
+                    text = stringResource(Res.string.export_success),
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(Res.string.export_success_msg, fileName),
+                    fontSize = 14.sp,
+                    color = TextSecondary,
                 )
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(Res.string.export_success),
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(Res.string.export_success_msg, fileName),
-                fontSize = 14.sp,
-                color = TextSecondary,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+        },
+        buttons = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -383,8 +357,8 @@ private fun ExportResultDialog(
                     color = Background,
                 )
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable
@@ -465,25 +439,10 @@ private fun ColorPickerDialog(
 ) {
     var workingSelection by remember { mutableStateOf(selected) }
 
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.gain_loss_color_title),
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+    GainfulDialog(
+        onDismiss = onDismiss,
+        title = stringResource(Res.string.gain_loss_color_title),
+        content = {
             GainLossColorScheme.entries.forEach { scheme ->
                 val isSelected = scheme == workingSelection
                 val upColor = if (scheme == GainLossColorScheme.RED_UP) GainRed else GainGreen
@@ -536,9 +495,8 @@ private fun ColorPickerDialog(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+        },
+        buttons = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -577,8 +535,8 @@ private fun ColorPickerDialog(
                     )
                 }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable
@@ -672,25 +630,10 @@ private fun FrequencyPickerDialog(
 ) {
     var workingSelection by remember { mutableStateOf(selected) }
 
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.refresh_frequency_title),
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+    GainfulDialog(
+        onDismiss = onDismiss,
+        title = stringResource(Res.string.refresh_frequency_title),
+        content = {
             listOf(1, 3, 10).forEach { minutes ->
                 val isSelected = minutes == workingSelection
                 Box(
@@ -716,9 +659,8 @@ private fun FrequencyPickerDialog(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+        },
+        buttons = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -757,6 +699,6 @@ private fun FrequencyPickerDialog(
                     )
                 }
             }
-        }
-    }
+        },
+    )
 }

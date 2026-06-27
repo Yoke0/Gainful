@@ -6,8 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,8 +28,43 @@ import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainRed
 import com.yoke.gainful.ui.theme.Surface
-import com.yoke.gainful.ui.theme.TextSecondary
 import com.yoke.gainful.ui.theme.TextPrimary
+import com.yoke.gainful.ui.theme.TextSecondary
+
+@Composable
+fun GainfulDialog(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    title: String,
+    titleAlign: TextAlign = TextAlign.Start,
+    content: @Composable ColumnScope.() -> Unit = {},
+    buttons: @Composable () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                text = title,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                textAlign = titleAlign,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Column { content() }
+
+            buttons()
+        }
+    }
+}
 
 @Composable
 fun ConfirmDialog(
@@ -37,49 +73,31 @@ fun ConfirmDialog(
     dismissText: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    confirmColor: Color = GainRed,
     content: @Composable () -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(24.dp),
-        ) {
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            content()
-
-            Spacer(modifier = Modifier.height(20.dp))
-
+    GainfulDialog(
+        onDismiss = onDismiss,
+        title = title,
+        content = { content() },
+        buttons = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
                         .background(Surface)
-                        .border(1.dp, Border, RoundedCornerShape(12.dp))
-                        .clickable(onClick = onDismiss)
-                        .padding(vertical = 12.dp),
+                        .border(1.dp, Border, RoundedCornerShape(50))
+                        .clickable(onClick = onDismiss),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = dismissText,
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TextSecondary,
                     )
@@ -87,20 +105,20 @@ fun ConfirmDialog(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(GainRed)
-                        .clickable(onClick = onConfirm)
-                        .padding(vertical = 12.dp),
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(confirmColor)
+                        .clickable(onClick = onConfirm),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = confirmText,
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Background,
                     )
                 }
             }
-        }
-    }
+        },
+    )
 }

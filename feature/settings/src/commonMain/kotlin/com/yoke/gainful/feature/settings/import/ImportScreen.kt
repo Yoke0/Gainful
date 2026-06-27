@@ -408,6 +408,7 @@ private fun ImportContent(
             onDismiss = {
                 onDismissDuplicateConfirm()
             },
+            confirmColor = Gold,
             content = {
                 Text(
                     text = confirmMessage,
