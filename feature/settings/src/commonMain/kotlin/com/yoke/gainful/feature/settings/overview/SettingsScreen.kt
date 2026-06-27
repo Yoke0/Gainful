@@ -1,5 +1,6 @@
 package com.yoke.gainful.feature.settings.overview
 
+import com.yoke.gainful.ui.components.GainfulTopAppBar
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.about_group
 import gainful.feature.settings.generated.resources.app_version
@@ -114,13 +115,10 @@ fun SettingsScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp),
     ) {
-        Text(
-            text = stringResource(Res.string.settings_title),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = TextPrimary,
+        GainfulTopAppBar(
+            title = stringResource(Res.string.settings_title),
         )
 
         Spacer(modifier = Modifier.height(16.dp))

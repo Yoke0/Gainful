@@ -2,7 +2,7 @@ package com.yoke.gainful.feature.settings.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.yoke.gainful.feature.settings.import.ImportEntry
+import com.yoke.gainful.feature.settings.import.ImportScreen
 import com.yoke.gainful.feature.settings.overview.SettingsScreen
 import com.yoke.gainful.feature.settings.overview.SettingsViewModel
 import com.yoke.gainful.navigation.Navigator
@@ -17,6 +17,6 @@ fun EntryProviderScope<NavKey>.settingsEntry(navigator: Navigator) {
         )
     }
     entry<ImportTransactionsNavKey> {
-        ImportEntry(onBack = { navigator.goBack() })
+        ImportScreen(onBack = { navigator.goBack() })
     }
 }

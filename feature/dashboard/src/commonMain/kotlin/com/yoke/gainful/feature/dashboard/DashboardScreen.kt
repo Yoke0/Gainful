@@ -70,6 +70,7 @@ import com.yoke.gainful.ui.theme.Gold
 import com.yoke.gainful.ui.theme.GoldDim
 import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
+import com.yoke.gainful.ui.components.GainfulTopAppBar
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
 
@@ -85,23 +86,11 @@ fun DashboardScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(Res.string.dashboard_title),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = TextPrimary,
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        GainfulTopAppBar(
+            title = stringResource(Res.string.dashboard_title),
+            actions = {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
@@ -125,8 +114,8 @@ fun DashboardScreen(
                         )
                     }
                 }
-            }
-        }
+            },
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

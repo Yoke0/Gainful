@@ -35,6 +35,10 @@ class ImportViewModel(
             is ImportIntent.DeleteItem -> deleteItem(intent.index)
             is ImportIntent.ConfirmImport -> confirmImport(intent.csvConfig)
             is ImportIntent.Reset -> resetState()
+            is ImportIntent.ShowDeleteDialog -> showDeleteDialog(intent.index, intent.item)
+            is ImportIntent.DismissDeleteDialog -> dismissDeleteDialog()
+            is ImportIntent.ShowDuplicateConfirm -> showDuplicateConfirm()
+            is ImportIntent.DismissDuplicateConfirm -> dismissDuplicateConfirm()
         }
     }
 
@@ -152,7 +156,32 @@ class ImportViewModel(
     private fun resetState() {
         _uiState.update { ImportUiState() }
     }
+
+    private fun showDeleteDialog(index: Int, item: TransactionDisplayItem) {
+        _uiState.update {
+            it.copy(deleteDialog = DeleteDialogState(index, item))
+        }
+    }
+
+    private fun dismissDeleteDialog() {
+        _uiState.update {
+            it.copy(deleteDialog = null)
+        }
+    }
+
+    private fun showDuplicateConfirm() {
+        _uiState.update { it.copy(showDuplicateConfirm = true) }
+    }
+
+    private fun dismissDuplicateConfirm() {
+        _uiState.update { it.copy(showDuplicateConfirm = false) }
+    }
 }
+
+data class DeleteDialogState(
+    val index: Int = -1,
+    val item: TransactionDisplayItem? = null,
+)
 
 data class ImportUiState(
     val preview: CsvPreviewData? = null,
@@ -161,4 +190,6 @@ data class ImportUiState(
     val isLoading: Boolean = false,
     val importSuccess: Boolean = false,
     val importedCount: Int = 0,
+    val deleteDialog: DeleteDialogState? = null,
+    val showDuplicateConfirm: Boolean = false,
 )

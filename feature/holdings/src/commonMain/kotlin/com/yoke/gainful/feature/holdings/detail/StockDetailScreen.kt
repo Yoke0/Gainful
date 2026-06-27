@@ -1,7 +1,9 @@
 package com.yoke.gainful.feature.holdings.detail
 
-import androidx.compose.foundation.border
+import com.yoke.gainful.ui.components.GainfulTopAppBar
+import com.yoke.gainful.ui.components.BackNavigationIcon
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -136,47 +138,12 @@ fun StockDetailScreen(
             .fillMaxSize()
             .background(Background),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(Card)
-                    .clickable(onClick = onBack),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "\u2039",
-                    fontSize = 20.sp,
-                    color = TextSecondary,
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = if (uiState.pinYin.isNotBlank()) "${uiState.name} ${uiState.pinYin}" else uiState.name,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.alignByBaseline(),
-                )
-                Text(
-                    text = uiState.code,
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = TextMuted,
-                    modifier = Modifier.alignByBaseline(),
-                )
-            }
-        }
+        GainfulTopAppBar(
+            title = uiState.name,
+            subtitle = uiState.code,
+            navigationIcon = { BackNavigationIcon(onClick = onBack) },
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
 
         when (uiState) {
             is StockDetailUiState.Loading -> LoadingCenterArea(uiState.pinYin, uiState.name)

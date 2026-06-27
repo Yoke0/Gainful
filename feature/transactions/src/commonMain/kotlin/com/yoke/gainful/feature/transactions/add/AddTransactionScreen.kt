@@ -1,5 +1,7 @@
 package com.yoke.gainful.feature.transactions.add
 
+import com.yoke.gainful.ui.components.GainfulTopAppBar
+import com.yoke.gainful.ui.components.BackNavigationIcon
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -211,57 +213,26 @@ private fun AddTransactionHeader(
     onSave: () -> Unit,
 ) {
     val saveAlpha = if (isEnabled) 1f else 0.4f
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Background)
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .clickable(onClick = onBack)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "‹",
-                fontSize = 22.sp,
-                color = TextSecondary,
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = stringResource(Res.string.back),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                color = TextSecondary,
-            )
-        }
-
-        Text(
-            text = stringResource(Res.string.add_transaction_title),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary,
-        )
-
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(Gold.copy(alpha = saveAlpha))
-                .clickable(enabled = isEnabled, onClick = onSave)
-                .padding(horizontal = 18.dp, vertical = 6.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.save),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = Background,
-            )
-        }
-    }
+    GainfulTopAppBar(
+        title = stringResource(Res.string.add_transaction_title),
+        navigationIcon = { BackNavigationIcon(onClick = onBack) },
+        actions = {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(Gold.copy(alpha = saveAlpha))
+                    .clickable(enabled = isEnabled, onClick = onSave)
+                    .padding(horizontal = 18.dp, vertical = 6.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.save),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Background,
+                )
+            }
+        },
+    )
 }
 
 @Composable

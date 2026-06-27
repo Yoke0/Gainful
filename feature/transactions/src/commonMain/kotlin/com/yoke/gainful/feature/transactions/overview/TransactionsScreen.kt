@@ -2,6 +2,7 @@ package com.yoke.gainful.feature.transactions.overview
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import com.yoke.gainful.ui.components.GainfulTopAppBar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -196,34 +197,27 @@ fun TransactionsScreen(
             .background(Background)
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(Res.string.transactions_title),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = TextPrimary,
-            )
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Gold)
-                    .clickable(onClick = onAddTransaction)
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.add_button),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Background,
-                )
-            }
-        }
+        GainfulTopAppBar(
+            title = stringResource(Res.string.transactions_title),
+            actions = {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Gold)
+                        .clickable(onClick = onAddTransaction)
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.add_button),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Background,
+                    )
+                }
+            },
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
