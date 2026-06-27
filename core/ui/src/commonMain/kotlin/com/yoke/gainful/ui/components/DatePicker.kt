@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -199,8 +197,8 @@ fun CalendarDialog(
                     color = TextPrimary,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    CalendarNavButton("‹") { prevMonth() }
-                    CalendarNavButton("›") { nextMonth() }
+                    NavButton("‹") { prevMonth() }
+                    NavButton("›") { nextMonth() }
                 }
             }
 
@@ -236,9 +234,8 @@ fun CalendarDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                CalendarFooterButton(
+                SecondaryButton(
                     label = stringResource(Res.string.today),
-                    isPrimary = false,
                     modifier = Modifier.weight(1f),
                     onClick = {
                         year = today.year
@@ -246,10 +243,9 @@ fun CalendarDialog(
                         tempSelected = today
                     },
                 )
-                CalendarFooterButton(label = stringResource(Res.string.cancel), isPrimary = false, modifier = Modifier.weight(1f), onClick = onDismiss)
-                CalendarFooterButton(
+                SecondaryButton(label = stringResource(Res.string.cancel), modifier = Modifier.weight(1f), onClick = onDismiss)
+                PrimaryButton(
                     label = stringResource(Res.string.confirm),
-                    isPrimary = true,
                     modifier = Modifier.weight(1f),
                     onClick = { onDateSelected(kotlinx.datetime.LocalDateTime(tempSelected, kotlinx.datetime.LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()) },
                 )
@@ -322,51 +318,6 @@ internal fun CalendarGrid(
                 }
             }
         }
-    }
-}
-
-@Composable
-internal fun CalendarNavButton(text: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onClick)
-            .background(Surface)
-            .border(1.dp, Border, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextSecondary,
-        )
-    }
-}
-
-@Composable
-internal fun CalendarFooterButton(
-    label: String,
-    isPrimary: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onClick)
-            .background(if (isPrimary) Gold else Surface)
-            .border(if (isPrimary) 0.dp else 1.dp, Border, RoundedCornerShape(50)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isPrimary) Background else TextSecondary,
-        )
     }
 }
 

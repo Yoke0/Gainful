@@ -236,8 +236,8 @@ fun DateTimePickerDialog(
                     color = TextPrimary,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    CalendarNavButton("‹") { prevMonth() }
-                    CalendarNavButton("›") { nextMonth() }
+                    NavButton("‹") { prevMonth() }
+                    NavButton("›") { nextMonth() }
                 }
             }
 
@@ -311,15 +311,13 @@ fun DateTimePickerDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                CalendarFooterButton(
+                SecondaryButton(
                     label = stringResource(Res.string.cancel),
-                    isPrimary = false,
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
                 )
-                CalendarFooterButton(
+                PrimaryButton(
                     label = stringResource(Res.string.confirm),
-                    isPrimary = true,
                     modifier = Modifier.weight(1f),
                     onClick = {
                         val ldt = kotlinx.datetime.LocalDateTime(

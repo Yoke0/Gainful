@@ -190,9 +190,8 @@ fun TimePickerDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TimeFooterButton(
+                SecondaryButton(
                     label = stringResource(Res.string.now),
-                    isPrimary = false,
                     modifier = Modifier.weight(1f),
                     onClick = {
                         val currentNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -200,15 +199,13 @@ fun TimePickerDialog(
                         workingMinute = currentNow.minute
                     },
                 )
-                TimeFooterButton(
+                SecondaryButton(
                     label = stringResource(Res.string.cancel),
-                    isPrimary = false,
                     modifier = Modifier.weight(1f),
                     onClick = onDismiss,
                 )
-                TimeFooterButton(
+                PrimaryButton(
                     label = stringResource(Res.string.confirm),
-                    isPrimary = true,
                     modifier = Modifier.weight(1f),
                     onClick = { onTimeSelected(workingHour, workingMinute) },
                 )
@@ -334,31 +331,6 @@ internal fun WheelColumn(
                 }
             }
         }
-    }
-}
-
-@Composable
-internal fun TimeFooterButton(
-    label: String,
-    isPrimary: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onClick)
-            .background(if (isPrimary) Gold else Surface)
-            .border(if (isPrimary) 0.dp else 1.dp, Border, RoundedCornerShape(50)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isPrimary) Background else TextSecondary,
-        )
     }
 }
 

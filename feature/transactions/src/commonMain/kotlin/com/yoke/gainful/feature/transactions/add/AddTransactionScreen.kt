@@ -1,7 +1,5 @@
 package com.yoke.gainful.feature.transactions.add
 
-import com.yoke.gainful.ui.components.GainfulTopAppBar
-import com.yoke.gainful.ui.components.BackNavigationIcon
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,10 +40,30 @@ import com.yoke.gainful.common.extensions.formatTwoDecimals
 import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.components.BackNavigationIcon
+import com.yoke.gainful.ui.components.DateTimePickerDialog
+import com.yoke.gainful.ui.components.DateTimePickerField
+import com.yoke.gainful.ui.components.GainfulTopAppBar
+import com.yoke.gainful.ui.components.SelectChip
+import com.yoke.gainful.ui.components.SquareIconButton
+import com.yoke.gainful.ui.theme.Background
+import com.yoke.gainful.ui.theme.Border
+import com.yoke.gainful.ui.theme.Card
+import com.yoke.gainful.ui.theme.GainRed
+import com.yoke.gainful.ui.theme.Gold
+import com.yoke.gainful.ui.theme.GoldDim
+import com.yoke.gainful.ui.theme.Surface
+import com.yoke.gainful.ui.theme.Surface2
+import com.yoke.gainful.ui.theme.TextMuted
+import com.yoke.gainful.ui.theme.TextPrimary
+import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.ui.theme.gainColor
+import com.yoke.gainful.ui.theme.gainDimColor
+import com.yoke.gainful.ui.theme.lossColor
+import com.yoke.gainful.ui.theme.lossDimColor
 import gainful.feature.transactions.generated.resources.Res
 import gainful.feature.transactions.generated.resources.add_transaction_title
 import gainful.feature.transactions.generated.resources.asset_section
-import gainful.feature.transactions.generated.resources.back
 import gainful.feature.transactions.generated.resources.buy
 import gainful.feature.transactions.generated.resources.dividend
 import gainful.feature.transactions.generated.resources.dividend_amount
@@ -75,26 +93,9 @@ import gainful.feature.transactions.generated.resources.trade_details_section
 import gainful.feature.transactions.generated.resources.trade_price
 import gainful.feature.transactions.generated.resources.trade_quantity
 import gainful.feature.transactions.generated.resources.transaction_summary
-import org.jetbrains.compose.resources.stringResource
-import com.yoke.gainful.ui.components.DateTimePickerDialog
-import com.yoke.gainful.ui.components.DateTimePickerField
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainRed
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.gainColor
-import com.yoke.gainful.ui.theme.gainDimColor
-import com.yoke.gainful.ui.theme.lossColor
-import com.yoke.gainful.ui.theme.lossDimColor
-import com.yoke.gainful.ui.theme.Surface
-import com.yoke.gainful.ui.theme.Surface2
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AddTransactionScreen(
@@ -244,7 +245,7 @@ private fun TypeSelector(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        TypeButton(
+        SelectChip(
             label = stringResource(Res.string.buy),
             icon = "📈",
             isSelected = selectedType == TransactionType.BUY,
@@ -253,7 +254,7 @@ private fun TypeSelector(
             modifier = Modifier.weight(1f),
             onClick = { onTypeSelected(TransactionType.BUY) },
         )
-        TypeButton(
+        SelectChip(
             label = stringResource(Res.string.sell),
             icon = "📉",
             isSelected = selectedType == TransactionType.SELL,
@@ -262,7 +263,7 @@ private fun TypeSelector(
             modifier = Modifier.weight(1f),
             onClick = { onTypeSelected(TransactionType.SELL) },
         )
-        TypeButton(
+        SelectChip(
             label = stringResource(Res.string.dividend),
             icon = "💵",
             isSelected = selectedType == TransactionType.DIVIDEND,
@@ -270,40 +271,6 @@ private fun TypeSelector(
             activeBackground = GoldDim,
             modifier = Modifier.weight(1f),
             onClick = { onTypeSelected(TransactionType.DIVIDEND) },
-        )
-    }
-}
-
-@Composable
-private fun TypeButton(
-    label: String,
-    icon: String,
-    isSelected: Boolean,
-    activeColor: androidx.compose.ui.graphics.Color,
-    activeBackground: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    val bgColor = if (isSelected) activeBackground else Surface
-    val borderColor = if (isSelected) activeColor else Border
-    val textColor = if (isSelected) activeColor else TextSecondary
-
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .border(1.dp, borderColor, RoundedCornerShape(50))
-            .background(bgColor)
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = icon, fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = textColor,
         )
     }
 }
@@ -342,8 +309,8 @@ private fun AssetSelectorSection(
         }
 
         if (type == TransactionType.BUY) {
-            SearchToggleButton(
-                isExpanded = showSearch,
+            SquareIconButton(
+                icon = if (showSearch) "✕" else "🔍",
                 onClick = onToggleSearch,
             )
         }
@@ -434,29 +401,6 @@ private fun SelectedStockInfo(
                 color = TextMuted,
             )
         }
-    }
-}
-
-@Composable
-private fun SearchToggleButton(
-    isExpanded: Boolean,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .width(44.dp)
-            .height(44.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = if (isExpanded) "✕" else "🔍",
-            fontSize = 20.sp,
-            color = TextSecondary,
-        )
     }
 }
 
