@@ -16,7 +16,7 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
 - `core/` — Core modules (Clean Architecture)
   - `common/` — Utilities, extensions, constants
   - `model/` — Data models (DTOs, Entities)
-  - `ui/` — Common UI components, theme colors
+  - `ui/` — Common UI components, theme colors (see [UI Components](#ui-components) below)
   - `data/` — Repository interfaces + offline implementations
   - `database/` — Room with BundledSQLiteDriver (cross-platform)
   - `network/` — Ktor HTTP client (expect/actual per platform)
@@ -154,6 +154,24 @@ android screen capture -o /tmp/s.png
 - `android layout` returns JSON with `text`, `center`, `bounds`, `interactions` — no grep needed.
 - `adb shell input tap` may fail with SecurityException on first wireless ADB attempt; retry works.
 - Clean up screenshots after verification.
+
+## UI Components
+
+Reusable composables in `core/ui/src/commonMain/kotlin/com/yoke/gainful/ui/components/`:
+
+- **Button.kt** — `NavButton`, `PrimaryButton`, `SecondaryButton`, `SelectChip`, `SquareIconButton`
+- **Dialog.kt** — `GainfulDialog`, `ConfirmDialog`
+- **TopAppBar.kt** — `GainfulTopAppBar`
+- **BottomBar.kt** — `BottomBar`
+- **DatePicker.kt** — `DatePickerField`, `CalendarDialog`, `CalendarGrid`
+- **TimePicker.kt** — `TimePickerField`, `TimePickerDialog`
+- **DateTimePicker.kt** — `DateTimePickerField`, `DateTimePickerDialog`
+- **Loading.kt** — `LoadingIndicator`
+- **TransactionCard.kt** — `TransactionCard`
+- **GainText.kt** — `SectionLabel`
+- **NavIcons.kt** — `BackNavigationIcon`, nav icons
+
+Button naming follows Material3 conventions: `PrimaryButton` (filled), `SecondaryButton` (outlined), `NavButton` (circular icon), `SelectChip` (toggleable chip), `SquareIconButton` (square icon).
 
 ## Gotchas
 

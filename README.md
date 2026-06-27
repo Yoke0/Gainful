@@ -121,6 +121,27 @@ Gainful/
 - **格式化字符串**: 使用位置参数 `%1$d`、`%2$s`（CMP 要求）
 - **测试命令**: `./gradlew allTests` 运行所有平台测试
 
+### 通用 UI 组件 (`core/ui`)
+
+| 组件 | 文件 | 说明 |
+|------|------|------|
+| `NavButton` | `Button.kt` | 圆形导航按钮（‹ ›） |
+| `PrimaryButton` | `Button.kt` | 填充按钮（支持自定义颜色） |
+| `SecondaryButton` | `Button.kt` | 描边按钮 |
+| `SelectChip` | `Button.kt` | 可选中 chip，icon + label |
+| `SquareIconButton` | `Button.kt` | 方形图标按钮 |
+| `GainfulDialog` | `Dialog.kt` | 通用对话框容器（title + content + buttons） |
+| `ConfirmDialog` | `Dialog.kt` | 确认对话框（支持自定义确认按钮颜色） |
+| `GainfulTopAppBar` | `TopAppBar.kt` | 顶部导航栏 |
+| `BottomBar` | `BottomBar.kt` | 底部导航栏 |
+| `DatePickerField` / `CalendarDialog` | `DatePicker.kt` | 日期选择器 |
+| `TimePickerField` / `TimePickerDialog` | `TimePicker.kt` | 时间选择器 |
+| `DateTimePickerField` / `DateTimePickerDialog` | `DateTimePicker.kt` | 日期时间选择器 |
+| `LoadingIndicator` | `Loading.kt` | 加载状态指示器 |
+| `TransactionCard` | `TransactionCard.kt` | 交易卡片 |
+| `SectionLabel` | `GainText.kt` | 分区标签 |
+| `BackNavigationIcon` / `NavIcons` | `NavIcons.kt` | 导航图标 |
+
 ### 测试
 
 ```bash

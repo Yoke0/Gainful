@@ -120,6 +120,27 @@ Gainful/
 - **Generated resource IDs**: `gainful.<module>.generated.resources.*` (e.g., `gainful.feature.dashboard.generated.resources.*`)
 - **Format strings**: Use positional args: `%1$d`, `%2$s` (CMP requirement)
 
+### Shared UI Components (`core/ui`)
+
+| Component | File | Description |
+|-----------|------|-------------|
+| `NavButton` | `Button.kt` | Circular navigation button (‹ ›) |
+| `PrimaryButton` | `Button.kt` | Filled button (customizable color) |
+| `SecondaryButton` | `Button.kt` | Outlined button |
+| `SelectChip` | `Button.kt` | Selectable chip with icon + label |
+| `SquareIconButton` | `Button.kt` | Square icon toggle button |
+| `GainfulDialog` | `Dialog.kt` | Generic dialog container (title + content + buttons) |
+| `ConfirmDialog` | `Dialog.kt` | Confirm dialog (customizable confirm button color) |
+| `GainfulTopAppBar` | `TopAppBar.kt` | Top navigation bar |
+| `BottomBar` | `BottomBar.kt` | Bottom navigation bar |
+| `DatePickerField` / `CalendarDialog` | `DatePicker.kt` | Date picker |
+| `TimePickerField` / `TimePickerDialog` | `TimePicker.kt` | Time picker |
+| `DateTimePickerField` / `DateTimePickerDialog` | `DateTimePicker.kt` | Date-time picker |
+| `LoadingIndicator` | `Loading.kt` | Loading state indicator |
+| `TransactionCard` | `TransactionCard.kt` | Transaction card |
+| `SectionLabel` | `GainText.kt` | Section label |
+| `BackNavigationIcon` / `NavIcons` | `NavIcons.kt` | Navigation icons |
+
 ### Testing
 
 ```bash
