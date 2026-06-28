@@ -1,5 +1,3 @@
-import java.io.File
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
@@ -17,8 +15,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
         }
-
+        jvmMain.dependencies {
+            implementation(libs.icu4j)
+        }
     }
 }
 
@@ -46,6 +47,7 @@ abstract class GenerateBuildConfigTask : DefaultTask() {
 }
 
 val generateBuildConfig by tasks.registering(GenerateBuildConfigTask::class) {
+    description = "Generates BuildConfig.kt with app version"
     versionName.set(project.property("VERSION_NAME").toString())
     outputDir.set(layout.buildDirectory.dir("generated/buildconfig"))
 }

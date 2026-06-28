@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.yoke.gainful.common.extensions.pad2
 import com.yoke.gainful.ui.theme.Background
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
@@ -333,8 +334,6 @@ internal fun WheelColumn(
         }
     }
 }
-
-internal fun Int.pad2(): String = if (this < 10) "0$this" else "$this"
 
 @Preview
 @Composable

@@ -37,6 +37,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.yoke.gainful.common.extensions.pad2
+import com.yoke.gainful.ui.theme.Background
+import com.yoke.gainful.ui.theme.Border
+import com.yoke.gainful.ui.theme.Card
+import com.yoke.gainful.ui.theme.GainfulTheme
+import com.yoke.gainful.ui.theme.Gold
+import com.yoke.gainful.ui.theme.Surface
+import com.yoke.gainful.ui.theme.TextMuted
+import com.yoke.gainful.ui.theme.TextPrimary
+import com.yoke.gainful.ui.theme.TextSecondary
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
 import gainful.core.ui.generated.resources.confirm
@@ -55,7 +65,6 @@ import gainful.core.ui.generated.resources.month_6
 import gainful.core.ui.generated.resources.month_7
 import gainful.core.ui.generated.resources.month_8
 import gainful.core.ui.generated.resources.month_9
-import gainful.core.ui.generated.resources.now
 import gainful.core.ui.generated.resources.select_datetime
 import gainful.core.ui.generated.resources.weekday_friday
 import gainful.core.ui.generated.resources.weekday_monday
@@ -65,22 +74,13 @@ import gainful.core.ui.generated.resources.weekday_thursday
 import gainful.core.ui.generated.resources.weekday_tuesday
 import gainful.core.ui.generated.resources.weekday_wednesday
 import gainful.core.ui.generated.resources.year_month_format
-import org.jetbrains.compose.resources.stringResource
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainfulTheme
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.Surface
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -320,9 +320,9 @@ fun DateTimePickerDialog(
                     label = stringResource(Res.string.confirm),
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        val ldt = kotlinx.datetime.LocalDateTime(
+                        val ldt = LocalDateTime(
                             selectedDate,
-                            kotlinx.datetime.LocalTime(workingHour, workingMinute),
+                            LocalTime(workingHour, workingMinute),
                         )
                         onDateTimeSelected(ldt.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds())
                     },

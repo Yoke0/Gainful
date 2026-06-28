@@ -49,8 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
-import com.yoke.gainful.common.extensions.formatDecimal
-import com.yoke.gainful.common.extensions.formatTurnover
+import com.yoke.gainful.common.extensions.formatLocalized
+import com.yoke.gainful.common.extensions.formatLocalizedDate
+import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.components.LoadingDots
@@ -67,9 +68,6 @@ import com.yoke.gainful.ui.theme.Surface
 import com.yoke.gainful.ui.theme.TextMuted
 import com.yoke.gainful.ui.theme.TextPrimary
 import com.yoke.gainful.ui.theme.TextSecondary
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 
 import gainful.feature.holdings.generated.resources.Res
 import gainful.feature.holdings.generated.resources.amplitude
@@ -389,7 +387,7 @@ private fun PriceHeroCard(uiState: StockDetailUiState.Success) {
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = uiState.price.formatDecimal(2),
+                text = uiState.price.formatLocalized(),
                 fontSize = 34.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.Monospace,
@@ -397,7 +395,7 @@ private fun PriceHeroCard(uiState: StockDetailUiState.Success) {
                 modifier = Modifier.alignByBaseline(),
             )
             Text(
-                text = "${if (change >= 0) "+" else ""}${change.formatDecimal(2)}",
+                text = change.formatSigned(),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
@@ -405,7 +403,7 @@ private fun PriceHeroCard(uiState: StockDetailUiState.Success) {
                 modifier = Modifier.alignByBaseline(),
             )
             Text(
-                text = "${if (changePct >= 0) "+" else ""}${changePct.formatDecimal(2)}%",
+                text = changePct.formatSigned() + "%",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
@@ -420,9 +418,9 @@ private fun PriceHeroCard(uiState: StockDetailUiState.Success) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            ExtraItem(stringResource(Res.string.open_price), uiState.open.formatDecimal(2))
-            ExtraItem(stringResource(Res.string.high_price), uiState.high.formatDecimal(2))
-            ExtraItem(stringResource(Res.string.low_price), uiState.low.formatDecimal(2))
+            ExtraItem(stringResource(Res.string.open_price), uiState.open.formatLocalized())
+            ExtraItem(stringResource(Res.string.high_price), uiState.high.formatLocalized())
+            ExtraItem(stringResource(Res.string.low_price), uiState.low.formatLocalized())
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -431,8 +429,8 @@ private fun PriceHeroCard(uiState: StockDetailUiState.Success) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            ExtraItem(stringResource(Res.string.volume), formatVolume(uiState.volume))
-            ExtraItem(stringResource(Res.string.turnover), uiState.turnover.formatTurnover())
+            ExtraItem(stringResource(Res.string.volume), uiState.volume.toDouble().formatCompact())
+            ExtraItem(stringResource(Res.string.turnover), uiState.turnover.formatCompact())
         }
     }
 }
@@ -683,8 +681,8 @@ private fun MetricsGrid(uiState: StockDetailUiState.Success) {
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MetricItem(stringResource(Res.string.market_value), uiState.totalMarketCap.formatCompact(), Modifier.weight(1f))
-            MetricItem(stringResource(Res.string.turnover_rate), "${uiState.turnoverRate.formatDecimal(2)}%", Modifier.weight(1f))
-            MetricItem(stringResource(Res.string.amplitude), "${uiState.amplitude.formatDecimal(2)}%", Modifier.weight(1f))
+            MetricItem(stringResource(Res.string.turnover_rate), "${uiState.turnoverRate.formatLocalized()}%", Modifier.weight(1f))
+            MetricItem(stringResource(Res.string.amplitude), "${uiState.amplitude.formatLocalized()}%", Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MetricItem(
@@ -694,13 +692,13 @@ private fun MetricsGrid(uiState: StockDetailUiState.Success) {
             )
             MetricItem(
                 stringResource(Res.string.cost),
-                uiState.averageCost.formatDecimal(2),
+                uiState.averageCost.formatLocalized(),
                 Modifier.weight(1f),
                 valueColor = if (uiState.averageCost > uiState.price) lossColor else gainColor,
             )
             MetricItem(
                 stringResource(Res.string.profit_loss),
-                "${if (uiState.totalGain >= 0) "+" else ""}${uiState.totalGain.formatCompact()}",
+                uiState.totalGain.formatSigned(),
                 Modifier.weight(1f),
                 valueColor = if (uiState.totalGain >= 0) gainColor else lossColor,
             )
@@ -827,17 +825,14 @@ private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
                 color = typeColor,
             )
             Text(
-                text = Instant.fromEpochMilliseconds(trade.tradeDate)
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .date
-                    .toString(),
+                text = trade.tradeDate.formatLocalizedDate(),
                 fontSize = 11.sp,
                 color = TextMuted,
             )
         }
         if (trade.type == TransactionType.DIVIDEND) {
             Text(
-                text = "+${trade.amount.formatDecimal(2)}",
+                text = "+${trade.amount.formatLocalized()}",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
@@ -845,21 +840,12 @@ private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
             )
         } else {
             Text(
-                text = stringResource(Res.string.trade_detail, trade.quantity.toInt(), trade.price.formatDecimal(2)),
+                text = stringResource(Res.string.trade_detail, trade.quantity.toInt(), trade.price.formatLocalized()),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
                 color = TextPrimary,
             )
         }
-    }
-}
-
-private fun formatVolume(volume: Long): String {
-    return when {
-        volume >= 1_000_000_000 -> "${(volume / 1_000_000_000.0).formatDecimal(1)}B"
-        volume >= 1_000_000 -> "${(volume / 1_000_000.0).formatDecimal(1)}M"
-        volume >= 1_000 -> "${(volume / 1_000.0).formatDecimal(1)}K"
-        else -> volume.toString()
     }
 }

@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.common.extensions.formatTwoDecimals
+import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
@@ -668,7 +668,7 @@ private fun HoldingChip(
 
 private fun Double.formatQuantity(): String {
     val qty = this.toLong()
-    return if (qty.toDouble() == this) qty.toString() else this.formatTwoDecimals()
+    return if (qty.toDouble() == this) qty.toString() else this.formatLocalized()
 }
 
 @Composable
@@ -905,9 +905,9 @@ private fun TransactionSummary(
     val amountVal = amount.toDoubleOrNull() ?: 0.0
     val pnlText = when {
         amountVal <= 0 -> "—"
-        type == TransactionType.SELL -> "+¥${amountVal.formatTwoDecimals()}"
-        type == TransactionType.DIVIDEND -> "+¥${amountVal.formatTwoDecimals()}"
-        else -> "-¥${amountVal.formatTwoDecimals()}"
+        type == TransactionType.SELL -> "+¥${amountVal.formatLocalized()}"
+        type == TransactionType.DIVIDEND -> "+¥${amountVal.formatLocalized()}"
+        else -> "-¥${amountVal.formatLocalized()}"
     }
     val pnlColor = when {
         amountVal <= 0 -> TextPrimary
@@ -945,7 +945,7 @@ private fun TransactionSummary(
             Row(modifier = Modifier.fillMaxWidth()) {
                 SummaryItem(
                     stringResource(Res.string.summary_amount),
-                    if (amountVal > 0) "¥${amountVal.formatTwoDecimals()}" else "—",
+                    if (amountVal > 0) "¥${amountVal.formatLocalized()}" else "—",
                     Modifier.weight(1f),
                 )
                 SummaryItem(

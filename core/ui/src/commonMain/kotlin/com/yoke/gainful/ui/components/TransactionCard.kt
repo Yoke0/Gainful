@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
 import com.yoke.gainful.ui.theme.GainRed
@@ -167,7 +167,7 @@ fun TransactionCard(
                 horizontalAlignment = Alignment.End,
             ) {
                 Text(
-                    text = "$amountPrefix${item.amount}",
+                    text = "$amountPrefix${item.amount.formatLocalized()}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
@@ -226,7 +226,7 @@ fun TransactionCard(
                             color = TextMuted,
                         )
                         Text(
-                            text = item.price.toString(),
+                            text = item.price.formatLocalized(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,
@@ -243,7 +243,7 @@ fun TransactionCard(
                             color = TextMuted,
                         )
                         Text(
-                            text = item.fee.toString(),
+                            text = item.fee.formatLocalized(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,

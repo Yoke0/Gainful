@@ -2,6 +2,7 @@ package com.yoke.gainful.feature.settings.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yoke.gainful.common.extensions.pad2
 import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnceUseCase
 import com.yoke.gainful.feature.settings.model.CsvConfig
@@ -158,5 +159,3 @@ data class ExportResult(
     val fileName: String,
     val recordCount: Int,
 )
-
-private fun Int.pad2(): String = if (this < 10) "0$this" else "$this"

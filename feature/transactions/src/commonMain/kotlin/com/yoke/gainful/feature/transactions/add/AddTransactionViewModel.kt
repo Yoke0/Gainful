@@ -2,7 +2,7 @@ package com.yoke.gainful.feature.transactions.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yoke.gainful.common.extensions.formatTwoDecimals
+import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.domain.usecase.asset.InsertAssetUseCase
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
@@ -241,7 +241,7 @@ class AddTransactionViewModel(
             TransactionType.SELL -> marketValue - amt
             TransactionType.DIVIDEND -> 0.0
         }
-        return fee.formatTwoDecimals()
+        return fee.formatLocalized()
     }
 
     private fun saveTransaction() {

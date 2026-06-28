@@ -74,6 +74,7 @@ import gainful.core.ui.generated.resources.year_month_format
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
+import com.yoke.gainful.common.extensions.pad2
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.plus

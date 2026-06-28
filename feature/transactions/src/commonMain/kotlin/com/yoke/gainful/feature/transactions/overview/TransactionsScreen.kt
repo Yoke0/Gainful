@@ -37,7 +37,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.common.extensions.formatDecimal
+import com.yoke.gainful.common.extensions.formatLocalized
+import com.yoke.gainful.common.extensions.formatLocalizedDate
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.components.BottomBarHeight
 import com.yoke.gainful.ui.components.ConfirmDialog
@@ -387,10 +388,7 @@ private fun TradeCard(
         else -> stringResource(Res.string.dividend)
     }
     val amountPrefix = if (isBuy) "-" else "+"
-    val dateStr = Instant.fromEpochMilliseconds(trade.tradeDate)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .date
-        .toString()
+    val dateStr = trade.tradeDate.formatLocalizedDate()
 
     Column(
         modifier = Modifier
@@ -458,7 +456,7 @@ private fun TradeCard(
                 horizontalAlignment = Alignment.End,
             ) {
                 Text(
-                    text = "$amountPrefix${trade.displayAmount.formatDecimal(2)}",
+                    text = "$amountPrefix${trade.displayAmount.formatLocalized()}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
@@ -517,7 +515,7 @@ private fun TradeCard(
                             color = TextMuted,
                         )
                         Text(
-                            text = trade.price.formatDecimal(2),
+                            text = trade.price.formatLocalized(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,
@@ -534,7 +532,7 @@ private fun TradeCard(
                             color = TextMuted,
                         )
                         Text(
-                            text = trade.fee.formatDecimal(2),
+                            text = trade.fee.formatLocalized(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,

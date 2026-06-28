@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.common.extensions.formatDecimal
+import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.HoldingDisplay
 import gainful.feature.dashboard.generated.resources.Res
@@ -164,7 +164,7 @@ private fun SummaryCard(state: DashboardUiState) {
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Text(
-                text = if (totalGain >= 0) "+${totalGain.formatDecimal(2)}" else totalGain.formatDecimal(2),
+                text = totalGain.formatSigned(),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = if (totalGain >= 0) Gold else lossColor,
@@ -186,12 +186,12 @@ private fun SummaryCard(state: DashboardUiState) {
         ) {
             DetailText(
                 stringResource(Res.string.total_market_value_label),
-                totalValue.formatDecimal(2),
+                totalValue.formatLocalized(),
                 Modifier.alignByBaseline(),
             )
             DetailText(
                 stringResource(Res.string.total_cost_label),
-                totalCost.formatDecimal(2),
+                totalCost.formatLocalized(),
                 Modifier.alignByBaseline(),
             )
         }
@@ -391,12 +391,12 @@ private fun MetricsSection(state: DashboardUiState) {
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_assets),
-                value = totalValue.formatDecimal(2),
+                value = totalValue.formatLocalized(),
             )
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_cost),
-                value = totalCost.formatDecimal(2),
+                value = totalCost.formatLocalized(),
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -407,7 +407,7 @@ private fun MetricsSection(state: DashboardUiState) {
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_profit),
-                value = if (totalGain >= 0) "+${totalGain.formatDecimal(2)}" else totalGain.formatDecimal(2),
+                value = totalGain.formatSigned(),
                 valueColor = if (totalGain >= 0) gainColor else lossColor,
             )
             MetricCard(
@@ -519,7 +519,7 @@ private fun HoldingsOverviewCard(holdings: List<HoldingDisplay>) {
             SummaryBadge(stringResource(Res.string.holdings_quantity_label), "${holdings.size}")
             SummaryBadge(
                 stringResource(Res.string.total_pnl_label),
-                if (totalGain >= 0) "+${totalGain.formatDecimal(2)}" else totalGain.formatDecimal(2),
+                totalGain.formatSigned(),
                 isPositive = totalGain >= 0,
             )
         }
@@ -542,7 +542,7 @@ private fun HoldingRow(name: String, gain: Double) {
             color = TextPrimary,
         )
         Text(
-            text = if (gain >= 0) "+${gain.formatDecimal(2)}" else gain.formatDecimal(2),
+            text = gain.formatSigned(),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = if (gain >= 0) gainColor else lossColor,

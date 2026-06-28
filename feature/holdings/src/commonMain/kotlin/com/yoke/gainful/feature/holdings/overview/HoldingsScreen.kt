@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
-import com.yoke.gainful.common.extensions.formatDecimal
+import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
@@ -163,7 +163,7 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = totalValue.formatDecimal(2),
+            text = totalValue.formatLocalized(),
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
             color = TextPrimary,
@@ -175,7 +175,7 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = if (totalPnl >= 0) "+${totalPnl.formatDecimal(2)}" else totalPnl.formatDecimal(2),
+                text = totalPnl.formatSigned(),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
@@ -304,7 +304,7 @@ private fun HeatmapItem(
             }
             Column {
                 Text(
-                    text = "${pct.formatDecimal(2)}%",
+                    text = "${pct.formatLocalized()}%",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.Monospace,
@@ -368,7 +368,7 @@ private fun HoldingCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = holding.currentPrice.formatDecimal(2),
+                    text = holding.currentPrice.formatLocalized(),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
@@ -390,8 +390,8 @@ private fun HoldingCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatDecimal(2))
-                MetaText(stringResource(Res.string.cost), holding.averageCost.formatDecimal(2))
+                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatLocalized())
+                MetaText(stringResource(Res.string.cost), holding.averageCost.formatLocalized())
                 MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}")
             }
             Spacer(modifier = Modifier.height(2.dp))
@@ -400,7 +400,7 @@ private fun HoldingCard(
             ) {
                 MetaText(
                     stringResource(Res.string.profit_loss),
-                    holding.totalGain.formatDecimal(2),
+                    holding.totalGain.formatLocalized(),
                     valueColor = if (holding.totalGain > 0) gainColor else lossColor,
                 )
             }
@@ -478,17 +478,17 @@ private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String, 
             ) {
                 MetaText(
                     stringResource(Res.string.liquidation_price),
-                    position.lastSellPrice.formatDecimal(2),
+                    position.lastSellPrice.formatLocalized(),
                 )
                 MetaText(
                     stringResource(Res.string.profit_loss),
-                    position.realizedGainPercent.formatDecimal(2) + "%",
+                    position.realizedGainPercent.formatLocalized() + "%",
                     valueColor = if (isPositive) gainColor else lossColor,
                 )
             }
         }
         Text(
-            text = "${if (isPositive) "+" else ""}${position.realizedGain.formatDecimal(2)}",
+            text = "${if (isPositive) "+" else ""}${position.realizedGain.formatLocalized()}",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace,
