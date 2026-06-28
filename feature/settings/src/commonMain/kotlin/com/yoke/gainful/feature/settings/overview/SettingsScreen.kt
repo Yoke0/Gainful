@@ -19,8 +19,11 @@ import gainful.feature.settings.generated.resources.export_record_count
 import gainful.feature.settings.generated.resources.export_success
 import gainful.feature.settings.generated.resources.export_success_msg
 import gainful.feature.settings.generated.resources.export_transactions
+import gainful.feature.settings.generated.resources.file_name_label
 import gainful.feature.settings.generated.resources.gain_loss_color
 import gainful.feature.settings.generated.resources.gain_loss_color_title
+import gainful.feature.settings.generated.resources.gain_label
+import gainful.feature.settings.generated.resources.loss_label
 import gainful.feature.settings.generated.resources.import_transactions
 import gainful.feature.settings.generated.resources.minutes_format
 import gainful.feature.settings.generated.resources.open_time
@@ -249,7 +252,7 @@ private fun ExportDialog(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "文件名: $fileName.csv",
+                text = stringResource(Res.string.file_name_label, fileName),
                 fontSize = 14.sp,
                 color = TextMuted,
                 fontFamily = FontFamily.Monospace,
@@ -399,7 +402,7 @@ private fun ColorSettingRow(
                             .background(upColor),
                     )
                     Text(
-                        text = "涨",
+                        text = stringResource(Res.string.gain_label),
                         fontSize = 13.sp,
                         color = TextSecondary,
                     )
@@ -410,7 +413,7 @@ private fun ColorSettingRow(
                             .background(downColor),
                     )
                     Text(
-                        text = "跌",
+                        text = stringResource(Res.string.loss_label),
                         fontSize = 13.sp,
                         color = TextSecondary,
                     )
@@ -453,7 +456,7 @@ private fun ColorPickerDialog(
                     stringResource(Res.string.color_green_up)
                 }
 
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
@@ -466,17 +469,17 @@ private fun ColorPickerDialog(
                         )
                         .clickable { workingSelection = scheme }
                         .padding(vertical = 12.dp, horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = label,
                         fontSize = 15.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                         color = if (isSelected) Gold else TextPrimary,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     ) {
                         Text(
                             text = stringResource(Res.string.color_demo_up),

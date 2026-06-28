@@ -13,6 +13,9 @@
     <string name="gain_loss_color_title">涨跌颜色标识</string>
     <string name="color_red_up">红涨绿跌</string>
     <string name="color_green_up">绿涨红跌</string>
+    <string name="gain_label">涨</string>
+    <string name="loss_label">跌</string>
+    <string name="file_name_label">文件名: %1$s.csv</string>
     <string name="color_demo_up">▲ +2.5%%</string>
     <string name="color_demo_down">▼ -1.2%%</string>
     <string name="cancel">取消</string>

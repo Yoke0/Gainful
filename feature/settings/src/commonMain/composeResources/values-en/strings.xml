@@ -13,6 +13,9 @@
     <string name="gain_loss_color_title">Gain/Loss Color Scheme</string>
     <string name="color_red_up">Red Up, Green Down</string>
     <string name="color_green_up">Green Up, Red Down</string>
+    <string name="gain_label">Up</string>
+    <string name="loss_label">Down</string>
+    <string name="file_name_label">Filename: %1$s.csv</string>
     <string name="color_demo_up">▲ +2.5%%</string>
     <string name="color_demo_down">▼ -1.2%%</string>
     <string name="cancel">Cancel</string>
