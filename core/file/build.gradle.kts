@@ -35,6 +35,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
+            implementation(libs.compose.ui)
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
