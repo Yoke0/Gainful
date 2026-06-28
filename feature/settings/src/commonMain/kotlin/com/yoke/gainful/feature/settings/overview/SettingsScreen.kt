@@ -83,6 +83,12 @@ import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.ui.TimePickerDialog
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.stringArrayResource
 import gainful.feature.settings.generated.resources.csv_headers
@@ -189,7 +195,17 @@ fun SettingsScreen(
     }
 
     if (uiState.showTimePicker) {
+        val (initHour, initMinute) = when (uiState.timePickerTarget) {
+            TimePickerTarget.OPEN -> uiState.openHour to uiState.openMinute
+            TimePickerTarget.CLOSE -> uiState.closeHour to uiState.closeMinute
+        }
+        val initMillis = LocalDateTime(
+            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date,
+            LocalTime(initHour, initMinute)
+        ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+
         TimePickerDialog(
+            initialSelectedTimeMillis = initMillis,
             onTimeSelected = { hour, minute ->
                 when (uiState.timePickerTarget) {
                     TimePickerTarget.OPEN -> viewModel.onIntent(SettingsIntent.SetOpenTime(hour, minute))

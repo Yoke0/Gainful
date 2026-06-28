@@ -75,11 +75,13 @@ import gainful.core.ui.generated.resources.weekday_thursday
 import gainful.core.ui.generated.resources.weekday_tuesday
 import gainful.core.ui.generated.resources.weekday_wednesday
 import gainful.core.ui.generated.resources.year_month_format
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
@@ -272,7 +274,8 @@ internal fun CalendarGrid(
     onDayClick: (LocalDate) -> Unit,
 ) {
     val firstDayOfMonth = LocalDate(year, month + 1, 1)
-    val daysInMonth = LocalDate(year, month + 2, 1).day - 1
+    val firstDayOfNextMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH)
+    val daysInMonth = (firstDayOfNextMonth.toEpochDays() - firstDayOfMonth.toEpochDays()).toInt()
     val offset = firstDayOfMonth.dayOfWeek.ordinal
 
     Column(modifier = Modifier.animateContentSize()) {
