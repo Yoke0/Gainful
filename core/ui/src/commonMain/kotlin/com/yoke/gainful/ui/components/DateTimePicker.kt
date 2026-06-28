@@ -51,8 +51,6 @@ import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
 import gainful.core.ui.generated.resources.confirm
 import gainful.core.ui.generated.resources.date_format
-import gainful.core.ui.generated.resources.hour_label
-import gainful.core.ui.generated.resources.minute_label
 import gainful.core.ui.generated.resources.month_1
 import gainful.core.ui.generated.resources.month_10
 import gainful.core.ui.generated.resources.month_11
@@ -276,34 +274,12 @@ fun DateTimePickerDialog(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                WheelColumn(
-                    label = stringResource(Res.string.hour_label),
-                    valueRange = 0..23,
-                    initialValue = workingHour,
-                    onValueChanged = { workingHour = it },
-                )
-
-                Text(
-                    text = ":",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextSecondary,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                )
-
-                WheelColumn(
-                    label = stringResource(Res.string.minute_label),
-                    valueRange = 0..59,
-                    initialValue = workingMinute,
-                    onValueChanged = { workingMinute = it },
-                )
-            }
+            TimePickerWheel(
+                workingHour = workingHour,
+                workingMinute = workingMinute,
+                onHourChanged = { workingHour = it },
+                onMinuteChanged = { workingMinute = it },
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 

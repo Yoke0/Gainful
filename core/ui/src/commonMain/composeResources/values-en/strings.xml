@@ -2,8 +2,6 @@
     <string name="select_time">Select time</string>
     <string name="select_date">Select date</string>
     <string name="select_datetime">Select date and time</string>
-    <string name="hour_label">H</string>
-    <string name="minute_label">M</string>
     <string name="now">Now</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>

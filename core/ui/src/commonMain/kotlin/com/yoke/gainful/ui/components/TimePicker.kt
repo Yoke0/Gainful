@@ -43,8 +43,6 @@ import com.yoke.gainful.ui.theme.Background
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
 import gainful.core.ui.generated.resources.confirm
-import gainful.core.ui.generated.resources.hour_label
-import gainful.core.ui.generated.resources.minute_label
 import gainful.core.ui.generated.resources.now
 import gainful.core.ui.generated.resources.select_time
 import org.jetbrains.compose.resources.stringResource
@@ -69,6 +67,41 @@ import kotlin.time.Instant
 internal val TimeItemHeight = 44.dp
 internal const val VisibleItems = 5
 internal const val HalfVisible = VisibleItems / 2
+
+@Composable
+internal fun TimePickerWheel(
+    workingHour: Int,
+    workingMinute: Int,
+    onHourChanged: (Int) -> Unit,
+    onMinuteChanged: (Int) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        WheelColumn(
+            valueRange = 0..23,
+            initialValue = workingHour,
+            onValueChanged = onHourChanged,
+        )
+
+        Text(
+            text = ":",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextSecondary,
+            fontFamily = FontFamily.Monospace,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+
+        WheelColumn(
+            valueRange = 0..59,
+            initialValue = workingMinute,
+            onValueChanged = onMinuteChanged,
+        )
+    }
+}
 
 @Composable
 fun TimePickerField(
@@ -156,34 +189,12 @@ fun TimePickerDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                WheelColumn(
-                    label = stringResource(Res.string.hour_label),
-                    valueRange = 0..23,
-                    initialValue = workingHour,
-                    onValueChanged = { workingHour = it },
-                )
-
-                Text(
-                    text = ":",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextSecondary,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                )
-
-                WheelColumn(
-                    label = stringResource(Res.string.minute_label),
-                    valueRange = 0..59,
-                    initialValue = workingMinute,
-                    onValueChanged = { workingMinute = it },
-                )
-            }
+            TimePickerWheel(
+                workingHour = workingHour,
+                workingMinute = workingMinute,
+                onHourChanged = { workingHour = it },
+                onMinuteChanged = { workingMinute = it },
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -217,7 +228,6 @@ fun TimePickerDialog(
 
 @Composable
 internal fun WheelColumn(
-    label: String,
     valueRange: IntRange,
     initialValue: Int,
     onValueChanged: (Int) -> Unit,
@@ -256,79 +266,68 @@ internal fun WheelColumn(
         onValueChanged(currentValue)
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = label,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextMuted,
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
+    Box(
+        modifier = Modifier
+            .width(96.dp)
+            .height(TimeItemHeight * VisibleItems)
+            .clip(RoundedCornerShape(10.dp))
+            .background(Surface)
+            .border(1.dp, Border, RoundedCornerShape(10.dp)),
+    ) {
         Box(
             modifier = Modifier
-                .width(96.dp)
-                .height(TimeItemHeight * VisibleItems)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp)),
+                .fillMaxWidth()
+                .height(TimeItemHeight)
+                .align(Alignment.Center)
+                .background(GoldDim)
+                .drawBehind {
+                    val stroke = 1.dp.toPx()
+                    drawLine(
+                        color = Gold,
+                        start = Offset(0f, stroke / 2),
+                        end = Offset(size.width, stroke / 2),
+                        strokeWidth = stroke,
+                    )
+                    drawLine(
+                        color = Gold,
+                        start = Offset(0f, size.height - stroke / 2),
+                        end = Offset(size.width, size.height - stroke / 2),
+                        strokeWidth = stroke,
+                    )
+                },
+        )
+
+        LazyColumn(
+            state = listState,
+            flingBehavior = snapBehavior,
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(TimeItemHeight)
-                    .align(Alignment.Center)
-                    .background(GoldDim)
-                    .drawBehind {
-                        val stroke = 1.dp.toPx()
-                        drawLine(
-                            color = Gold,
-                            start = Offset(0f, stroke / 2),
-                            end = Offset(size.width, stroke / 2),
-                            strokeWidth = stroke,
-                        )
-                        drawLine(
-                            color = Gold,
-                            start = Offset(0f, size.height - stroke / 2),
-                            end = Offset(size.width, size.height - stroke / 2),
-                            strokeWidth = stroke,
-                        )
-                    },
-            )
+            items(totalItems) { index ->
+                val valueIndex = index % itemCount
+                val value = valueIndex + valueRange.first
 
-            LazyColumn(
-                state = listState,
-                flingBehavior = snapBehavior,
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                items(totalItems) { index ->
-                    val valueIndex = index % itemCount
-                    val value = valueIndex + valueRange.first
+                val distance = abs(index - centerIndex).toFloat()
+                val t = (distance / 2f).coerceIn(0f, 1f)
 
-                    val distance = abs(index - centerIndex).toFloat()
-                    val t = (distance / 2f).coerceIn(0f, 1f)
+                val fontSize = (24f - (24f - 16f) * t).sp
+                val fontWeight = if (distance < 0.5f) FontWeight.Bold else FontWeight.Medium
+                val alpha = 1f - 0.6f * t
+                val color = if (distance < 0.5f) TextPrimary else TextSecondary
 
-                    val fontSize = (24f - (24f - 16f) * t).sp
-                    val fontWeight = if (distance < 0.5f) FontWeight.Bold else FontWeight.Medium
-                    val alpha = 1f - 0.6f * t
-                    val color = if (distance < 0.5f) TextPrimary else TextSecondary
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(TimeItemHeight),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = value.pad2(),
-                            fontSize = fontSize,
-                            fontWeight = fontWeight,
-                            fontFamily = FontFamily.Monospace,
-                            color = color.copy(alpha = alpha),
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(TimeItemHeight),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = value.pad2(),
+                        fontSize = fontSize,
+                        fontWeight = fontWeight,
+                        fontFamily = FontFamily.Monospace,
+                        color = color.copy(alpha = alpha),
+                    )
                 }
             }
         }

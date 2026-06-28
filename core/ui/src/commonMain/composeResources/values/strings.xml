@@ -2,8 +2,6 @@
     <string name="select_time">选择时间</string>
     <string name="select_date">选择日期</string>
     <string name="select_datetime">选择日期和时间</string>
-    <string name="hour_label">时</string>
-    <string name="minute_label">分</string>
     <string name="now">现在</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
