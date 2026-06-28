@@ -157,21 +157,77 @@ android screen capture -o /tmp/s.png
 
 ## UI Components
 
-Reusable composables in `core/ui/src/commonMain/kotlin/com/yoke/gainful/ui/components/`:
+Reusable composables in `core/ui/src/commonMain/kotlin/com/yoke/gainful/ui/`:
 
-- **Button.kt** — `NavButton`, `PrimaryButton`, `SecondaryButton`, `SelectChip`, `SquareIconButton`
-- **Dialog.kt** — `GainfulDialog`, `ConfirmDialog`
-- **TopAppBar.kt** — `GainfulTopAppBar`
-- **BottomBar.kt** — `BottomBar`
-- **DatePicker.kt** — `DatePickerField`, `CalendarDialog`, `CalendarGrid`
-- **TimePicker.kt** — `TimePickerField`, `TimePickerDialog`
-- **DateTimePicker.kt** — `DateTimePickerField`, `DateTimePickerDialog`
-- **Loading.kt** — `LoadingIndicator`
+- **ScreenScaffold.kt** — `GainfulScaffold` (common screen layout with optional top bar)
+- **components/BottomBar.kt** — `BottomBar`, `Modifier.bottomBarPadding()`
+- **components/Button.kt** — `NavButton`, `PrimaryButton`, `SecondaryButton`, `SelectChip`, `SquareIconButton`
+- **components/Dialog.kt** — `GainfulDialog`, `ConfirmDialog`
+- **components/TopAppBar.kt** — `GainfulTopAppBar`
+- **components/DatePicker.kt** — `DatePickerField`, `CalendarDialog`, `CalendarGrid`
+- **components/TimePicker.kt** — `TimePickerField`, `TimePickerDialog`
+- **components/DateTimePicker.kt** — `DateTimePickerField`, `DateTimePickerDialog`
+- **components/Loading.kt** — `LoadingIndicator`
 - **TransactionCard.kt** — `TransactionCard`
-- **GainText.kt** — `SectionLabel`
-- **NavIcons.kt** — `BackNavigationIcon`, nav icons
+- **components/NavIcons.kt** — `BackNavigationIcon`, nav icons
 
 Button naming follows Material3 conventions: `PrimaryButton` (filled), `SecondaryButton` (outlined), `NavButton` (circular icon), `SelectChip` (toggleable chip), `SquareIconButton` (square icon).
+
+## Screen Composition
+
+### Structure: Two Overloaded Methods
+
+Each screen has two composable functions with the same name:
+
+```kotlin
+// 1. Data handling — collects state, binds ViewModel
+@Composable
+fun XxxScreen(viewModel: XxxViewModel, onBack: () -> Unit) {
+    val uiState by viewModel.uiState.collectAsState()
+    // LaunchedEffect, callbacks...
+    XxxScreen(uiState = uiState, onIntent = viewModel::onIntent, onBack = onBack)
+}
+
+// 2. Pure layout — no ViewModel dependency
+@Composable
+private fun XxxScreen(uiState: XxxUiState, onIntent: (XxxIntent) -> Unit, onBack: () -> Unit) {
+    GainfulScaffold(appTopBar = { ... }) {
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            // content blocks
+        }
+    }
+}
+```
+
+### Outer Container: GainfulScaffold
+
+```kotlin
+GainfulScaffold(
+    modifier = Modifier,            // default: Modifier.padding(horizontal = 16.dp)
+    appTopBar = { GainfulTopAppBar(title = "...", navigationIcon = { ... }, actions = { ... }) },
+    content: @Composable ColumnScope.() -> Unit,
+)
+```
+
+- `appTopBar` is optional — omit when no top bar needed (e.g., Loading/Error states)
+- `modifier` defaults to horizontal padding; callers override for additional modifiers
+- Located in `core/ui/ScreenScaffold.kt`
+
+### Inner Column
+
+- Use `verticalArrangement = Arrangement.spacedBy(14.dp)` for spacing between sections
+- Do NOT use `Spacer` for inter-section spacing — use `spacedBy` only
+- Use `Modifier.verticalScroll(rememberScrollState())` for scrollable content
+
+### Bottom Bar Padding
+
+- Use `Modifier.bottomBarPadding()` on the last content element
+- Defined in `core/designsystem/components/BottomBar.kt`
+- Do NOT use `Spacer(modifier = Modifier.height(BottomBarHeight))` — use the modifier instead
+- Omit when no bottom bar offset needed (e.g., detail screens)
 
 ## Gotchas
 

@@ -124,6 +124,7 @@ Gainful/
 
 | Component | File | Description |
 |-----------|------|-------------|
+| `GainfulScaffold` | `ScreenScaffold.kt` | Common screen layout container (optional top bar) |
 | `NavButton` | `Button.kt` | Circular navigation button (‹ ›) |
 | `PrimaryButton` | `Button.kt` | Filled button (customizable color) |
 | `SecondaryButton` | `Button.kt` | Outlined button |
@@ -132,13 +133,12 @@ Gainful/
 | `GainfulDialog` | `Dialog.kt` | Generic dialog container (title + content + buttons) |
 | `ConfirmDialog` | `Dialog.kt` | Confirm dialog (customizable confirm button color) |
 | `GainfulTopAppBar` | `TopAppBar.kt` | Top navigation bar |
-| `BottomBar` | `BottomBar.kt` | Bottom navigation bar |
+| `BottomBar` / `Modifier.bottomBarPadding()` | `BottomBar.kt` | Bottom navigation bar / bottom padding modifier |
 | `DatePickerField` / `CalendarDialog` | `DatePicker.kt` | Date picker |
 | `TimePickerField` / `TimePickerDialog` | `TimePicker.kt` | Time picker |
 | `DateTimePickerField` / `DateTimePickerDialog` | `DateTimePicker.kt` | Date-time picker |
 | `LoadingIndicator` | `Loading.kt` | Loading state indicator |
 | `TransactionCard` | `TransactionCard.kt` | Transaction card |
-| `SectionLabel` | `GainText.kt` | Section label |
 | `BackNavigationIcon` / `NavIcons` | `NavIcons.kt` | Navigation icons |
 
 ### Testing

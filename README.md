@@ -125,6 +125,7 @@ Gainful/
 
 | 组件 | 文件 | 说明 |
 |------|------|------|
+| `GainfulScaffold` | `ScreenScaffold.kt` | 通用页面布局容器（可选顶栏） |
 | `NavButton` | `Button.kt` | 圆形导航按钮（‹ ›） |
 | `PrimaryButton` | `Button.kt` | 填充按钮（支持自定义颜色） |
 | `SecondaryButton` | `Button.kt` | 描边按钮 |
@@ -133,13 +134,12 @@ Gainful/
 | `GainfulDialog` | `Dialog.kt` | 通用对话框容器（title + content + buttons） |
 | `ConfirmDialog` | `Dialog.kt` | 确认对话框（支持自定义确认按钮颜色） |
 | `GainfulTopAppBar` | `TopAppBar.kt` | 顶部导航栏 |
-| `BottomBar` | `BottomBar.kt` | 底部导航栏 |
+| `BottomBar` / `Modifier.bottomBarPadding()` | `BottomBar.kt` | 底部导航栏 / 底部间距修饰符 |
 | `DatePickerField` / `CalendarDialog` | `DatePicker.kt` | 日期选择器 |
 | `TimePickerField` / `TimePickerDialog` | `TimePicker.kt` | 时间选择器 |
 | `DateTimePickerField` / `DateTimePickerDialog` | `DateTimePicker.kt` | 日期时间选择器 |
 | `LoadingIndicator` | `Loading.kt` | 加载状态指示器 |
 | `TransactionCard` | `TransactionCard.kt` | 交易卡片 |
-| `SectionLabel` | `GainText.kt` | 分区标签 |
 | `BackNavigationIcon` / `NavIcons` | `NavIcons.kt` | 导航图标 |
 
 ### 测试
