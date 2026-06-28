@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,10 +34,12 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatLocalized
+import com.yoke.gainful.common.extensions.formatLocalizedDate
 import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
@@ -44,6 +47,7 @@ import com.yoke.gainful.ui.components.BackNavigationIcon
 import com.yoke.gainful.ui.components.DateTimePickerDialog
 import com.yoke.gainful.ui.components.DateTimePickerField
 import com.yoke.gainful.ui.components.GainfulTopAppBar
+import com.yoke.gainful.ui.components.PrimaryButton
 import com.yoke.gainful.ui.components.SelectChip
 import com.yoke.gainful.ui.components.SquareIconButton
 import com.yoke.gainful.ui.theme.Background
@@ -65,6 +69,8 @@ import gainful.feature.transactions.generated.resources.Res
 import gainful.feature.transactions.generated.resources.add_transaction_title
 import gainful.feature.transactions.generated.resources.asset_section
 import gainful.feature.transactions.generated.resources.buy
+import gainful.feature.transactions.generated.resources.buy_amount_hint
+import gainful.feature.transactions.generated.resources.buy_fee_hint
 import gainful.feature.transactions.generated.resources.dividend
 import gainful.feature.transactions.generated.resources.dividend_amount
 import gainful.feature.transactions.generated.resources.dividend_amount_hint
@@ -76,10 +82,13 @@ import gainful.feature.transactions.generated.resources.fee_label
 import gainful.feature.transactions.generated.resources.holding_badge
 import gainful.feature.transactions.generated.resources.no_match_stock
 import gainful.feature.transactions.generated.resources.no_selection
+import gainful.feature.transactions.generated.resources.quantity_format
 import gainful.feature.transactions.generated.resources.quantity_unit
 import gainful.feature.transactions.generated.resources.save
 import gainful.feature.transactions.generated.resources.search_stock_placeholder
 import gainful.feature.transactions.generated.resources.sell
+import gainful.feature.transactions.generated.resources.sell_amount_hint
+import gainful.feature.transactions.generated.resources.sell_fee_hint
 import gainful.feature.transactions.generated.resources.summary_amount
 import gainful.feature.transactions.generated.resources.summary_asset
 import gainful.feature.transactions.generated.resources.summary_date
@@ -87,14 +96,11 @@ import gainful.feature.transactions.generated.resources.summary_fee
 import gainful.feature.transactions.generated.resources.summary_pnl
 import gainful.feature.transactions.generated.resources.summary_type
 import gainful.feature.transactions.generated.resources.trade_amount
-import gainful.feature.transactions.generated.resources.trade_amount_placeholder
 import gainful.feature.transactions.generated.resources.trade_date
 import gainful.feature.transactions.generated.resources.trade_details_section
 import gainful.feature.transactions.generated.resources.trade_price
 import gainful.feature.transactions.generated.resources.trade_quantity
 import gainful.feature.transactions.generated.resources.transaction_summary
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -213,25 +219,16 @@ private fun AddTransactionHeader(
     isEnabled: Boolean = true,
     onSave: () -> Unit,
 ) {
-    val saveAlpha = if (isEnabled) 1f else 0.4f
     GainfulTopAppBar(
         title = stringResource(Res.string.add_transaction_title),
+        modifier = Modifier.padding(horizontal = 16.dp),
         navigationIcon = { BackNavigationIcon(onClick = onBack) },
         actions = {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(Gold.copy(alpha = saveAlpha))
-                    .clickable(enabled = isEnabled, onClick = onSave)
-                    .padding(horizontal = 18.dp, vertical = 6.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.save),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Background,
-                )
-            }
+            PrimaryButton(
+                label = stringResource(Res.string.save),
+                enabled = isEnabled,
+                onClick = onSave,
+            )
         },
     )
 }
@@ -658,7 +655,7 @@ private fun HoldingChip(
             color = TextSecondary,
         )
         Text(
-            text = "${holding.quantity.formatQuantity()} 股",
+            text = stringResource(Res.string.quantity_format, holding.quantity.formatQuantity()),
             fontSize = 10.sp,
             color = TextMuted,
             fontFamily = FontFamily.Monospace,
@@ -689,14 +686,13 @@ private fun TradeFields(
     feeError: Boolean = false,
 ) {
     val isBuy = type == TransactionType.BUY
-    val amountHint = if (isBuy) "实际成交总金额（已含手续费）" else "实际到账金额（已扣手续费）"
-    val feePlaceholder = if (isBuy) "= 金额 − 价×量" else "= 价×量 − 金额"
-    val feeHint = if (isBuy) "手续费 = 成交金额 − 成交价 × 成交量" else "手续费 = 成交价 × 成交量 − 成交金额"
-    val decimalKeyboard = androidx.compose.foundation.text.KeyboardOptions(
-        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+    val amountHint = if (isBuy) stringResource(Res.string.buy_amount_hint) else stringResource(Res.string.sell_amount_hint)
+    val feeHint = if (isBuy) stringResource(Res.string.buy_fee_hint) else stringResource(Res.string.sell_fee_hint)
+    val decimalKeyboard = KeyboardOptions(
+        keyboardType = KeyboardType.Decimal
     )
-    val integerKeyboard = androidx.compose.foundation.text.KeyboardOptions(
-        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+    val integerKeyboard = KeyboardOptions(
+        keyboardType = KeyboardType.Number
     )
 
     SectionLabel(stringResource(Res.string.trade_details_section))
@@ -709,8 +705,7 @@ private fun TradeFields(
             label = stringResource(Res.string.trade_amount),
             value = amount,
             onValueChange = onAmountChanged,
-            prefix = "¥",
-            placeholder = stringResource(Res.string.trade_amount_placeholder),
+            placeholder = "0.00",
             modifier = Modifier.weight(1f),
             hint = amountHint,
             isError = amountError,
@@ -720,8 +715,7 @@ private fun TradeFields(
             label = stringResource(Res.string.fee_label),
             value = fee,
             onValueChange = {},
-            prefix = "¥",
-            placeholder = feePlaceholder,
+            placeholder = "0.00",
             readOnly = true,
             modifier = Modifier.weight(1f),
             hint = feeHint,
@@ -739,7 +733,6 @@ private fun TradeFields(
             label = stringResource(Res.string.trade_price),
             value = price,
             onValueChange = onPriceChanged,
-            prefix = "¥",
             placeholder = "0.00",
             modifier = Modifier.weight(1f),
             isError = priceError,
@@ -774,8 +767,8 @@ private fun DividendFields(
     onDateClicked: () -> Unit,
     amountError: Boolean = false,
 ) {
-    val decimalKeyboard = androidx.compose.foundation.text.KeyboardOptions(
-        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+    val decimalKeyboard = KeyboardOptions(
+        keyboardType = KeyboardType.Decimal
     )
 
     SectionLabel(stringResource(Res.string.dividend_details_section))
@@ -784,7 +777,6 @@ private fun DividendFields(
         label = stringResource(Res.string.dividend_amount),
         value = amount,
         onValueChange = onAmountChanged,
-        prefix = "¥",
         placeholder = stringResource(Res.string.dividend_amount_placeholder),
         modifier = Modifier.fillMaxWidth(),
         hint = stringResource(Res.string.dividend_amount_hint),
@@ -813,7 +805,7 @@ private fun FormField(
     readOnly: Boolean = false,
     hint: String? = null,
     isError: Boolean = false,
-    keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     val borderColor = if (isError) GainRed else Border
     Column(modifier = modifier) {
@@ -905,9 +897,9 @@ private fun TransactionSummary(
     val amountVal = amount.toDoubleOrNull() ?: 0.0
     val pnlText = when {
         amountVal <= 0 -> "—"
-        type == TransactionType.SELL -> "+¥${amountVal.formatLocalized()}"
-        type == TransactionType.DIVIDEND -> "+¥${amountVal.formatLocalized()}"
-        else -> "-¥${amountVal.formatLocalized()}"
+        type == TransactionType.SELL -> "+${amountVal.formatLocalized()}"
+        type == TransactionType.DIVIDEND -> "+${amountVal.formatLocalized()}"
+        else -> "-${amountVal.formatLocalized()}"
     }
     val pnlColor = when {
         amountVal <= 0 -> TextPrimary
@@ -945,12 +937,12 @@ private fun TransactionSummary(
             Row(modifier = Modifier.fillMaxWidth()) {
                 SummaryItem(
                     stringResource(Res.string.summary_amount),
-                    if (amountVal > 0) "¥${amountVal.formatLocalized()}" else "—",
+                    if (amountVal > 0) amountVal.formatLocalized() else "—",
                     Modifier.weight(1f),
                 )
                 SummaryItem(
                     stringResource(Res.string.summary_fee),
-                    if (fee.isNotBlank() && fee != "0.00") "¥$fee" else "—",
+                    if (fee.isNotBlank() && fee != "0.00") fee else "—",
                     Modifier.weight(1f),
                 )
             }
@@ -958,10 +950,7 @@ private fun TransactionSummary(
                 SummaryItem(stringResource(Res.string.summary_pnl), pnlText, Modifier.weight(1f), valueColor = pnlColor)
                 SummaryItem(
                     stringResource(Res.string.summary_date),
-                    run {
-                        val dt = kotlin.time.Instant.fromEpochMilliseconds(dateTimeMillis).toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                        "${dt.date.year}-${dt.date.month.number.toString().padStart(2, '0')}-${dt.date.day.toString().padStart(2, '0')}"
-                    },
+                    dateTimeMillis.formatLocalizedDate(),
                     Modifier.weight(1f),
                 )
             }

@@ -93,9 +93,4 @@ data class TransactionItem(
         TransactionType.SELL -> amount
         TransactionType.DIVIDEND -> amount
     }
-    val typeLabel: String get() = when (type) {
-        TransactionType.BUY -> "买入"
-        TransactionType.SELL -> "卖出"
-        TransactionType.DIVIDEND -> "股息"
-    }
 }

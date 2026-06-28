@@ -69,20 +69,21 @@ fun PrimaryButton(
     label: String,
     modifier: Modifier = Modifier,
     color: Color = Gold,
-    fontSize: TextUnit = 15.sp,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     Box(
         modifier = modifier
             .height(36.dp)
             .clip(RoundedCornerShape(50))
-            .background(color)
-            .clickable(onClick = onClick),
+            .background(color.copy(alpha = if (enabled) 1f else 0.4f))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
-            fontSize = fontSize,
+            fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = Background,
         )
@@ -102,7 +103,8 @@ fun SecondaryButton(
             .clip(RoundedCornerShape(50))
             .background(Surface)
             .border(1.dp, Border, RoundedCornerShape(50))
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -198,6 +200,7 @@ fun ButtonPreview() {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PrimaryButton(label = "危险操作", modifier = Modifier.weight(1f), color = GainRed, onClick = {})
+                PrimaryButton(label = "禁用状态", modifier = Modifier.weight(1f), enabled = false, onClick = {})
             }
 
             Text(text = "SelectChip", fontSize = 13.sp, color = TextSecondary)

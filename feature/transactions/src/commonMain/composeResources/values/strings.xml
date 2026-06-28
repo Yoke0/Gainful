@@ -24,7 +24,6 @@
 
     <!-- Add Transaction -->
     <string name="add_transaction_title">新增交易</string>
-    <string name="back">返回</string>
     <string name="save">保存</string>
     <string name="asset_section">标的资产</string>
     <string name="no_selection">已选：无</string>
@@ -33,15 +32,13 @@
     <string name="holding_badge">持仓</string>
     <string name="existing_holdings">已有持仓</string>
     <string name="quantity_unit">股</string>
+    <string name="quantity_format">%1$d股</string>
     <string name="buy_amount_hint">实际成交总金额（已含手续费）</string>
     <string name="sell_amount_hint">实际到账金额（已扣手续费）</string>
-    <string name="buy_fee_placeholder">= 金额 − 价×量</string>
-    <string name="sell_fee_placeholder">= 价×量 − 金额</string>
     <string name="buy_fee_hint">手续费 = 成交金额 − 成交价 × 成交量</string>
     <string name="sell_fee_hint">手续费 = 成交价 × 成交量 − 成交金额</string>
     <string name="trade_details_section">交易详情</string>
     <string name="trade_amount">成交金额</string>
-    <string name="trade_amount_placeholder">输入实际成交总金额</string>
     <string name="fee_label">手续费（自动计算）</string>
     <string name="trade_price">成交价</string>
     <string name="trade_quantity">成交量</string>

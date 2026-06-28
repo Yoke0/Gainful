@@ -24,7 +24,6 @@
 
     <!-- Add Transaction -->
     <string name="add_transaction_title">New Transaction</string>
-    <string name="back">Back</string>
     <string name="save">Save</string>
     <string name="asset_section">Asset</string>
     <string name="no_selection">Selected: None</string>
@@ -33,15 +32,13 @@
     <string name="holding_badge">Holding</string>
     <string name="existing_holdings">Existing Holdings</string>
     <string name="quantity_unit">shares</string>
+    <string name="quantity_format">%1$d shares</string>
     <string name="buy_amount_hint">Actual trade amount (including fees)</string>
     <string name="sell_amount_hint">Actual received amount (after fees)</string>
-    <string name="buy_fee_placeholder">= Amount − Price×Qty</string>
-    <string name="sell_fee_placeholder">= Price×Qty − Amount</string>
     <string name="buy_fee_hint">Fee = Trade Amount − Price × Quantity</string>
     <string name="sell_fee_hint">Fee = Price × Quantity − Trade Amount</string>
     <string name="trade_details_section">Trade Details</string>
     <string name="trade_amount">Trade Amount</string>
-    <string name="trade_amount_placeholder">Enter actual trade amount</string>
     <string name="fee_label">Fee (auto-calculated)</string>
     <string name="trade_price">Trade Price</string>
     <string name="trade_quantity">Trade Quantity</string>

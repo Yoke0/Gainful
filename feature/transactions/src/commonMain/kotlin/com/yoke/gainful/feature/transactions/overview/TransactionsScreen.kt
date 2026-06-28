@@ -2,7 +2,6 @@ package com.yoke.gainful.feature.transactions.overview
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import com.yoke.gainful.ui.components.GainfulTopAppBar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -42,6 +41,8 @@ import com.yoke.gainful.common.extensions.formatLocalizedDate
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.components.BottomBarHeight
 import com.yoke.gainful.ui.components.ConfirmDialog
+import com.yoke.gainful.ui.components.GainfulTopAppBar
+import com.yoke.gainful.ui.components.PrimaryButton
 import com.yoke.gainful.ui.theme.Background
 import com.yoke.gainful.ui.theme.Border
 import com.yoke.gainful.ui.theme.Card
@@ -69,6 +70,7 @@ import gainful.feature.transactions.generated.resources.delete_confirm_text
 import gainful.feature.transactions.generated.resources.dividend
 import gainful.feature.transactions.generated.resources.no_trade_records_empty
 import gainful.feature.transactions.generated.resources.no_trade_records_hint
+import gainful.feature.transactions.generated.resources.quantity_format
 import gainful.feature.transactions.generated.resources.sell
 import gainful.feature.transactions.generated.resources.summary_buy
 import gainful.feature.transactions.generated.resources.summary_dividend
@@ -203,20 +205,10 @@ fun TransactionsScreen(
         GainfulTopAppBar(
             title = stringResource(Res.string.transactions_title),
             actions = {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Gold)
-                        .clickable(onClick = onAddTransaction)
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.add_button),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Background,
-                    )
-                }
+                PrimaryButton(
+                    label = stringResource(Res.string.add_button),
+                    onClick = onAddTransaction,
+                )
             },
         )
 
@@ -498,7 +490,7 @@ private fun TradeCard(
                             color = TextMuted,
                         )
                         Text(
-                            text = "${trade.quantity.toInt()} 股",
+                            text = stringResource(Res.string.quantity_format, trade.quantity.toInt()),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Monospace,
