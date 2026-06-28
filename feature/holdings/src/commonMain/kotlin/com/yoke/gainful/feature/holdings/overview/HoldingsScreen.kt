@@ -38,11 +38,8 @@ import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
-import com.yoke.gainful.model.ClosedPosition
-import com.yoke.gainful.model.HoldingDisplay
+import com.yoke.gainful.designsystem.components.bottomBarPadding
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
-import com.yoke.gainful.designsystem.components.BottomBarHeight
-import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Blue
 import com.yoke.gainful.designsystem.theme.BlueDark
 import com.yoke.gainful.designsystem.theme.Border
@@ -53,10 +50,12 @@ import com.yoke.gainful.designsystem.theme.GoldDark
 import com.yoke.gainful.designsystem.theme.GreenDim
 import com.yoke.gainful.designsystem.theme.Purple
 import com.yoke.gainful.designsystem.theme.PurpleDark
-import com.yoke.gainful.designsystem.theme.RedDim
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.model.ClosedPosition
+import com.yoke.gainful.model.HoldingDisplay
+import com.yoke.gainful.ui.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 import gainful.feature.holdings.generated.resources.Res
@@ -77,59 +76,64 @@ import kotlin.math.sin
 @Composable
 fun HoldingsScreen(
     viewModel: HoldingsViewModel,
-    onStockClick: (String, String, String) -> Unit = { _, _, _ -> },
+    onStockClick: (String, String, String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val totalValue = remember(uiState.holdings) {
-        uiState.holdings.sumOf { it.totalMarketValue }
-    }
-    val totalPnl = remember(uiState.holdings) {
-        uiState.holdings.sumOf { it.totalGain }
-    }
-    val totalPnlPct = remember(uiState.holdings) {
-        val totalBuys = uiState.holdings.sumOf { it.totalBuys }
-        if (totalBuys > 0) (totalPnl / totalBuys) * 100 else 0.0
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background)
-            .verticalScroll(rememberScrollState())
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        PortfolioHeader()
-
-        TotalCard(totalValue, totalPnl, totalPnlPct)
-
-        HeatmapCard(uiState.holdings, totalValue)
-
-        ListSection(
-            title = stringResource(Res.string.holdings_detail_header),
-            items = uiState.holdings.sortedByDescending { it.quantity },
-        ) { holding ->
-            HoldingCard(holding, onStockClick)
-        }
-
-        if (uiState.closedPositions.isNotEmpty()) {
-            ListSection(
-                title = stringResource(Res.string.closed_positions),
-                items = uiState.closedPositions,
-            ) { position ->
-                ClosedPositionItem(position, onStockClick)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(BottomBarHeight))
-    }
+    HoldingsScreen(
+        holdings = uiState.holdings,
+        closedPositions = uiState.closedPositions,
+        totalValue = uiState.totalValue,
+        totalPnl = uiState.totalPnl,
+        totalPnlPct = uiState.totalPnlPct,
+        onStockClick = onStockClick,
+    )
 }
 
 @Composable
-private fun PortfolioHeader() {
-    GainfulTopAppBar(title = stringResource(Res.string.holdings_title))
+private fun HoldingsScreen(
+    holdings: List<HoldingDisplay>,
+    closedPositions: List<ClosedPosition>,
+    totalValue: Double,
+    totalPnl: Double,
+    totalPnlPct: Double,
+    onStockClick: (String, String, String) -> Unit,
+) {
+    GainfulScaffold(
+        appTopBar = {
+            GainfulTopAppBar(title = stringResource(Res.string.holdings_title))
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            TotalCard(totalValue, totalPnl, totalPnlPct)
+
+            HeatmapCard(holdings, totalValue)
+
+            ListSection(
+                title = stringResource(Res.string.holdings_detail_header),
+                items = holdings.sortedByDescending { it.quantity },
+            ) { holding ->
+                HoldingCard(holding, onStockClick)
+            }
+
+            if (closedPositions.isNotEmpty()) {
+                ListSection(
+                    title = stringResource(Res.string.closed_positions),
+                    items = closedPositions,
+                ) { position ->
+                    ClosedPositionItem(position, onStockClick)
+                }
+            }
+
+            Spacer(modifier = Modifier.bottomBarPadding())
+        }
+    }
 }
 
 @Composable
@@ -146,9 +150,13 @@ private fun SectionHeader(title: String) {
 private fun <T> ListSection(
     title: String,
     items: List<T>,
+    modifier: Modifier = Modifier,
     itemContent: @Composable (T) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
         SectionHeader(title)
         items.forEach { itemContent(it) }
     }

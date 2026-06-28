@@ -38,12 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatLocalizedDate
-import com.yoke.gainful.model.TransactionType
-import com.yoke.gainful.designsystem.components.BottomBarHeight
 import com.yoke.gainful.designsystem.components.ConfirmDialog
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.PrimaryButton
-import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.components.bottomBarPadding
 import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
 import com.yoke.gainful.designsystem.theme.GainRed
@@ -54,6 +52,8 @@ import com.yoke.gainful.designsystem.theme.Surface2
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
@@ -116,29 +116,10 @@ fun TransactionsScreen(
     val deleteTarget = remember { mutableStateOf<TransactionItem?>(null) }
 
     if (showDeleteDialog.value && deleteTarget.value != null) {
-        val target = deleteTarget.value!!
-        val typeLabel = when (target.type) {
-            TransactionType.BUY -> stringResource(Res.string.buy)
-            TransactionType.SELL -> stringResource(Res.string.sell)
-            TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
-        }
-        val typeColor = when (target.type) {
-            TransactionType.BUY -> gainColor
-            TransactionType.SELL -> lossColor
-            else -> Gold
-        }
-        val typeBgColor = when (target.type) {
-            TransactionType.BUY -> gainDimColor
-            TransactionType.SELL -> lossDimColor
-            else -> GoldDim
-        }
-
-        ConfirmDialog(
-            title = stringResource(Res.string.confirm_delete),
-            confirmText = stringResource(Res.string.delete),
-            dismissText = stringResource(Res.string.cancel),
+        DeleteConfirmDialog(
+            target = deleteTarget.value!!,
             onConfirm = {
-                viewModel.onIntent(TransactionsIntent.DeleteTransaction(target.id))
+                viewModel.onIntent(TransactionsIntent.DeleteTransaction(it.id))
                 deleteTarget.value = null
                 showDeleteDialog.value = false
             },
@@ -146,129 +127,184 @@ fun TransactionsScreen(
                 showDeleteDialog.value = false
                 deleteTarget.value = null
             },
-            content = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.delete_confirm_text),
-                        fontSize = 14.sp,
-                        color = TextSecondary,
-                        textAlign = TextAlign.Center,
+        )
+    }
+
+    TransactionsScreen(
+        uiState = uiState,
+        filteredTrades = filteredTrades,
+        groups = groups,
+        groupOrder = groupOrder,
+        buyCount = buyCount,
+        sellCount = sellCount,
+        divCount = divCount,
+        onIntent = viewModel::onIntent,
+        onAddTransaction = onAddTransaction,
+        onDeleteTrade = { trade ->
+            deleteTarget.value = trade
+            showDeleteDialog.value = true
+        },
+    )
+}
+
+@Composable
+private fun TransactionsScreen(
+    uiState: TransactionsUiState,
+    filteredTrades: List<TransactionItem>,
+    groups: Map<Int, List<TransactionItem>>,
+    groupOrder: List<String>,
+    buyCount: Int,
+    sellCount: Int,
+    divCount: Int,
+    onIntent: (TransactionsIntent) -> Unit,
+    onAddTransaction: () -> Unit,
+    onDeleteTrade: (TransactionItem) -> Unit,
+) {
+    GainfulScaffold(
+        appTopBar = {
+            GainfulTopAppBar(
+                title = stringResource(Res.string.transactions_title),
+                actions = {
+                    PrimaryButton(
+                        label = stringResource(Res.string.add_button),
+                        onClick = onAddTransaction,
                     )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(typeBgColor)
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                        ) {
-                            Text(
-                                text = typeLabel,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = typeColor,
-                            )
+                },
+            )
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                FilterTab(stringResource(Res.string.all), uiState.filterType == null, null) {
+                    onIntent(TransactionsIntent.SetFilter(null))
+                }
+                FilterTab(stringResource(Res.string.buy), uiState.filterType == TransactionType.BUY, gainColor) {
+                    onIntent(TransactionsIntent.SetFilter(TransactionType.BUY))
+                }
+                FilterTab(stringResource(Res.string.sell), uiState.filterType == TransactionType.SELL, lossColor) {
+                    onIntent(TransactionsIntent.SetFilter(TransactionType.SELL))
+                }
+                FilterTab(stringResource(Res.string.dividend), uiState.filterType == TransactionType.DIVIDEND, Gold) {
+                    onIntent(TransactionsIntent.SetFilter(TransactionType.DIVIDEND))
+                }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                SummaryItem(stringResource(Res.string.summary_total), stringResource(Res.string.trade_count_unit, uiState.transactions.size))
+                SummaryItem(stringResource(Res.string.summary_buy), "$buyCount", gainColor)
+                SummaryItem(stringResource(Res.string.summary_sell), "$sellCount", lossColor)
+                SummaryItem(stringResource(Res.string.summary_dividend), "$divCount", Gold)
+            }
+
+            if (filteredTrades.isEmpty()) {
+                EmptyState()
+            } else {
+                groupOrder.forEachIndexed { index, groupName ->
+                    val items = groups[index]
+                    if (!items.isNullOrEmpty()) {
+                        TimeGroupHeader(groupName, items.size)
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items.forEach { trade ->
+                                TradeCard(
+                                    trade = trade,
+                                    onLongPress = { onDeleteTrade(trade) },
+                                )
+                            }
                         }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.bottomBarPadding())
+        }
+    }
+}
+
+@Composable
+private fun DeleteConfirmDialog(
+    target: TransactionItem,
+    onConfirm: (TransactionItem) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val typeLabel = when (target.type) {
+        TransactionType.BUY -> stringResource(Res.string.buy)
+        TransactionType.SELL -> stringResource(Res.string.sell)
+        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
+    }
+    val typeColor = when (target.type) {
+        TransactionType.BUY -> gainColor
+        TransactionType.SELL -> lossColor
+        else -> Gold
+    }
+    val typeBgColor = when (target.type) {
+        TransactionType.BUY -> gainDimColor
+        TransactionType.SELL -> lossDimColor
+        else -> GoldDim
+    }
+
+    ConfirmDialog(
+        title = stringResource(Res.string.confirm_delete),
+        confirmText = stringResource(Res.string.delete),
+        dismissText = stringResource(Res.string.cancel),
+        onConfirm = { onConfirm(target) },
+        onDismiss = onDismiss,
+        content = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.delete_confirm_text),
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    textAlign = TextAlign.Center,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(typeBgColor)
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    ) {
                         Text(
-                            text = target.name,
-                            fontSize = 14.sp,
+                            text = typeLabel,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
-                            fontFamily = FontFamily.Monospace,
-                            color = TextPrimary,
+                            color = typeColor,
                         )
                     }
                     Text(
-                        text = stringResource(Res.string.delete_confirm_suffix),
+                        text = target.name,
                         fontSize = 14.sp,
-                        color = TextSecondary,
-                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = FontFamily.Monospace,
+                        color = TextPrimary,
                     )
                 }
-            },
-        )
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background)
-            .verticalScroll(rememberScrollState())
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp),
-    ) {
-        GainfulTopAppBar(
-            title = stringResource(Res.string.transactions_title),
-            actions = {
-                PrimaryButton(
-                    label = stringResource(Res.string.add_button),
-                    onClick = onAddTransaction,
+                Text(
+                    text = stringResource(Res.string.delete_confirm_suffix),
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    textAlign = TextAlign.Center,
                 )
-            },
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            FilterTab(stringResource(Res.string.all), uiState.filterType == null, null) {
-                viewModel.onIntent(TransactionsIntent.SetFilter(null))
             }
-            FilterTab(stringResource(Res.string.buy), uiState.filterType == TransactionType.BUY, gainColor) {
-                viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.BUY))
-            }
-            FilterTab(stringResource(Res.string.sell), uiState.filterType == TransactionType.SELL, lossColor) {
-                viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.SELL))
-            }
-            FilterTab(stringResource(Res.string.dividend), uiState.filterType == TransactionType.DIVIDEND, Gold) {
-                viewModel.onIntent(TransactionsIntent.SetFilter(TransactionType.DIVIDEND))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            SummaryItem(stringResource(Res.string.summary_total), stringResource(Res.string.trade_count_unit, uiState.transactions.size))
-            SummaryItem(stringResource(Res.string.summary_buy), "$buyCount", gainColor)
-            SummaryItem(stringResource(Res.string.summary_sell), "$sellCount", lossColor)
-            SummaryItem(stringResource(Res.string.summary_dividend), "$divCount", Gold)
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (filteredTrades.isEmpty()) {
-            EmptyState()
-        } else {
-            groupOrder.forEachIndexed { index, groupName ->
-                val items = groups[index]
-                if (!items.isNullOrEmpty()) {
-                    TimeGroupHeader(groupName, items.size)
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items.forEach { trade ->
-                            TradeCard(
-                                trade = trade,
-                                onLongPress = {
-                                    deleteTarget.value = trade
-                                    showDeleteDialog.value = true
-                                },
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(BottomBarHeight))
-    }
+        },
+    )
 }
 
 @Composable
@@ -538,9 +574,9 @@ private fun TradeCard(
 }
 
 @Composable
-private fun EmptyState() {
+private fun EmptyState(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Card)

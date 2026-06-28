@@ -50,6 +50,7 @@
     <string name="dividend_date">Payment Date</string>
     <string name="transaction_summary">Transaction Summary</string>
     <string name="summary_type">Type</string>
+    <string name="type_label">Transaction Type</string>
     <string name="summary_asset">Asset</string>
     <string name="summary_amount">Amount</string>
     <string name="summary_pnl">P&amp;L</string>

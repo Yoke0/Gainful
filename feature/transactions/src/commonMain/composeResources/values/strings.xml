@@ -50,6 +50,7 @@
     <string name="dividend_date">到账日期</string>
     <string name="transaction_summary">交易概览</string>
     <string name="summary_type">类型</string>
+    <string name="type_label">交易类型</string>
     <string name="summary_asset">标的</string>
     <string name="summary_amount">金额</string>
     <string name="summary_pnl">盈亏</string>

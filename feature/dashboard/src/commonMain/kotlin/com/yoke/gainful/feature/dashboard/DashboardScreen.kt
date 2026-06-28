@@ -59,7 +59,8 @@ import gainful.feature.dashboard.generated.resources.total_pnl
 import gainful.feature.dashboard.generated.resources.total_pnl_label
 import gainful.feature.dashboard.generated.resources.total_profit
 import org.jetbrains.compose.resources.stringResource
-import com.yoke.gainful.designsystem.components.BottomBarHeight
+import com.yoke.gainful.designsystem.components.bottomBarPadding
+import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
@@ -70,9 +71,9 @@ import com.yoke.gainful.designsystem.theme.GoldLight
 import com.yoke.gainful.designsystem.theme.GridLine
 import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
-import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.ui.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 
@@ -82,60 +83,62 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background)
-            .verticalScroll(rememberScrollState())
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp),
-    ) {
-        GainfulTopAppBar(
-            title = stringResource(Res.string.dashboard_title),
-            actions = {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Card)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    DashboardScreen(uiState = uiState)
+}
+
+@Composable
+private fun DashboardScreen(
+    uiState: DashboardUiState,
+) {
+    GainfulScaffold(
+        appTopBar = {
+            GainfulTopAppBar(
+                title = stringResource(Res.string.dashboard_title),
+                actions = {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Card)
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(GainGreen),
-                        )
-                        Text(
-                            text = stringResource(Res.string.live_badge),
-                            fontSize = 12.sp,
-                            color = TextSecondary,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(GainGreen),
+                            )
+                            Text(
+                                text = stringResource(Res.string.live_badge),
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                            )
+                        }
                     }
-                }
-            },
-        )
+                },
+            )
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            SummaryCard(uiState)
 
-        Spacer(modifier = Modifier.height(16.dp))
+            ChartCard(uiState.holdings)
 
-        SummaryCard(uiState)
+            MetricsSection(uiState)
 
-        Spacer(modifier = Modifier.height(14.dp))
+            HoldingsOverviewCard(holdings = uiState.holdings)
 
-        ChartCard(uiState.holdings)
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        MetricsSection(uiState)
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        HoldingsOverviewCard(uiState.holdings)
-
-        Spacer(modifier = Modifier.height(BottomBarHeight))
+            Spacer(modifier = Modifier.bottomBarPadding())
+        }
     }
 }
 
@@ -378,13 +381,14 @@ private fun MetricsSection(state: DashboardUiState) {
     val totalGain = state.totalGain
     val totalGainPercent = state.totalGainPercent
 
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         Text(
             text = stringResource(Res.string.key_metrics),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = TextPrimary,
-            modifier = Modifier.padding(bottom = 12.dp),
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -401,7 +405,6 @@ private fun MetricsSection(state: DashboardUiState) {
                 value = totalCost.formatLocalized(),
             )
         }
-        Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -453,12 +456,15 @@ private fun MetricCard(
 }
 
 @Composable
-private fun HoldingsOverviewCard(holdings: List<HoldingDisplay>) {
+private fun HoldingsOverviewCard(
+    holdings: List<HoldingDisplay>,
+    modifier: Modifier = Modifier,
+) {
     val sorted = remember(holdings) { holdings.sortedByDescending { it.totalMarketValue } }
     val totalGain = remember(holdings) { holdings.sumOf { it.totalGain } }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Card)

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,15 +41,11 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatLocalizedDate
-import com.yoke.gainful.model.Asset
-import com.yoke.gainful.model.HoldingDisplay
-import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.designsystem.components.BackNavigationIcon
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.PrimaryButton
 import com.yoke.gainful.designsystem.components.SelectChip
 import com.yoke.gainful.designsystem.components.SquareIconButton
-import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
 import com.yoke.gainful.designsystem.theme.GainRed
@@ -59,8 +56,12 @@ import com.yoke.gainful.designsystem.theme.Surface2
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.model.Asset
+import com.yoke.gainful.model.HoldingDisplay
+import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.DateTimePickerDialog
 import com.yoke.gainful.ui.DateTimePickerField
+import com.yoke.gainful.ui.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
@@ -101,6 +102,7 @@ import gainful.feature.transactions.generated.resources.trade_details_section
 import gainful.feature.transactions.generated.resources.trade_price
 import gainful.feature.transactions.generated.resources.trade_quantity
 import gainful.feature.transactions.generated.resources.transaction_summary
+import gainful.feature.transactions.generated.resources.type_label
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -116,43 +118,59 @@ fun AddTransactionScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background),
-    ) {
-        AddTransactionHeader(
-            onBack = onBack,
-            isEnabled = uiState.canSave,
-            onSave = {
-                viewModel.onIntent(AddTransactionIntent.SaveTransaction)
+    AddTransactionScreen(
+        uiState = uiState,
+        onBack = onBack,
+        onIntent = viewModel::onIntent,
+        computeFee = viewModel::computeFee,
+    )
+
+    AnimatedVisibility(visible = uiState.showCalendar) {
+        DateTimePickerDialog(
+            initialSelectedDateTimeMillis = uiState.dateTimeMillis,
+            selectableToTodayOnly = true,
+            onDateTimeSelected = {
+                viewModel.onIntent(AddTransactionIntent.DateTimeChanged(it))
+                viewModel.onIntent(AddTransactionIntent.HideCalendar)
             },
+            onDismiss = { viewModel.onIntent(AddTransactionIntent.HideCalendar) },
         )
+    }
+}
 
-        AnimatedVisibility(visible = uiState.showCalendar) {
-            DateTimePickerDialog(
-                initialSelectedDateTimeMillis = uiState.dateTimeMillis,
-                selectableToTodayOnly = true,
-                onDateTimeSelected = {
-                    viewModel.onIntent(AddTransactionIntent.DateTimeChanged(it))
-                    viewModel.onIntent(AddTransactionIntent.HideCalendar)
+@Composable
+private fun AddTransactionScreen(
+    uiState: AddTransactionUiState,
+    onBack: () -> Unit,
+    onIntent: (AddTransactionIntent) -> Unit,
+    computeFee: () -> String,
+) {
+    GainfulScaffold(
+        appTopBar = {
+            GainfulTopAppBar(
+                title = stringResource(Res.string.add_transaction_title),
+                navigationIcon = { BackNavigationIcon(onClick = onBack) },
+                actions = {
+                    PrimaryButton(
+                        label = stringResource(Res.string.save),
+                        enabled = uiState.canSave,
+                        onClick = { onIntent(AddTransactionIntent.SaveTransaction) },
+                    )
                 },
-                onDismiss = { viewModel.onIntent(AddTransactionIntent.HideCalendar) },
             )
-        }
-
+        },
+    ) {
         Column(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 20.dp),
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             TypeSelector(
                 selectedType = uiState.type,
-                onTypeSelected = { viewModel.onIntent(AddTransactionIntent.SelectType(it)) },
+                onTypeSelected = { onIntent(AddTransactionIntent.SelectType(it)) },
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             AssetSelectorSection(
                 selectedAsset = uiState.selectedAsset,
@@ -162,35 +180,32 @@ fun AddTransactionScreen(
                 showSuggestions = uiState.showSuggestions,
                 holdings = uiState.holdings,
                 type = uiState.type,
-                onToggleSearch = { viewModel.onIntent(AddTransactionIntent.ToggleSearch) },
-                onQueryChanged = { viewModel.onIntent(AddTransactionIntent.SearchQueryChanged(it)) },
-                onAssetSelected = { viewModel.onIntent(AddTransactionIntent.SelectAsset(it)) },
-                onAssetSelectedFromHolding = { viewModel.onIntent(AddTransactionIntent.SelectAssetFromHolding(it)) },
-                onAssetCleared = { viewModel.onIntent(AddTransactionIntent.ClearAsset) },
+                onToggleSearch = { onIntent(AddTransactionIntent.ToggleSearch) },
+                onQueryChanged = { onIntent(AddTransactionIntent.SearchQueryChanged(it)) },
+                onAssetSelected = { onIntent(AddTransactionIntent.SelectAsset(it)) },
+                onAssetSelectedFromHolding = { onIntent(AddTransactionIntent.SelectAssetFromHolding(it)) },
+                onAssetCleared = { onIntent(AddTransactionIntent.ClearAsset) },
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            if (uiState.type == TransactionType.DIVIDEND) {
-                DividendFields(
+            when (uiState.type) {
+                TransactionType.DIVIDEND -> DividendFields(
                     amount = uiState.amount,
                     dateTimeMillis = uiState.dateTimeMillis,
-                    onAmountChanged = { viewModel.onIntent(AddTransactionIntent.AmountChanged(it)) },
-                    onDateClicked = { viewModel.onIntent(AddTransactionIntent.ShowCalendar) },
+                    onAmountChanged = { onIntent(AddTransactionIntent.AmountChanged(it)) },
+                    onDateClicked = { onIntent(AddTransactionIntent.ShowCalendar) },
                     amountError = uiState.amountError,
                 )
-            } else {
-                TradeFields(
+                else -> TradeFields(
                     type = uiState.type,
                     amount = uiState.amount,
                     price = uiState.price,
                     quantity = uiState.quantity,
-                    fee = viewModel.computeFee(),
+                    fee = computeFee(),
                     dateTimeMillis = uiState.dateTimeMillis,
-                    onAmountChanged = { viewModel.onIntent(AddTransactionIntent.AmountChanged(it)) },
-                    onPriceChanged = { viewModel.onIntent(AddTransactionIntent.PriceChanged(it)) },
-                    onQuantityChanged = { viewModel.onIntent(AddTransactionIntent.QuantityChanged(it)) },
-                    onDateClicked = { viewModel.onIntent(AddTransactionIntent.ShowCalendar) },
+                    onAmountChanged = { onIntent(AddTransactionIntent.AmountChanged(it)) },
+                    onPriceChanged = { onIntent(AddTransactionIntent.PriceChanged(it)) },
+                    onQuantityChanged = { onIntent(AddTransactionIntent.QuantityChanged(it)) },
+                    onDateClicked = { onIntent(AddTransactionIntent.ShowCalendar) },
                     amountError = uiState.amountError,
                     priceError = uiState.priceError,
                     quantityError = uiState.quantityError,
@@ -198,39 +213,15 @@ fun AddTransactionScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             TransactionSummary(
                 type = uiState.type,
                 asset = uiState.selectedAsset,
                 amount = uiState.amount,
-                fee = if (uiState.type != TransactionType.DIVIDEND) viewModel.computeFee() else "",
+                fee = if (uiState.type != TransactionType.DIVIDEND) computeFee() else "",
                 dateTimeMillis = uiState.dateTimeMillis,
             )
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
-}
-
-@Composable
-private fun AddTransactionHeader(
-    onBack: () -> Unit,
-    isEnabled: Boolean = true,
-    onSave: () -> Unit,
-) {
-    GainfulTopAppBar(
-        title = stringResource(Res.string.add_transaction_title),
-        modifier = Modifier.padding(horizontal = 16.dp),
-        navigationIcon = { BackNavigationIcon(onClick = onBack) },
-        actions = {
-            PrimaryButton(
-                label = stringResource(Res.string.save),
-                enabled = isEnabled,
-                onClick = onSave,
-            )
-        },
-    )
 }
 
 @Composable
@@ -238,37 +229,39 @@ private fun TypeSelector(
     selectedType: TransactionType,
     onTypeSelected: (TransactionType) -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        SelectChip(
-            label = stringResource(Res.string.buy),
-            icon = "📈",
-            isSelected = selectedType == TransactionType.BUY,
-            activeColor = gainColor,
-            activeBackground = gainDimColor,
-            modifier = Modifier.weight(1f),
-            onClick = { onTypeSelected(TransactionType.BUY) },
-        )
-        SelectChip(
-            label = stringResource(Res.string.sell),
-            icon = "📉",
-            isSelected = selectedType == TransactionType.SELL,
-            activeColor = lossColor,
-            activeBackground = lossDimColor,
-            modifier = Modifier.weight(1f),
-            onClick = { onTypeSelected(TransactionType.SELL) },
-        )
-        SelectChip(
-            label = stringResource(Res.string.dividend),
-            icon = "💵",
-            isSelected = selectedType == TransactionType.DIVIDEND,
-            activeColor = Gold,
-            activeBackground = GoldDim,
-            modifier = Modifier.weight(1f),
-            onClick = { onTypeSelected(TransactionType.DIVIDEND) },
-        )
+    SectionWithLabel(stringResource(Res.string.type_label)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            SelectChip(
+                label = stringResource(Res.string.buy),
+                icon = "📈",
+                isSelected = selectedType == TransactionType.BUY,
+                activeColor = gainColor,
+                activeBackground = gainDimColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onTypeSelected(TransactionType.BUY) },
+            )
+            SelectChip(
+                label = stringResource(Res.string.sell),
+                icon = "📉",
+                isSelected = selectedType == TransactionType.SELL,
+                activeColor = lossColor,
+                activeBackground = lossDimColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onTypeSelected(TransactionType.SELL) },
+            )
+            SelectChip(
+                label = stringResource(Res.string.dividend),
+                icon = "💵",
+                isSelected = selectedType == TransactionType.DIVIDEND,
+                activeColor = Gold,
+                activeBackground = GoldDim,
+                modifier = Modifier.weight(1f),
+                onClick = { onTypeSelected(TransactionType.DIVIDEND) },
+            )
+        }
     }
 }
 
@@ -287,50 +280,48 @@ private fun AssetSelectorSection(
     onAssetSelectedFromHolding: (HoldingDisplay) -> Unit,
     onAssetCleared: () -> Unit,
 ) {
-    SectionLabel(stringResource(Res.string.asset_section))
+    SectionWithLabel(stringResource(Res.string.asset_section)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (selectedAsset != null) {
+                SelectedStockInfo(
+                    asset = selectedAsset,
+                    onRemove = onAssetCleared,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                StockPlaceholder(
+                    modifier = Modifier.weight(1f),
+                )
+            }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        if (selectedAsset != null) {
-            SelectedStockInfo(
-                asset = selectedAsset,
-                onRemove = onAssetCleared,
-                modifier = Modifier.weight(1f),
-            )
-        } else {
-            StockPlaceholder(
-                modifier = Modifier.weight(1f),
+            if (type == TransactionType.BUY) {
+                SquareIconButton(
+                    icon = if (showSearch) "✕" else "🔍",
+                    onClick = onToggleSearch,
+                )
+            }
+        }
+
+        if (showSearch) {
+            AssetSearchExpandable(
+                query = searchQuery,
+                suggestions = suggestions,
+                showSuggestions = showSuggestions,
+                holdings = holdings,
+                onQueryChanged = onQueryChanged,
+                onAssetSelected = onAssetSelected,
             )
         }
 
-        if (type == TransactionType.BUY) {
-            SquareIconButton(
-                icon = if (showSearch) "✕" else "🔍",
-                onClick = onToggleSearch,
+        if (!showSearch && holdings.isNotEmpty()) {
+            HoldingsQuickSelect(
+                holdings = holdings,
+                onHoldingSelected = onAssetSelectedFromHolding,
             )
         }
-    }
-
-    if (showSearch) {
-        Spacer(modifier = Modifier.height(10.dp))
-        AssetSearchExpandable(
-            query = searchQuery,
-            suggestions = suggestions,
-            showSuggestions = showSuggestions,
-            holdings = holdings,
-            onQueryChanged = onQueryChanged,
-            onAssetSelected = onAssetSelected,
-        )
-    }
-
-    if (!showSearch && holdings.isNotEmpty()) {
-        Spacer(modifier = Modifier.height(10.dp))
-        HoldingsQuickSelect(
-            holdings = holdings,
-            onHoldingSelected = onAssetSelectedFromHolding,
-        )
     }
 }
 
@@ -695,68 +686,66 @@ private fun TradeFields(
         keyboardType = KeyboardType.Number
     )
 
-    SectionLabel(stringResource(Res.string.trade_details_section))
+    SectionWithLabel(stringResource(Res.string.trade_details_section)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                FormField(
+                    label = stringResource(Res.string.trade_amount),
+                    value = amount,
+                    onValueChange = onAmountChanged,
+                    placeholder = "0.00",
+                    modifier = Modifier.weight(1f),
+                    hint = amountHint,
+                    isError = amountError,
+                    keyboardOptions = decimalKeyboard,
+                )
+                FormField(
+                    label = stringResource(Res.string.fee_label),
+                    value = fee,
+                    onValueChange = {},
+                    placeholder = "0.00",
+                    readOnly = true,
+                    modifier = Modifier.weight(1f),
+                    hint = feeHint,
+                    isError = feeError,
+                )
+            }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        FormField(
-            label = stringResource(Res.string.trade_amount),
-            value = amount,
-            onValueChange = onAmountChanged,
-            placeholder = "0.00",
-            modifier = Modifier.weight(1f),
-            hint = amountHint,
-            isError = amountError,
-            keyboardOptions = decimalKeyboard,
-        )
-        FormField(
-            label = stringResource(Res.string.fee_label),
-            value = fee,
-            onValueChange = {},
-            placeholder = "0.00",
-            readOnly = true,
-            modifier = Modifier.weight(1f),
-            hint = feeHint,
-            isError = feeError,
-        )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                FormField(
+                    label = stringResource(Res.string.trade_price),
+                    value = price,
+                    onValueChange = onPriceChanged,
+                    placeholder = "0.00",
+                    modifier = Modifier.weight(1f),
+                    isError = priceError,
+                    keyboardOptions = decimalKeyboard,
+                )
+                FormField(
+                    label = stringResource(Res.string.trade_quantity),
+                    value = quantity,
+                    onValueChange = onQuantityChanged,
+                    suffix = stringResource(Res.string.quantity_unit),
+                    placeholder = "0",
+                    modifier = Modifier.weight(1f),
+                    isError = quantityError,
+                    keyboardOptions = integerKeyboard,
+                )
+            }
+
+            DateTimePickerField(
+                label = stringResource(Res.string.trade_date),
+                dateTimeMillis = dateTimeMillis,
+                onClick = onDateClicked,
+            )
+        }
     }
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        FormField(
-            label = stringResource(Res.string.trade_price),
-            value = price,
-            onValueChange = onPriceChanged,
-            placeholder = "0.00",
-            modifier = Modifier.weight(1f),
-            isError = priceError,
-            keyboardOptions = decimalKeyboard,
-        )
-        FormField(
-            label = stringResource(Res.string.trade_quantity),
-            value = quantity,
-            onValueChange = onQuantityChanged,
-            suffix = stringResource(Res.string.quantity_unit),
-            placeholder = "0",
-            modifier = Modifier.weight(1f),
-            isError = quantityError,
-            keyboardOptions = integerKeyboard,
-        )
-    }
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    DateTimePickerField(
-        label = stringResource(Res.string.trade_date),
-        dateTimeMillis = dateTimeMillis,
-        onClick = onDateClicked,
-    )
 }
 
 @Composable
@@ -771,26 +760,26 @@ private fun DividendFields(
         keyboardType = KeyboardType.Decimal
     )
 
-    SectionLabel(stringResource(Res.string.dividend_details_section))
+    SectionWithLabel(stringResource(Res.string.dividend_details_section)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            FormField(
+                label = stringResource(Res.string.dividend_amount),
+                value = amount,
+                onValueChange = onAmountChanged,
+                placeholder = stringResource(Res.string.dividend_amount_placeholder),
+                modifier = Modifier.fillMaxWidth(),
+                hint = stringResource(Res.string.dividend_amount_hint),
+                isError = amountError,
+                keyboardOptions = decimalKeyboard,
+            )
 
-    FormField(
-        label = stringResource(Res.string.dividend_amount),
-        value = amount,
-        onValueChange = onAmountChanged,
-        placeholder = stringResource(Res.string.dividend_amount_placeholder),
-        modifier = Modifier.fillMaxWidth(),
-        hint = stringResource(Res.string.dividend_amount_hint),
-        isError = amountError,
-        keyboardOptions = decimalKeyboard,
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    DateTimePickerField(
-        label = stringResource(Res.string.dividend_date),
-        dateTimeMillis = dateTimeMillis,
-        onClick = onDateClicked,
-    )
+            DateTimePickerField(
+                label = stringResource(Res.string.dividend_date),
+                dateTimeMillis = dateTimeMillis,
+                onClick = onDateClicked,
+            )
+        }
+    }
 }
 
 @Composable
@@ -908,51 +897,44 @@ private fun TransactionSummary(
         else -> lossColor
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(10.dp))
-            .padding(16.dp),
-    ) {
-        Text(
-            text = stringResource(Res.string.transaction_summary),
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextMuted,
-            letterSpacing = 0.06.em,
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryItem(stringResource(Res.string.summary_type), typeLabel, Modifier.weight(1f))
-                SummaryItem(
-                    stringResource(Res.string.summary_asset),
-                    asset?.let { "${it.pinYin.ifBlank { it.code }} ${it.name}" } ?: "—",
-                    Modifier.weight(1f),
-                )
-            }
-            Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryItem(
-                    stringResource(Res.string.summary_amount),
-                    if (amountVal > 0) amountVal.formatLocalized() else "—",
-                    Modifier.weight(1f),
-                )
-                SummaryItem(
-                    stringResource(Res.string.summary_fee),
-                    if (fee.isNotBlank() && fee != "0.00") fee else "—",
-                    Modifier.weight(1f),
-                )
-            }
-            Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryItem(stringResource(Res.string.summary_pnl), pnlText, Modifier.weight(1f), valueColor = pnlColor)
-                SummaryItem(
-                    stringResource(Res.string.summary_date),
-                    dateTimeMillis.formatLocalizedDate(),
-                    Modifier.weight(1f),
-                )
+    SectionWithLabel(stringResource(Res.string.transaction_summary)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(10.dp))
+                .padding(16.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    SummaryItem(stringResource(Res.string.summary_type), typeLabel, Modifier.weight(1f))
+                    SummaryItem(
+                        stringResource(Res.string.summary_asset),
+                        asset?.let { "${it.pinYin.ifBlank { it.code }} ${it.name}" } ?: "—",
+                        Modifier.weight(1f),
+                    )
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    SummaryItem(
+                        stringResource(Res.string.summary_amount),
+                        if (amountVal > 0) amountVal.formatLocalized() else "—",
+                        Modifier.weight(1f),
+                    )
+                    SummaryItem(
+                        stringResource(Res.string.summary_fee),
+                        if (fee.isNotBlank() && fee != "0.00") fee else "—",
+                        Modifier.weight(1f),
+                    )
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    SummaryItem(stringResource(Res.string.summary_pnl), pnlText, Modifier.weight(1f), valueColor = pnlColor)
+                    SummaryItem(
+                        stringResource(Res.string.summary_date),
+                        dateTimeMillis.formatLocalizedDate(),
+                        Modifier.weight(1f),
+                    )
+                }
             }
         }
     }
@@ -982,26 +964,31 @@ private fun SummaryItem(
 }
 
 @Composable
-private fun SectionLabel(text: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = text,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextMuted,
-            letterSpacing = 0.06.em,
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Box(
+private fun SectionWithLabel(
+    title: String,
+    content: @Composable () -> Unit,
+) {
+    Column {
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .height(1.dp)
-                .background(Border),
-        )
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+                    .background(Border),
+            )
+        }
+        content()
     }
 }

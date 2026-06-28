@@ -38,6 +38,8 @@ import com.yoke.gainful.designsystem.theme.Surface
 
 val BottomBarHeight = 80.dp
 
+fun Modifier.bottomBarPadding(): Modifier = this.padding(bottom = BottomBarHeight)
+
 @Composable
 fun BottomBar(
     itemCount: Int,

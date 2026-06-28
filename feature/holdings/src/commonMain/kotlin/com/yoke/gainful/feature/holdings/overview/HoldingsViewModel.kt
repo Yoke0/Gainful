@@ -34,8 +34,15 @@ class HoldingsViewModel(
         _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch {
             getHoldingsDisplayUseCase().collect { holdings ->
+                val totalValue = holdings.sumOf { it.totalMarketValue }
+                val totalPnl = holdings.sumOf { it.totalGain }
+                val totalBuys = holdings.sumOf { it.totalBuys }
+                val totalPnlPct = if (totalBuys > 0) (totalPnl / totalBuys) * 100 else 0.0
                 _uiState.value = _uiState.value.copy(
                     holdings = holdings,
+                    totalValue = totalValue,
+                    totalPnl = totalPnl,
+                    totalPnlPct = totalPnlPct,
                     isLoading = false,
                 )
             }
@@ -52,5 +59,8 @@ data class HoldingsUiState(
     val isLoading: Boolean = false,
     val holdings: List<HoldingDisplay> = emptyList(),
     val closedPositions: List<ClosedPosition> = emptyList(),
+    val totalValue: Double = 0.0,
+    val totalPnl: Double = 0.0,
+    val totalPnlPct: Double = 0.0,
     val error: String? = null,
 )

@@ -1,10 +1,8 @@
 package com.yoke.gainful.feature.holdings.detail
 
-import com.yoke.gainful.designsystem.components.GainfulTopAppBar
-import com.yoke.gainful.designsystem.components.BackNavigationIcon
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,8 +50,8 @@ import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatLocalizedDate
 import com.yoke.gainful.common.extensions.formatSigned
-import com.yoke.gainful.model.ChartPeriod
-import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.designsystem.components.BackNavigationIcon
+import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.LoadingDots
 import com.yoke.gainful.designsystem.components.LoadingSpinner
 import com.yoke.gainful.designsystem.theme.Background
@@ -66,25 +64,15 @@ import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.model.ChartPeriod
+import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
-
 import gainful.feature.holdings.generated.resources.Res
 import gainful.feature.holdings.generated.resources.amplitude
-import gainful.feature.holdings.generated.resources.buy
-import gainful.feature.holdings.generated.resources.cost
-import gainful.feature.holdings.generated.resources.dividend
-import gainful.feature.holdings.generated.resources.high_price
-import gainful.feature.holdings.generated.resources.holding_badge
-import gainful.feature.holdings.generated.resources.holding_quantity
-import gainful.feature.holdings.generated.resources.loading_hint
-import gainful.feature.holdings.generated.resources.loading_quote
-import gainful.feature.holdings.generated.resources.low_price
-import gainful.feature.holdings.generated.resources.error_title
-import gainful.feature.holdings.generated.resources.error_desc
-import gainful.feature.holdings.generated.resources.retry
 import gainful.feature.holdings.generated.resources.back_to_holdings
-import gainful.feature.holdings.generated.resources.market_value
+import gainful.feature.holdings.generated.resources.buy
 import gainful.feature.holdings.generated.resources.chart_daily
 import gainful.feature.holdings.generated.resources.chart_min_1
 import gainful.feature.holdings.generated.resources.chart_min_15
@@ -95,12 +83,24 @@ import gainful.feature.holdings.generated.resources.chart_monthly
 import gainful.feature.holdings.generated.resources.chart_trends
 import gainful.feature.holdings.generated.resources.chart_trends_5d
 import gainful.feature.holdings.generated.resources.chart_weekly
+import gainful.feature.holdings.generated.resources.cost
+import gainful.feature.holdings.generated.resources.dividend
+import gainful.feature.holdings.generated.resources.error_desc
+import gainful.feature.holdings.generated.resources.error_title
+import gainful.feature.holdings.generated.resources.high_price
+import gainful.feature.holdings.generated.resources.holding_badge
+import gainful.feature.holdings.generated.resources.holding_quantity
+import gainful.feature.holdings.generated.resources.loading_hint
+import gainful.feature.holdings.generated.resources.loading_quote
+import gainful.feature.holdings.generated.resources.low_price
+import gainful.feature.holdings.generated.resources.market_value
 import gainful.feature.holdings.generated.resources.minutes_suffix
 import gainful.feature.holdings.generated.resources.no_data
 import gainful.feature.holdings.generated.resources.no_trade_records
 import gainful.feature.holdings.generated.resources.open_price
 import gainful.feature.holdings.generated.resources.profit_loss
 import gainful.feature.holdings.generated.resources.recent_trades
+import gainful.feature.holdings.generated.resources.retry
 import gainful.feature.holdings.generated.resources.sell
 import gainful.feature.holdings.generated.resources.trade_count
 import gainful.feature.holdings.generated.resources.trade_detail
@@ -131,53 +131,51 @@ fun StockDetailScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState().value
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background),
-    ) {
-        GainfulTopAppBar(
-            title = uiState.name,
-            subtitle = uiState.code,
-            navigationIcon = { BackNavigationIcon(onClick = onBack) },
-            modifier = Modifier.padding(horizontal = 16.dp),
-        )
-
-        when (uiState) {
-            is StockDetailUiState.Loading -> LoadingCenterArea(uiState.pinYin, uiState.name)
-            is StockDetailUiState.Error -> ErrorCenterArea(
-                pinYin = uiState.pinYin,
-                name = uiState.name,
-                onRetry = { viewModel.onIntent(StockDetailIntent.Retry) },
-                onBack = onBack,
-            )
-            is StockDetailUiState.Success -> StockDetailContent(uiState) {
-                viewModel.onIntent(StockDetailIntent.SelectPeriod(it))
-            }
-        }
-    }
+    StockDetailScreen(
+        uiState = uiState,
+        onBack = onBack,
+        onPeriodSelected = { viewModel.onIntent(StockDetailIntent.SelectPeriod(it)) },
+        onRetry = { viewModel.onIntent(StockDetailIntent.Retry) },
+    )
 }
 
 @Composable
-private fun StockDetailContent(
-    uiState: StockDetailUiState.Success,
+private fun StockDetailScreen(
+    uiState: StockDetailUiState,
+    onBack: () -> Unit,
     onPeriodSelected: (ChartPeriod) -> Unit,
+    onRetry: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-    ) {
-        Spacer(modifier = Modifier.height(4.dp))
-        PriceHeroCard(uiState)
-        Spacer(modifier = Modifier.height(14.dp))
-        ChartCard(uiState.selectedPeriod, uiState.kLines.map { it.close }, onPeriodSelected)
-        Spacer(modifier = Modifier.height(14.dp))
-        MetricsGrid(uiState)
-        Spacer(modifier = Modifier.height(14.dp))
-        TradesCard(uiState)
-        Spacer(modifier = Modifier.navigationBarsPadding())
+    when (uiState) {
+        is StockDetailUiState.Loading -> LoadingCenterArea(uiState.pinYin, uiState.name)
+        is StockDetailUiState.Error -> ErrorCenterArea(
+            pinYin = uiState.pinYin,
+            name = uiState.name,
+            onRetry = onRetry,
+            onBack = onBack,
+        )
+        is StockDetailUiState.Success -> GainfulScaffold(
+            appTopBar = {
+                GainfulTopAppBar(
+                    title = uiState.name,
+                    subtitle = "${uiState.pinYin} ${uiState.code}",
+                    navigationIcon = { BackNavigationIcon(onClick = onBack) },
+                )
+            },
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                PriceHeroCard(uiState)
+                ChartCard(uiState.selectedPeriod, uiState.kLines.map { it.close }, onPeriodSelected)
+                MetricsGrid(uiState)
+                TradesCard(uiState)
+            }
+        }
     }
 }
 
