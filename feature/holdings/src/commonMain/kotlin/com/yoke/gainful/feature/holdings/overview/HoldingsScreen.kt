@@ -40,16 +40,25 @@ import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
-import com.yoke.gainful.ui.components.GainfulTopAppBar
-import com.yoke.gainful.ui.components.BottomBarHeight
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
-import com.yoke.gainful.ui.theme.gainColor
-import com.yoke.gainful.ui.theme.lossColor
+import com.yoke.gainful.designsystem.components.GainfulTopAppBar
+import com.yoke.gainful.designsystem.components.BottomBarHeight
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Blue
+import com.yoke.gainful.designsystem.theme.BlueDark
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainGreen
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.GoldDark
+import com.yoke.gainful.designsystem.theme.GreenDim
+import com.yoke.gainful.designsystem.theme.Purple
+import com.yoke.gainful.designsystem.theme.PurpleDark
+import com.yoke.gainful.designsystem.theme.RedDim
+import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.ui.gainColor
+import com.yoke.gainful.ui.lossColor
 import gainful.feature.holdings.generated.resources.Res
 import gainful.feature.holdings.generated.resources.closed_positions
 import gainful.feature.holdings.generated.resources.cost
@@ -195,10 +204,10 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
 @Composable
 private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
     val gradientColors = listOf(
-        listOf(Color(0xFFC8A34E), Color(0xFFA8862E)),
-        listOf(Color(0xFF4285F4), Color(0xFF2A5FC1)),
-        listOf(Color(0xFF1DB954), Color(0xFF148A3E)),
-        listOf(Color(0xFFAB47BC), Color(0xFF7B2D8B)),
+        listOf(Gold, GoldDark),
+        listOf(Blue, BlueDark),
+        listOf(GainGreen, GreenDim),
+        listOf(Purple, PurpleDark),
     )
 
     val sorted = remember(holdings) {

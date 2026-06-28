@@ -28,9 +28,9 @@ import com.yoke.gainful.navigation.TOP_LEVEL_NAV_ITEMS
 import com.yoke.gainful.navigation.rememberNavigationState
 import com.yoke.gainful.navigation.serializersConfig
 import com.yoke.gainful.sync.StockPriceFetchService
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.GainfulTheme
-import com.yoke.gainful.ui.theme.ProvideGainLossColors
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.GainfulTheme
+import com.yoke.gainful.ui.ProvideGainLossColors
 import org.koin.compose.koinInject
 
 @Composable

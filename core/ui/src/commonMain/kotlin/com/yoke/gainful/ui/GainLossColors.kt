@@ -1,10 +1,14 @@
-package com.yoke.gainful.ui.theme
+package com.yoke.gainful.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import com.yoke.gainful.designsystem.theme.GainGreen
+import com.yoke.gainful.designsystem.theme.GainRed
+import com.yoke.gainful.designsystem.theme.GreenDim
+import com.yoke.gainful.designsystem.theme.RedDim
 import com.yoke.gainful.model.GainLossColorScheme
 
 @Immutable

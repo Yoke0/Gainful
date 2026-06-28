@@ -16,11 +16,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
-import com.yoke.gainful.ui.components.BottomBar
-import com.yoke.gainful.ui.components.BottomBarItem
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.TextMuted
+import com.yoke.gainful.designsystem.components.BottomBar
+import com.yoke.gainful.designsystem.components.BottomBarItem
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.TextMuted
 
 @Composable
 fun GainfulNavGraph(

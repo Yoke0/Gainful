@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.components
+package com.yoke.gainful.designsystem.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,10 +19,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainRed
-import com.yoke.gainful.ui.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainRed
+import com.yoke.gainful.designsystem.theme.TextPrimary
 
 @Composable
 fun GainfulDialog(

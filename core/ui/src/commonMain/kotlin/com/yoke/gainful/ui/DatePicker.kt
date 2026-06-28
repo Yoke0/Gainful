@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.components
+package com.yoke.gainful.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -35,16 +35,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainfulTheme
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.Surface
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.common.extensions.pad2
+import com.yoke.gainful.designsystem.components.NavButton
+import com.yoke.gainful.designsystem.components.PrimaryButton
+import com.yoke.gainful.designsystem.components.SecondaryButton
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainfulTheme
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.GoldDim
+import com.yoke.gainful.designsystem.theme.Surface
+import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
 import gainful.core.ui.generated.resources.confirm
@@ -71,15 +75,14 @@ import gainful.core.ui.generated.resources.weekday_thursday
 import gainful.core.ui.generated.resources.weekday_tuesday
 import gainful.core.ui.generated.resources.weekday_wednesday
 import gainful.core.ui.generated.resources.year_month_format
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import org.jetbrains.compose.resources.stringResource
-import com.yoke.gainful.common.extensions.pad2
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
-import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -248,7 +251,11 @@ fun CalendarDialog(
                 PrimaryButton(
                     label = stringResource(Res.string.confirm),
                     modifier = Modifier.weight(1f),
-                    onClick = { onDateSelected(kotlinx.datetime.LocalDateTime(tempSelected, kotlinx.datetime.LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()) },
+                    onClick = {
+                        onDateSelected(
+                            LocalDateTime(tempSelected, LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+                        )
+                    },
                 )
             }
         }
@@ -265,8 +272,7 @@ internal fun CalendarGrid(
     onDayClick: (LocalDate) -> Unit,
 ) {
     val firstDayOfMonth = LocalDate(year, month + 1, 1)
-    val firstDayOfNextMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH)
-    val daysInMonth = (firstDayOfNextMonth.toEpochDays() - firstDayOfMonth.toEpochDays()).toInt()
+    val daysInMonth = LocalDate(year, month + 2, 1).day - 1
     val offset = firstDayOfMonth.dayOfWeek.ordinal
 
     Column(modifier = Modifier.animateContentSize()) {

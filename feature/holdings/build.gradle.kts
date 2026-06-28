@@ -40,6 +40,7 @@ kotlin {
             implementation(projects.core.domain)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
+            implementation(projects.core.designsystem)
             implementation(projects.core.ui)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

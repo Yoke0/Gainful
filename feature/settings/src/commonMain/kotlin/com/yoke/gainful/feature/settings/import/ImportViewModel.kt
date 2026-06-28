@@ -10,7 +10,7 @@ import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.feature.settings.model.toDisplayItems
 import com.yoke.gainful.feature.settings.util.CsvUtil
-import com.yoke.gainful.ui.components.TransactionDisplayItem
+import com.yoke.gainful.ui.TransactionDisplayItem
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow

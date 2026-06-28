@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.theme
+package com.yoke.gainful.designsystem.theme
 
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.LocalIndication

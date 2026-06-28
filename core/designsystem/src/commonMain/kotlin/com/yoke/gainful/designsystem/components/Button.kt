@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.components
+package com.yoke.gainful.designsystem.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,14 +31,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.GainRed
-import com.yoke.gainful.ui.theme.GainfulTheme
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.Surface
-import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.GainRed
+import com.yoke.gainful.designsystem.theme.GainfulTheme
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.GoldDim
+import com.yoke.gainful.designsystem.theme.Surface
+import com.yoke.gainful.designsystem.theme.TextSecondary
 
 @Composable
 fun NavButton(
@@ -176,7 +176,7 @@ fun SquareIconButton(
 
 @Preview
 @Composable
-fun ButtonPreview() {
+private fun ButtonPreview() {
     var selectedType by remember { mutableStateOf(0) }
 
     GainfulTheme {
@@ -189,18 +189,18 @@ fun ButtonPreview() {
         ) {
             Text(text = "NavButton", fontSize = 13.sp, color = TextSecondary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NavButton("‹") {}
-                NavButton("›") {}
+                NavButton("<") {}
+                NavButton(">") {}
             }
 
             Text(text = "PrimaryButton / SecondaryButton", fontSize = 13.sp, color = TextSecondary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PrimaryButton(label = "确认", modifier = Modifier.weight(1f), onClick = {})
-                SecondaryButton(label = "取消", modifier = Modifier.weight(1f), onClick = {})
+                PrimaryButton(label = "Confirm", modifier = Modifier.weight(1f), onClick = {})
+                SecondaryButton(label = "Cancel", modifier = Modifier.weight(1f), onClick = {})
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PrimaryButton(label = "危险操作", modifier = Modifier.weight(1f), color = GainRed, onClick = {})
-                PrimaryButton(label = "禁用状态", modifier = Modifier.weight(1f), enabled = false, onClick = {})
+                PrimaryButton(label = "Danger", modifier = Modifier.weight(1f), color = GainRed, onClick = {})
+                PrimaryButton(label = "Disabled", modifier = Modifier.weight(1f), enabled = false, onClick = {})
             }
 
             Text(text = "SelectChip", fontSize = 13.sp, color = TextSecondary)
@@ -209,21 +209,21 @@ fun ButtonPreview() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 SelectChip(
-                    label = "买入", icon = "📈",
+                    label = "Buy", icon = "\uD83D\uDCC8",
                     isSelected = selectedType == 0,
                     activeColor = Gold, activeBackground = GoldDim,
                     modifier = Modifier.weight(1f),
                     onClick = { selectedType = 0 },
                 )
                 SelectChip(
-                    label = "卖出", icon = "📉",
+                    label = "Sell", icon = "\uD83D\uDCC9",
                     isSelected = selectedType == 1,
                     activeColor = GainRed, activeBackground = GainRed.copy(alpha = 0.15f),
                     modifier = Modifier.weight(1f),
                     onClick = { selectedType = 1 },
                 )
                 SelectChip(
-                    label = "分红", icon = "💵",
+                    label = "Dividend", icon = "\uD83D\uDCB5",
                     isSelected = selectedType == 2,
                     activeColor = Gold, activeBackground = GoldDim,
                     modifier = Modifier.weight(1f),
@@ -233,8 +233,8 @@ fun ButtonPreview() {
 
             Text(text = "SquareIconButton", fontSize = 13.sp, color = TextSecondary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SquareIconButton(icon = "🔍") {}
-                SquareIconButton(icon = "✕") {}
+                SquareIconButton(icon = "\uD83D\uDD0D") {}
+                SquareIconButton(icon = "\u2715") {}
             }
         }
     }

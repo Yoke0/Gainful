@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.components
+package com.yoke.gainful.ui
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -28,18 +28,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatLocalized
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainRed
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
-import com.yoke.gainful.ui.theme.gainColor
-import com.yoke.gainful.ui.theme.gainDimColor
-import com.yoke.gainful.ui.theme.lossColor
-import com.yoke.gainful.ui.theme.lossDimColor
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainRed
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.GoldDim
+import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.trade_fee_label
 import gainful.core.ui.generated.resources.trade_price_label

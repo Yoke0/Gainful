@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.components
+package com.yoke.gainful.designsystem.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -23,15 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.GainfulTheme
-import com.yoke.gainful.ui.theme.Gold
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.GainfulTheme
+import com.yoke.gainful.designsystem.theme.Gold
 
 @Composable
 fun LoadingDots(
@@ -165,7 +164,7 @@ fun LoadingSpinner(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF070B15)),
+                .background(Background),
         )
     }
 }

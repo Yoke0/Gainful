@@ -59,20 +59,22 @@ import gainful.feature.dashboard.generated.resources.total_pnl
 import gainful.feature.dashboard.generated.resources.total_pnl_label
 import gainful.feature.dashboard.generated.resources.total_profit
 import org.jetbrains.compose.resources.stringResource
-import com.yoke.gainful.ui.components.BottomBarHeight
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainGreen
-import com.yoke.gainful.ui.theme.gainColor
-import com.yoke.gainful.ui.theme.lossColor
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.Surface
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.components.GainfulTopAppBar
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.designsystem.components.BottomBarHeight
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainGreen
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.GoldDim
+import com.yoke.gainful.designsystem.theme.GoldLight
+import com.yoke.gainful.designsystem.theme.GridLine
+import com.yoke.gainful.designsystem.theme.Surface
+import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.designsystem.components.GainfulTopAppBar
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.ui.gainColor
+import com.yoke.gainful.ui.lossColor
 
 @Composable
 fun DashboardScreen(
@@ -277,8 +279,8 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                             val padBottom = 10f
                             val chartH = h - padTop - padBottom
 
-                            val lineColor = Color(0xFFC8A34E)
-                            val gridColor = Color(0x08FFFFFF)
+                            val lineColor = Gold
+                            val gridColor = GridLine
 
                             for (i in 0..2) {
                                 val y = padTop + chartH * i / 2f
@@ -339,7 +341,7 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                             val lastNormalized = if (range > 0) ((chartData.last() - minVal) / range).toFloat() else 0.5f
                             val lastY = padTop + chartH * (1f - lastNormalized)
                             drawCircle(
-                                color = Color(0xFFE0C06A),
+                                color = GoldLight,
                                 radius = 3.5f,
                                 center = Offset(lastX, lastY),
                             )

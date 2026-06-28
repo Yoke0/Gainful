@@ -1,7 +1,7 @@
 package com.yoke.gainful.feature.settings.`import`
 
 import com.yoke.gainful.feature.settings.model.CsvConfig
-import com.yoke.gainful.ui.components.TransactionDisplayItem
+import com.yoke.gainful.ui.TransactionDisplayItem
 
 sealed interface ImportIntent {
     data class ParseCsv(

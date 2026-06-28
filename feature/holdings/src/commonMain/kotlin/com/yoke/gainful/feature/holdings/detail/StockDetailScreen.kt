@@ -1,7 +1,7 @@
 package com.yoke.gainful.feature.holdings.detail
 
-import com.yoke.gainful.ui.components.GainfulTopAppBar
-import com.yoke.gainful.ui.components.BackNavigationIcon
+import com.yoke.gainful.designsystem.components.GainfulTopAppBar
+import com.yoke.gainful.designsystem.components.BackNavigationIcon
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
@@ -54,20 +54,20 @@ import com.yoke.gainful.common.extensions.formatLocalizedDate
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.TransactionType
-import com.yoke.gainful.ui.components.LoadingDots
-import com.yoke.gainful.ui.components.LoadingSpinner
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Border
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainRed
-import com.yoke.gainful.ui.theme.gainColor
-import com.yoke.gainful.ui.theme.lossColor
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.GoldDim
-import com.yoke.gainful.ui.theme.Surface
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.designsystem.components.LoadingDots
+import com.yoke.gainful.designsystem.components.LoadingSpinner
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainRed
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.GoldDim
+import com.yoke.gainful.designsystem.theme.Surface
+import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
+import com.yoke.gainful.ui.gainColor
+import com.yoke.gainful.ui.lossColor
 
 import gainful.feature.holdings.generated.resources.Res
 import gainful.feature.holdings.generated.resources.amplitude
@@ -344,7 +344,7 @@ private fun ErrorCenterArea(
                         text = stringResource(Res.string.retry),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF070B15),
+                        color = Background,
                     )
                 }
                 Box(

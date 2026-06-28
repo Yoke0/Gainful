@@ -6,10 +6,10 @@ import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
 import com.yoke.gainful.feature.holdings.navigation.HoldingsNavKey
 import com.yoke.gainful.feature.settings.navigation.SettingsNavKey
 import com.yoke.gainful.feature.transactions.navigation.TransactionsNavKey
-import com.yoke.gainful.ui.components.DashboardIcon
-import com.yoke.gainful.ui.components.HoldingsIcon
-import com.yoke.gainful.ui.components.RecordsIcon
-import com.yoke.gainful.ui.components.SettingsIcon
+import com.yoke.gainful.designsystem.components.DashboardIcon
+import com.yoke.gainful.designsystem.components.HoldingsIcon
+import com.yoke.gainful.designsystem.components.RecordsIcon
+import com.yoke.gainful.designsystem.components.SettingsIcon
 import gainful.shared.generated.resources.Res
 import gainful.shared.generated.resources.nav_dashboard
 import gainful.shared.generated.resources.nav_holdings

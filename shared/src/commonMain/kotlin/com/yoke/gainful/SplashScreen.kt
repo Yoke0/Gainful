@@ -19,10 +19,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.ui.components.LoadingDots
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.designsystem.components.LoadingDots
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
 import gainful.shared.generated.resources.Res
 import gainful.shared.generated.resources.app_icon
 import gainful.shared.generated.resources.app_name

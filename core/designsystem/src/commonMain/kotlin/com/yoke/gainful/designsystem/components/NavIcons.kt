@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.components
+package com.yoke.gainful.designsystem.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -18,8 +18,11 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.TextMuted
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.TextMuted
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun DashboardIcon(
@@ -250,11 +253,11 @@ fun SettingsIcon(
         val rayInner = s * 0.24f
         val rayOuter = s * 0.42f
         for (i in 0 until 8) {
-            val angle = (i * 45.0) * kotlin.math.PI / 180.0
-            val x1 = cx + (rayInner * kotlin.math.cos(angle)).toFloat()
-            val y1 = cy + (rayInner * kotlin.math.sin(angle)).toFloat()
-            val x2 = cx + (rayOuter * kotlin.math.cos(angle)).toFloat()
-            val y2 = cy + (rayOuter * kotlin.math.sin(angle)).toFloat()
+            val angle = (i * 45.0) * PI / 180.0
+            val x1 = cx + (rayInner * cos(angle)).toFloat()
+            val y1 = cy + (rayInner * sin(angle)).toFloat()
+            val x2 = cx + (rayOuter * cos(angle)).toFloat()
+            val y2 = cy + (rayOuter * sin(angle)).toFloat()
             drawLine(color, Offset(x1, y1), Offset(x2, y2), strokeWidth = sw, cap = StrokeCap.Round)
         }
     }

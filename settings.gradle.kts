@@ -40,6 +40,7 @@ include(":shared")
 
 include(":core:common")
 include(":core:model")
+include(":core:designsystem")
 include(":core:data")
 include(":core:database")
 include(":core:network")

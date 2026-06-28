@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui.components
+package com.yoke.gainful.designsystem.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,13 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.ui.theme.Background
-import com.yoke.gainful.ui.theme.Card
-import com.yoke.gainful.ui.theme.GainfulTheme
-import com.yoke.gainful.ui.theme.Gold
-import com.yoke.gainful.ui.theme.TextMuted
-import com.yoke.gainful.ui.theme.TextPrimary
-import com.yoke.gainful.ui.theme.TextSecondary
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainfulTheme
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
 
 @Composable
 fun GainfulTopAppBar(
@@ -97,7 +97,7 @@ fun BackNavigationIcon(onClick: () -> Unit) {
 private fun GainfulTopAppBarPreview() {
     GainfulTheme {
         GainfulTopAppBar(
-            title = "仪表盘",
+            title = "Dashboard",
             modifier = Modifier.background(Background),
         )
     }
@@ -108,7 +108,7 @@ private fun GainfulTopAppBarPreview() {
 private fun GainfulTopAppBarWithBackPreview() {
     GainfulTheme {
         GainfulTopAppBar(
-            title = "股票详情",
+            title = "Stock Detail",
             navigationIcon = { BackNavigationIcon(onClick = {}) },
             modifier = Modifier.background(Background),
         )
@@ -120,8 +120,8 @@ private fun GainfulTopAppBarWithBackPreview() {
 private fun GainfulTopAppBarWithSubtitlePreview() {
     GainfulTheme {
         GainfulTopAppBar(
-            title = "贵州茅台",
-            subtitle = "600519",
+            title = "AAPL",
+            subtitle = "Apple Inc.",
             navigationIcon = { BackNavigationIcon(onClick = {}) },
             modifier = Modifier.background(Background),
         )
@@ -133,7 +133,7 @@ private fun GainfulTopAppBarWithSubtitlePreview() {
 private fun GainfulTopAppBarWithActionsPreview() {
     GainfulTheme {
         GainfulTopAppBar(
-            title = "交易记录",
+            title = "Transactions",
             modifier = Modifier.background(Background),
             actions = {
                 Box(
@@ -143,7 +143,7 @@ private fun GainfulTopAppBarWithActionsPreview() {
                         .padding(horizontal = 16.dp, vertical = 6.dp),
                 ) {
                     Text(
-                        text = "+ 新增",
+                        text = "+ Add",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Background,

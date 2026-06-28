@@ -1,6 +1,6 @@
 package com.yoke.gainful.feature.settings.model
 
-import com.yoke.gainful.ui.components.TransactionDisplayItem
+import com.yoke.gainful.ui.TransactionDisplayItem
 
 data class CsvPreviewData(
     val fileName: String,
