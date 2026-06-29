@@ -87,10 +87,4 @@ data class TransactionItem(
     val fee: Double,
     val tradeDate: Long,
     val timestamp: Long,
-) {
-    val displayAmount: Double get() = when (type) {
-        TransactionType.BUY -> amount
-        TransactionType.SELL -> amount
-        TransactionType.DIVIDEND -> amount
-    }
-}
+)

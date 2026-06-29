@@ -40,4 +40,8 @@
     <string name="trade_price_label">Price</string>
     <string name="trade_fee_label">Fee</string>
     <string name="trade_shares_format">%1$d shares</string>
+    <string name="confirm_delete">Confirm Delete</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirm_text">Are you sure you want to delete this transaction?</string>
+    <string name="delete_confirm_suffix">This action cannot be undone</string>
 </resources>

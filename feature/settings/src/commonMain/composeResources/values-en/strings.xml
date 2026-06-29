@@ -54,10 +54,6 @@
     <string name="import_duplicate_count">%1$d duplicates</string>
     <string name="import_confirm_title">Confirm Import</string>
     <string name="import_confirm_duplicate_message">Contains %1$d duplicate records. Import anyway?</string>
-    <string name="import_confirm_delete_title">Confirm Delete</string>
-    <string name="import_confirm_delete_text">Are you sure you want to delete this</string>
-    <string name="import_confirm_delete_suffix">record? This action cannot be undone.</string>
-    <string name="import_delete">Delete</string>
     <string name="import_loading">Parsing asset info…</string>
     <string-array name="csv_headers">
         <item>Date</item>

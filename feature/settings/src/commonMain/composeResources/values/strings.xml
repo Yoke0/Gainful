@@ -54,10 +54,6 @@
     <string name="import_duplicate_count">%1$d 条重复</string>
     <string name="import_confirm_title">确认导入</string>
     <string name="import_confirm_duplicate_message">包含 %1$d 条重复记录，确定要导入吗？</string>
-    <string name="import_confirm_delete_title">确认删除</string>
-    <string name="import_confirm_delete_text">确定要删除这笔</string>
-    <string name="import_confirm_delete_suffix">记录吗？此操作不可撤销。</string>
-    <string name="import_delete">删除</string>
     <string name="import_loading">正在解析资产信息…</string>
     <string-array name="csv_headers">
         <item>日期</item>

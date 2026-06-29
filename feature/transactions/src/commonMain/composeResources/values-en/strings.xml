@@ -10,16 +10,9 @@
     <string name="summary_buy">Buy</string>
     <string name="summary_sell">Sell</string>
     <string name="summary_dividend">Dividend</string>
-    <string name="trade_quantity_label">Quantity</string>
-    <string name="trade_price_label">Price</string>
     <string name="summary_fee">Fee</string>
     <string name="no_trade_records_empty">No trade records</string>
     <string name="no_trade_records_hint">Tap the top right to add your first trade</string>
-    <string name="confirm_delete">Confirm Delete</string>
-    <string name="cancel">Cancel</string>
-    <string name="delete">Delete</string>
-    <string name="delete_confirm_text">Are you sure you want to delete this</string>
-    <string name="delete_confirm_suffix">trade? This action cannot be undone.</string>
     <string name="trade_count_unit">%1$d trades</string>
 
     <!-- Add Transaction -->

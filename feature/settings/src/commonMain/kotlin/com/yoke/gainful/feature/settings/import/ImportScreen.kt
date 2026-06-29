@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.designsystem.components.BackNavigationIcon
 import com.yoke.gainful.designsystem.components.ConfirmDialog
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.LoadingSpinner
 import com.yoke.gainful.designsystem.theme.Background
@@ -38,7 +39,6 @@ import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.GainGreen
 import com.yoke.gainful.designsystem.theme.GainRed
 import com.yoke.gainful.designsystem.theme.Gold
-import com.yoke.gainful.designsystem.theme.GoldDim
 import com.yoke.gainful.designsystem.theme.GreenDim
 import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
@@ -47,25 +47,16 @@ import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.file.rememberCsvFileUtil
-import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.TransactionCard
 import com.yoke.gainful.ui.TransactionDisplayItem
-import com.yoke.gainful.ui.gainColor
-import com.yoke.gainful.ui.gainDimColor
-import com.yoke.gainful.ui.lossColor
-import com.yoke.gainful.ui.lossDimColor
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.cancel
 import gainful.feature.settings.generated.resources.confirm
 import gainful.feature.settings.generated.resources.csv_headers
 import gainful.feature.settings.generated.resources.csv_type_values
 import gainful.feature.settings.generated.resources.import_confirm
-import gainful.feature.settings.generated.resources.import_confirm_delete_suffix
-import gainful.feature.settings.generated.resources.import_confirm_delete_text
-import gainful.feature.settings.generated.resources.import_confirm_delete_title
 import gainful.feature.settings.generated.resources.import_confirm_duplicate_message
 import gainful.feature.settings.generated.resources.import_confirm_title
-import gainful.feature.settings.generated.resources.import_delete
 import gainful.feature.settings.generated.resources.import_dialog_title
 import gainful.feature.settings.generated.resources.import_error_format
 import gainful.feature.settings.generated.resources.import_file_types
@@ -73,9 +64,6 @@ import gainful.feature.settings.generated.resources.import_loading
 import gainful.feature.settings.generated.resources.import_stat_duplicate
 import gainful.feature.settings.generated.resources.import_stat_total
 import gainful.feature.settings.generated.resources.import_stat_valid
-import gainful.feature.settings.generated.resources.import_summary_buy
-import gainful.feature.settings.generated.resources.import_summary_dividend
-import gainful.feature.settings.generated.resources.import_summary_sell
 import gainful.feature.settings.generated.resources.import_upload_hint
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
@@ -114,15 +102,8 @@ fun ImportScreen(
             viewModel.onIntent(ImportIntent.ConfirmImport(csvConfig))
             onBack()
         },
-        onShowDeleteDialog = { index, item ->
-            viewModel.onIntent(ImportIntent.ShowDeleteDialog(index, item))
-        },
-        onDismissDeleteDialog = {
-            viewModel.onIntent(ImportIntent.DismissDeleteDialog)
-        },
         onDeleteItem = { index ->
             viewModel.onIntent(ImportIntent.DeleteItem(index))
-            viewModel.onIntent(ImportIntent.DismissDeleteDialog)
         },
         onDismissDuplicateConfirm = {
             viewModel.onIntent(ImportIntent.DismissDuplicateConfirm)
@@ -138,9 +119,7 @@ private fun ImportScreen(
     onPickFile: (content: String, fileName: String) -> Unit,
     onConfirmImport: () -> Unit,
     onConfirmDuplicate: () -> Unit,
-    onShowDeleteDialog: (index: Int, item: TransactionDisplayItem) -> Unit,
-    onDismissDeleteDialog: () -> Unit,
-    onDeleteItem: (index: Int) -> Unit,
+    onDeleteItem: (Int) -> Unit,
     onDismissDuplicateConfirm: () -> Unit,
     fileUtil: com.yoke.gainful.file.CsvFileUtil,
 ) {
@@ -200,20 +179,12 @@ private fun ImportScreen(
                     preview = preview,
                     displayItems = uiState.displayItems,
                     isLoading = uiState.isLoading,
-                    onShowDeleteDialog = onShowDeleteDialog,
+                    onDeleteItem = onDeleteItem,
                 )
             } ?: run {
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
-    }
-
-    if (uiState.deleteDialog != null && uiState.deleteDialog.item != null) {
-        DeleteConfirmDialog(
-            target = uiState.deleteDialog.item,
-            onConfirm = { onDeleteItem(uiState.deleteDialog.index) },
-            onDismiss = onDismissDeleteDialog,
-        )
     }
 
     if (uiState.showDuplicateConfirm) {
@@ -230,7 +201,7 @@ private fun ImportPreviewContent(
     preview: CsvPreviewData,
     displayItems: List<TransactionDisplayItem>,
     isLoading: Boolean,
-    onShowDeleteDialog: (Int, TransactionDisplayItem) -> Unit,
+    onDeleteItem: (Int) -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -276,7 +247,7 @@ private fun ImportPreviewContent(
                     TransactionCard(
                         item = item,
                         isDuplicate = isDuplicate,
-                        onLongPress = { onShowDeleteDialog(index, item) },
+                        onDelete = { onDeleteItem(index) },
                         modifier = Modifier.padding(horizontal = 0.dp),
                     )
                 }
@@ -383,82 +354,6 @@ private fun UploadArea(
             }
         }
     }
-}
-
-@Composable
-private fun DeleteConfirmDialog(
-    target: TransactionDisplayItem,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val typeLabel = when (target.type) {
-        0 -> stringResource(Res.string.import_summary_buy)
-        1 -> stringResource(Res.string.import_summary_sell)
-        else -> stringResource(Res.string.import_summary_dividend)
-    }
-    val typeColor = when (target.type) {
-        0 -> gainColor
-        1 -> lossColor
-        else -> Gold
-    }
-    val typeBgColor = when (target.type) {
-        0 -> gainDimColor
-        1 -> lossDimColor
-        else -> GoldDim
-    }
-
-    ConfirmDialog(
-        title = stringResource(Res.string.import_confirm_delete_title),
-        confirmText = stringResource(Res.string.import_delete),
-        dismissText = stringResource(Res.string.cancel),
-        onConfirm = onConfirm,
-        onDismiss = onDismiss,
-        content = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.import_confirm_delete_text),
-                    fontSize = 14.sp,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(typeBgColor)
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                    ) {
-                        Text(
-                            text = typeLabel,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = typeColor,
-                        )
-                    }
-                    Text(
-                        text = target.name,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = FontFamily.Monospace,
-                        color = TextPrimary,
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.import_confirm_delete_suffix),
-                    fontSize = 14.sp,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        },
-    )
 }
 
 @Composable

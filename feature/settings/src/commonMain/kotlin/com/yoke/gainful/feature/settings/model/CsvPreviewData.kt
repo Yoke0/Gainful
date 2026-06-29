@@ -1,5 +1,7 @@
 package com.yoke.gainful.feature.settings.model
 
+import com.yoke.gainful.common.extensions.parseLocalizedDateTimeToEpochMillis
+import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.TransactionDisplayItem
 
 data class CsvPreviewData(
@@ -28,11 +30,12 @@ fun CsvPreviewData.toDisplayItems(csvConfig: CsvConfig): List<TransactionDisplay
 
         val typeStr = if (typeIndex >= 0) row[typeIndex] else csvConfig.buyType
         val type = when (typeStr) {
-            csvConfig.buyType -> 0
-            csvConfig.sellType -> 1
-            else -> 2
+            csvConfig.buyType -> TransactionType.BUY
+            csvConfig.sellType -> TransactionType.SELL
+            else -> TransactionType.DIVIDEND
         }
         val dateStr = if (dateIndex >= 0) row[dateIndex] else ""
+        val tradeDate = dateStr.parseLocalizedDateTimeToEpochMillis()
 
         TransactionDisplayItem(
             name = if (nameIndex >= 0) row[nameIndex] else "",
@@ -42,8 +45,7 @@ fun CsvPreviewData.toDisplayItems(csvConfig: CsvConfig): List<TransactionDisplay
             quantity = if (quantityIndex >= 0) row[quantityIndex].toDoubleOrNull() ?: 0.0 else 0.0,
             price = if (priceIndex >= 0) row[priceIndex].toDoubleOrNull() ?: 0.0 else 0.0,
             amount = if (amountIndex >= 0) row[amountIndex].toDoubleOrNull() ?: 0.0 else 0.0,
-            fee = 0.0,
-            dateStr = dateStr,
+            tradeDate = tradeDate,
         )
     }.filterNotNull()
 }

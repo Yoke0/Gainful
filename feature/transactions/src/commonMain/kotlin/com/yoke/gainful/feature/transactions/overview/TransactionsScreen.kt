@@ -1,10 +1,8 @@
 package com.yoke.gainful.feature.transactions.overview
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,28 +21,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.common.extensions.formatLocalized
-import com.yoke.gainful.common.extensions.formatLocalizedDate
-import com.yoke.gainful.designsystem.components.ConfirmDialog
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.PrimaryButton
 import com.yoke.gainful.designsystem.components.bottomBarPadding
 import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
-import com.yoke.gainful.designsystem.theme.GainRed
 import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.GoldDim
 import com.yoke.gainful.designsystem.theme.Surface
@@ -54,33 +44,24 @@ import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.designsystem.components.GainfulScaffold
+import com.yoke.gainful.ui.TransactionCard
+import com.yoke.gainful.ui.TransactionDisplayItem
 import com.yoke.gainful.ui.gainColor
-import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
-import com.yoke.gainful.ui.lossDimColor
 import gainful.feature.transactions.generated.resources.Res
 import gainful.feature.transactions.generated.resources.add_button
 import gainful.feature.transactions.generated.resources.all
 import gainful.feature.transactions.generated.resources.buy
-import gainful.feature.transactions.generated.resources.cancel
-import gainful.feature.transactions.generated.resources.confirm_delete
-import gainful.feature.transactions.generated.resources.delete
-import gainful.feature.transactions.generated.resources.delete_confirm_suffix
-import gainful.feature.transactions.generated.resources.delete_confirm_text
 import gainful.feature.transactions.generated.resources.dividend
 import gainful.feature.transactions.generated.resources.no_trade_records_empty
 import gainful.feature.transactions.generated.resources.no_trade_records_hint
-import gainful.feature.transactions.generated.resources.quantity_format
 import gainful.feature.transactions.generated.resources.sell
 import gainful.feature.transactions.generated.resources.summary_buy
 import gainful.feature.transactions.generated.resources.summary_dividend
-import gainful.feature.transactions.generated.resources.summary_fee
 import gainful.feature.transactions.generated.resources.summary_sell
 import gainful.feature.transactions.generated.resources.summary_total
 import gainful.feature.transactions.generated.resources.time_groups
 import gainful.feature.transactions.generated.resources.trade_count_unit
-import gainful.feature.transactions.generated.resources.trade_price_label
-import gainful.feature.transactions.generated.resources.trade_quantity_label
 import gainful.feature.transactions.generated.resources.transactions_title
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -112,24 +93,6 @@ fun TransactionsScreen(
     }
     val groupOrder = stringArrayResource(Res.array.time_groups)
 
-    val showDeleteDialog = remember { mutableStateOf(false) }
-    val deleteTarget = remember { mutableStateOf<TransactionItem?>(null) }
-
-    if (showDeleteDialog.value && deleteTarget.value != null) {
-        DeleteConfirmDialog(
-            target = deleteTarget.value!!,
-            onConfirm = {
-                viewModel.onIntent(TransactionsIntent.DeleteTransaction(it.id))
-                deleteTarget.value = null
-                showDeleteDialog.value = false
-            },
-            onDismiss = {
-                showDeleteDialog.value = false
-                deleteTarget.value = null
-            },
-        )
-    }
-
     TransactionsScreen(
         uiState = uiState,
         filteredTrades = filteredTrades,
@@ -141,8 +104,7 @@ fun TransactionsScreen(
         onIntent = viewModel::onIntent,
         onAddTransaction = onAddTransaction,
         onDeleteTrade = { trade ->
-            deleteTarget.value = trade
-            showDeleteDialog.value = true
+            viewModel.onIntent(TransactionsIntent.DeleteTransaction(trade.id))
         },
     )
 }
@@ -216,9 +178,18 @@ private fun TransactionsScreen(
                         TimeGroupHeader(groupName, items.size)
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items.forEach { trade ->
-                                TradeCard(
-                                    trade = trade,
-                                    onLongPress = { onDeleteTrade(trade) },
+                                TransactionCard(
+                                    item = TransactionDisplayItem(
+                                        name = trade.name,
+                                        code = trade.code,
+                                        pinYin = trade.pinYin,
+                                        type = trade.type,
+                                        quantity = trade.quantity,
+                                        price = trade.price,
+                                        amount = trade.amount,
+                                        tradeDate = trade.tradeDate,
+                                    ),
+                                    onDelete = { onDeleteTrade(trade) },
                                 )
                             }
                         }
@@ -229,82 +200,6 @@ private fun TransactionsScreen(
             Spacer(modifier = Modifier.bottomBarPadding())
         }
     }
-}
-
-@Composable
-private fun DeleteConfirmDialog(
-    target: TransactionItem,
-    onConfirm: (TransactionItem) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val typeLabel = when (target.type) {
-        TransactionType.BUY -> stringResource(Res.string.buy)
-        TransactionType.SELL -> stringResource(Res.string.sell)
-        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
-    }
-    val typeColor = when (target.type) {
-        TransactionType.BUY -> gainColor
-        TransactionType.SELL -> lossColor
-        else -> Gold
-    }
-    val typeBgColor = when (target.type) {
-        TransactionType.BUY -> gainDimColor
-        TransactionType.SELL -> lossDimColor
-        else -> GoldDim
-    }
-
-    ConfirmDialog(
-        title = stringResource(Res.string.confirm_delete),
-        confirmText = stringResource(Res.string.delete),
-        dismissText = stringResource(Res.string.cancel),
-        onConfirm = { onConfirm(target) },
-        onDismiss = onDismiss,
-        content = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.delete_confirm_text),
-                    fontSize = 14.sp,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(typeBgColor)
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                    ) {
-                        Text(
-                            text = typeLabel,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = typeColor,
-                        )
-                    }
-                    Text(
-                        text = target.name,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = FontFamily.Monospace,
-                        color = TextPrimary,
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.delete_confirm_suffix),
-                    fontSize = 14.sp,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        },
-    )
 }
 
 @Composable
@@ -385,190 +280,6 @@ private fun TimeGroupHeader(title: String, count: Int) {
                 fontWeight = FontWeight.Medium,
                 color = TextMuted,
             )
-        }
-    }
-}
-
-@Composable
-private fun TradeCard(
-    trade: TransactionItem,
-    onLongPress: () -> Unit = {},
-) {
-    val isBuy = trade.type == TransactionType.BUY
-    val isSell = trade.type == TransactionType.SELL
-
-    val isPressed = remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isPressed.value) 0.97f else 1f, label = "scale")
-
-    val typeColor = when {
-        isBuy -> gainColor
-        isSell -> lossColor
-        else -> Gold
-    }
-    val typeBgColor = when {
-        isBuy -> gainDimColor
-        isSell -> lossDimColor
-        else -> GoldDim
-    }
-    val typeLabel = when {
-        isBuy -> stringResource(Res.string.buy)
-        isSell -> stringResource(Res.string.sell)
-        else -> stringResource(Res.string.dividend)
-    }
-    val amountPrefix = if (isBuy) "-" else "+"
-    val dateStr = trade.tradeDate.formatLocalizedDate()
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .scale(scale)
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (isPressed.value) Card.copy(alpha = 0.8f) else Card)
-            .border(1.dp, if (isPressed.value) GainRed.copy(alpha = 0.5f) else Border, RoundedCornerShape(10.dp))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        isPressed.value = true
-                        tryAwaitRelease()
-                        isPressed.value = false
-                    },
-                    onLongPress = {
-                        isPressed.value = false
-                        onLongPress()
-                    },
-                )
-            },
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = trade.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(typeBgColor)
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                    ) {
-                        Text(
-                            text = typeLabel,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = typeColor,
-                        )
-                    }
-                    Text(
-                        text = trade.pinYin.ifBlank { trade.code },
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = TextMuted,
-                    )
-                }
-            }
-
-            Column(
-                horizontalAlignment = Alignment.End,
-            ) {
-                Text(
-                    text = "$amountPrefix${trade.displayAmount.formatLocalized()}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    color = typeColor,
-                )
-                Text(
-                    text = dateStr,
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = TextMuted,
-                )
-            }
-        }
-
-        if (trade.type != TransactionType.DIVIDEND) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(Border),
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.trade_quantity_label),
-                            fontSize = 11.sp,
-                            color = TextMuted,
-                        )
-                        Text(
-                            text = stringResource(Res.string.quantity_format, trade.quantity.toInt()),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            fontFamily = FontFamily.Monospace,
-                            color = TextPrimary,
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.trade_price_label),
-                            fontSize = 11.sp,
-                            color = TextMuted,
-                        )
-                        Text(
-                            text = trade.price.formatLocalized(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            fontFamily = FontFamily.Monospace,
-                            color = TextPrimary,
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.summary_fee),
-                            fontSize = 11.sp,
-                            color = TextMuted,
-                        )
-                        Text(
-                            text = trade.fee.formatLocalized(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            fontFamily = FontFamily.Monospace,
-                            color = TextSecondary,
-                        )
-                    }
-                }
-            }
         }
     }
 }
