@@ -50,7 +50,7 @@ import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.file.rememberCsvFileUtil
 import com.yoke.gainful.model.GainLossColorScheme
-import com.yoke.gainful.ui.GainfulScaffold
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.TimePickerDialog
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.about_group

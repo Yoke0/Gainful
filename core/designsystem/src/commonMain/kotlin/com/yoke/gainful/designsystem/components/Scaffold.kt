@@ -1,4 +1,4 @@
-package com.yoke.gainful.ui
+package com.yoke.gainful.designsystem.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

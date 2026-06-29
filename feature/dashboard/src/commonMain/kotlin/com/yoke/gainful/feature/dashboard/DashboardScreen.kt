@@ -73,7 +73,7 @@ import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
-import com.yoke.gainful.ui.GainfulScaffold
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 

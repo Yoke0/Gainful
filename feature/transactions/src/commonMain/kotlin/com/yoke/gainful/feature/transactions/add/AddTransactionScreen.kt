@@ -61,7 +61,7 @@ import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.DateTimePickerDialog
 import com.yoke.gainful.ui.DateTimePickerField
-import com.yoke.gainful.ui.GainfulScaffold
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor

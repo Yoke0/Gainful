@@ -66,7 +66,7 @@ import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.TransactionType
-import com.yoke.gainful.ui.GainfulScaffold
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 import gainful.feature.holdings.generated.resources.Res

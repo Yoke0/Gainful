@@ -47,7 +47,7 @@ import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.file.rememberCsvFileUtil
-import com.yoke.gainful.ui.GainfulScaffold
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.TransactionCard
 import com.yoke.gainful.ui.TransactionDisplayItem
 import com.yoke.gainful.ui.gainColor
