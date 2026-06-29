@@ -48,17 +48,21 @@ fun DashboardIcon(
         val gap = s * 0.08f
         val rx = CornerRadius(s * 0.12f, s * 0.12f)
         val p = progress.value
-        val dashEffect = if (p in 0.01f..0.99f) {
-            val dashLen = s * 0.3f * p
-            PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
-        } else null
+        val dashEffect =
+            if (p in 0.01f..0.99f) {
+                val dashLen = s * 0.3f * p
+                PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
+            } else {
+                null
+            }
 
-        val stroke = Stroke(
-            width = sw,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-            pathEffect = dashEffect,
-        )
+        val stroke =
+            Stroke(
+                width = sw,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round,
+                pathEffect = dashEffect,
+            )
 
         drawRoundRect(
             color = color,
@@ -113,17 +117,21 @@ fun RecordsIcon(
         val s = this.size.width
         val sw = 1.6f
         val p = progress.value
-        val dashEffect = if (p in 0.01f..0.99f) {
-            val dashLen = s * 0.3f * p
-            PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
-        } else null
+        val dashEffect =
+            if (p in 0.01f..0.99f) {
+                val dashLen = s * 0.3f * p
+                PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
+            } else {
+                null
+            }
 
-        val stroke = Stroke(
-            width = sw,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-            pathEffect = dashEffect,
-        )
+        val stroke =
+            Stroke(
+                width = sw,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round,
+                pathEffect = dashEffect,
+            )
 
         val docLeft = s * 0.18f
         val docTop = s * 0.08f
@@ -131,14 +139,15 @@ fun RecordsIcon(
         val docBottom = s * 0.92f
         val fold = s * 0.22f
 
-        val path = Path().apply {
-            moveTo(docLeft, docTop)
-            lineTo(docRight - fold, docTop)
-            lineTo(docRight, docTop + fold)
-            lineTo(docRight, docBottom)
-            lineTo(docLeft, docBottom)
-            close()
-        }
+        val path =
+            Path().apply {
+                moveTo(docLeft, docTop)
+                lineTo(docRight - fold, docTop)
+                lineTo(docRight, docTop + fold)
+                lineTo(docRight, docBottom)
+                lineTo(docLeft, docBottom)
+                close()
+            }
         drawPath(path, color = color, style = stroke)
 
         val lineLeft = s * 0.30f
@@ -170,17 +179,21 @@ fun HoldingsIcon(
         val s = this.size.width
         val sw = 1.6f
         val p = progress.value
-        val dashEffect = if (p in 0.01f..0.99f) {
-            val dashLen = s * 0.3f * p
-            PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
-        } else null
+        val dashEffect =
+            if (p in 0.01f..0.99f) {
+                val dashLen = s * 0.3f * p
+                PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
+            } else {
+                null
+            }
 
-        val stroke = Stroke(
-            width = sw,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-            pathEffect = dashEffect,
-        )
+        val stroke =
+            Stroke(
+                width = sw,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round,
+                pathEffect = dashEffect,
+            )
 
         drawRoundRect(
             color = color,
@@ -190,13 +203,14 @@ fun HoldingsIcon(
             style = stroke,
         )
 
-        val handle = Path().apply {
-            moveTo(s * 0.36f, s * 0.32f)
-            lineTo(s * 0.36f, s * 0.22f)
-            quadraticTo(s * 0.36f, s * 0.14f, s * 0.50f, s * 0.14f)
-            quadraticTo(s * 0.64f, s * 0.14f, s * 0.64f, s * 0.22f)
-            lineTo(s * 0.64f, s * 0.32f)
-        }
+        val handle =
+            Path().apply {
+                moveTo(s * 0.36f, s * 0.32f)
+                lineTo(s * 0.36f, s * 0.22f)
+                quadraticTo(s * 0.36f, s * 0.14f, s * 0.50f, s * 0.14f)
+                quadraticTo(s * 0.64f, s * 0.14f, s * 0.64f, s * 0.22f)
+                lineTo(s * 0.64f, s * 0.32f)
+            }
         drawPath(handle, color = color, style = stroke)
 
         drawCircle(
@@ -231,17 +245,21 @@ fun SettingsIcon(
         val cx = s * 0.50f
         val cy = s * 0.50f
         val p = progress.value
-        val dashEffect = if (p in 0.01f..0.99f) {
-            val dashLen = s * 0.15f * p
-            PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
-        } else null
+        val dashEffect =
+            if (p in 0.01f..0.99f) {
+                val dashLen = s * 0.15f * p
+                PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
+            } else {
+                null
+            }
 
-        val stroke = Stroke(
-            width = sw,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-            pathEffect = dashEffect,
-        )
+        val stroke =
+            Stroke(
+                width = sw,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round,
+                pathEffect = dashEffect,
+            )
 
         drawCircle(
             color = color,

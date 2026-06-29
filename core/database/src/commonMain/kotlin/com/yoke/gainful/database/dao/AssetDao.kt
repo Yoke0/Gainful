@@ -15,7 +15,9 @@ interface AssetDao {
     @Query("SELECT * FROM assets WHERE inner_code = :innerCode")
     suspend fun getByInnerCode(innerCode: String): AssetEntity?
 
-    @Query("SELECT * FROM assets WHERE code LIKE '%' || :keyword || '%' OR name LIKE '%' || :keyword || '%' OR pinYin LIKE '%' || :keyword || '%'")
+    @Query(
+        "SELECT * FROM assets WHERE code LIKE '%' || :keyword || '%' OR name LIKE '%' || :keyword || '%' OR pinYin LIKE '%' || :keyword || '%'",
+    )
     suspend fun search(keyword: String): List<AssetEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

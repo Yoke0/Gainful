@@ -22,7 +22,6 @@ class SettingsViewModel(
     private val repository: UserPreferencesRepository,
     private val getTransactionsWithAssetsOnceUseCase: GetTransactionsWithAssetsOnceUseCase,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
@@ -45,34 +44,66 @@ class SettingsViewModel(
 
     fun onIntent(intent: SettingsIntent) {
         when (intent) {
-            is SettingsIntent.SetRefreshMinutes -> viewModelScope.launch {
-                repository.setRefreshMinutes(intent.minutes)
+            is SettingsIntent.SetRefreshMinutes -> {
+                viewModelScope.launch {
+                    repository.setRefreshMinutes(intent.minutes)
+                }
             }
-            is SettingsIntent.SetOpenTime -> viewModelScope.launch {
-                repository.setOpenTime(intent.hour, intent.minute)
+
+            is SettingsIntent.SetOpenTime -> {
+                viewModelScope.launch {
+                    repository.setOpenTime(intent.hour, intent.minute)
+                }
             }
-            is SettingsIntent.SetCloseTime -> viewModelScope.launch {
-                repository.setCloseTime(intent.hour, intent.minute)
+
+            is SettingsIntent.SetCloseTime -> {
+                viewModelScope.launch {
+                    repository.setCloseTime(intent.hour, intent.minute)
+                }
             }
-            is SettingsIntent.ShowTimePicker -> _uiState.update {
-                it.copy(timePickerTarget = intent.target, showTimePicker = true)
+
+            is SettingsIntent.ShowTimePicker -> {
+                _uiState.update {
+                    it.copy(timePickerTarget = intent.target, showTimePicker = true)
+                }
             }
-            is SettingsIntent.DismissTimePicker -> _uiState.update {
-                it.copy(showTimePicker = false)
+
+            is SettingsIntent.DismissTimePicker -> {
+                _uiState.update {
+                    it.copy(showTimePicker = false)
+                }
             }
-            is SettingsIntent.ShowFreqPicker -> _uiState.update {
-                it.copy(showFreqPicker = intent.show)
+
+            is SettingsIntent.ShowFreqPicker -> {
+                _uiState.update {
+                    it.copy(showFreqPicker = intent.show)
+                }
             }
-            is SettingsIntent.SetGainLossColorScheme -> viewModelScope.launch {
-                repository.setGainLossColorScheme(intent.scheme)
+
+            is SettingsIntent.SetGainLossColorScheme -> {
+                viewModelScope.launch {
+                    repository.setGainLossColorScheme(intent.scheme)
+                }
             }
-            is SettingsIntent.ShowColorPicker -> _uiState.update {
-                it.copy(showColorPicker = intent.show)
+
+            is SettingsIntent.ShowColorPicker -> {
+                _uiState.update {
+                    it.copy(showColorPicker = intent.show)
+                }
             }
-            is SettingsIntent.ShowExportDialog -> showExportDialog(intent.show)
-            is SettingsIntent.ConfirmExport -> confirmExport(intent.csvConfig)
-            is SettingsIntent.DismissExportResult -> _uiState.update {
-                it.copy(showExportResult = false, exportResult = null)
+
+            is SettingsIntent.ShowExportDialog -> {
+                showExportDialog(intent.show)
+            }
+
+            is SettingsIntent.ConfirmExport -> {
+                confirmExport(intent.csvConfig)
+            }
+
+            is SettingsIntent.DismissExportResult -> {
+                _uiState.update {
+                    it.copy(showExportResult = false, exportResult = null)
+                }
             }
         }
     }
@@ -121,10 +152,11 @@ class SettingsViewModel(
                 it.copy(
                     exportCsvContent = null,
                     showExportResult = true,
-                    exportResult = ExportResult(
-                        fileName = it.exportFileName,
-                        recordCount = it.exportRecordCount,
-                    ),
+                    exportResult =
+                        ExportResult(
+                            fileName = it.exportFileName,
+                            recordCount = it.exportRecordCount,
+                        ),
                 )
             }
         } else {

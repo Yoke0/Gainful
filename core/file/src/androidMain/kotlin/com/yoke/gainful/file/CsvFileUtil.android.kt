@@ -18,38 +18,47 @@ actual fun rememberCsvFileUtil(): CsvFileUtil {
     var saveCallback by remember { mutableStateOf<((Boolean) -> Unit)?>(null) }
     var pickCallback by remember { mutableStateOf<((String?, String?) -> Unit)?>(null) }
 
-    val saveLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/csv")
-    ) { uri: Uri? ->
-        val success = if (uri != null) {
-            runCatching {
-                val content = saveContent ?: return@runCatching false
-                context.contentResolver.openOutputStream(uri)?.use { os ->
-                    os.write(content.toByteArray(Charsets.UTF_8))
+    val saveLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("text/csv"),
+        ) { uri: Uri? ->
+            val success =
+                if (uri != null) {
+                    runCatching {
+                        val content = saveContent ?: return@runCatching false
+                        context.contentResolver.openOutputStream(uri)?.use { os ->
+                            os.write(content.toByteArray(Charsets.UTF_8))
+                        }
+                        true
+                    }.getOrDefault(false)
+                } else {
+                    false
                 }
-                true
-            }.getOrDefault(false)
-        } else false
-        saveCallback?.invoke(success)
-        saveContent = null
-        saveCallback = null
-    }
+            saveCallback?.invoke(success)
+            saveContent = null
+            saveCallback = null
+        }
 
-    val pickLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        val result = if (uri != null) {
-            runCatching {
-                val content = context.contentResolver.openInputStream(uri)?.use { input ->
-                    input.bufferedReader().readText()
+    val pickLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri: Uri? ->
+            val result =
+                if (uri != null) {
+                    runCatching {
+                        val content =
+                            context.contentResolver.openInputStream(uri)?.use { input ->
+                                input.bufferedReader().readText()
+                            }
+                        val fileName = uri.lastPathSegment ?: "trades.csv"
+                        content to fileName
+                    }.getOrNull()
+                } else {
+                    null
                 }
-                val fileName = uri.lastPathSegment ?: "trades.csv"
-                content to fileName
-            }.getOrNull()
-        } else null
-        pickCallback?.invoke(result?.first, result?.second)
-        pickCallback = null
-    }
+            pickCallback?.invoke(result?.first, result?.second)
+            pickCallback = null
+        }
 
     return remember {
         object : CsvFileUtil {

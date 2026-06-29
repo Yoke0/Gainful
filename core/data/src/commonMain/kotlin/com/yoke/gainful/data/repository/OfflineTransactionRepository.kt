@@ -1,8 +1,8 @@
 package com.yoke.gainful.data.repository
 
-import com.yoke.gainful.database.dao.TransactionDao
 import com.yoke.gainful.data.model.toDomain
 import com.yoke.gainful.data.model.toEntity
+import com.yoke.gainful.database.dao.TransactionDao
 import com.yoke.gainful.model.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.map
 class OfflineTransactionRepository(
     private val dao: TransactionDao,
 ) : TransactionRepository {
-
     override fun getTransactions(): Flow<List<Transaction>> {
         return dao.getAll().map { entities -> entities.map { it.toDomain() } }
     }

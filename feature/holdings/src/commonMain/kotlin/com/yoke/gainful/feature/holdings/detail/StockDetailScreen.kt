@@ -51,6 +51,7 @@ import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatLocalizedDate
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.designsystem.components.BackNavigationIcon
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.LoadingDots
 import com.yoke.gainful.designsystem.components.LoadingSpinner
@@ -66,7 +67,6 @@ import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.TransactionType
-import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 import gainful.feature.holdings.generated.resources.Res
@@ -111,18 +111,19 @@ import gainful.feature.holdings.generated.resources.volume
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-private fun ChartPeriod.localizedLabel(): String = when (this) {
-    ChartPeriod.TRENDS -> stringResource(Res.string.chart_trends)
-    ChartPeriod.TRENDS_5D -> stringResource(Res.string.chart_trends_5d)
-    ChartPeriod.DAILY -> stringResource(Res.string.chart_daily)
-    ChartPeriod.WEEKLY -> stringResource(Res.string.chart_weekly)
-    ChartPeriod.MONTHLY -> stringResource(Res.string.chart_monthly)
-    ChartPeriod.MIN_1 -> stringResource(Res.string.chart_min_1)
-    ChartPeriod.MIN_5 -> stringResource(Res.string.chart_min_5)
-    ChartPeriod.MIN_15 -> stringResource(Res.string.chart_min_15)
-    ChartPeriod.MIN_30 -> stringResource(Res.string.chart_min_30)
-    ChartPeriod.MIN_60 -> stringResource(Res.string.chart_min_60)
-}
+private fun ChartPeriod.localizedLabel(): String =
+    when (this) {
+        ChartPeriod.TRENDS -> stringResource(Res.string.chart_trends)
+        ChartPeriod.TRENDS_5D -> stringResource(Res.string.chart_trends_5d)
+        ChartPeriod.DAILY -> stringResource(Res.string.chart_daily)
+        ChartPeriod.WEEKLY -> stringResource(Res.string.chart_weekly)
+        ChartPeriod.MONTHLY -> stringResource(Res.string.chart_monthly)
+        ChartPeriod.MIN_1 -> stringResource(Res.string.chart_min_1)
+        ChartPeriod.MIN_5 -> stringResource(Res.string.chart_min_5)
+        ChartPeriod.MIN_15 -> stringResource(Res.string.chart_min_15)
+        ChartPeriod.MIN_30 -> stringResource(Res.string.chart_min_30)
+        ChartPeriod.MIN_60 -> stringResource(Res.string.chart_min_60)
+    }
 
 @Composable
 fun StockDetailScreen(
@@ -147,33 +148,42 @@ private fun StockDetailScreen(
     onRetry: () -> Unit,
 ) {
     when (uiState) {
-        is StockDetailUiState.Loading -> LoadingCenterArea(uiState.pinYin, uiState.name)
-        is StockDetailUiState.Error -> ErrorCenterArea(
-            pinYin = uiState.pinYin,
-            name = uiState.name,
-            onRetry = onRetry,
-            onBack = onBack,
-        )
-        is StockDetailUiState.Success -> GainfulScaffold(
-            appTopBar = {
-                GainfulTopAppBar(
-                    title = uiState.name,
-                    subtitle = "${uiState.pinYin} ${uiState.code}",
-                    navigationIcon = { BackNavigationIcon(onClick = onBack) },
-                )
-            },
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .navigationBarsPadding(),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+        is StockDetailUiState.Loading -> {
+            LoadingCenterArea(uiState.pinYin, uiState.name)
+        }
+
+        is StockDetailUiState.Error -> {
+            ErrorCenterArea(
+                pinYin = uiState.pinYin,
+                name = uiState.name,
+                onRetry = onRetry,
+                onBack = onBack,
+            )
+        }
+
+        is StockDetailUiState.Success -> {
+            GainfulScaffold(
+                appTopBar = {
+                    GainfulTopAppBar(
+                        title = uiState.name,
+                        subtitle = "${uiState.pinYin} ${uiState.code}",
+                        navigationIcon = { BackNavigationIcon(onClick = onBack) },
+                    )
+                },
             ) {
-                PriceHeroCard(uiState)
-                ChartCard(uiState.selectedPeriod, uiState.kLines.map { it.close }, onPeriodSelected)
-                MetricsGrid(uiState)
-                TradesCard(uiState)
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .navigationBarsPadding(),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    PriceHeroCard(uiState)
+                    ChartCard(uiState.selectedPeriod, uiState.kLines.map { it.close }, onPeriodSelected)
+                    MetricsGrid(uiState)
+                    TradesCard(uiState)
+                }
             }
         }
     }
@@ -268,10 +278,11 @@ private fun ErrorCenterArea(
             }
 
             Box(
-                modifier = Modifier
-                    .size(96.dp)
-                    .clip(CircleShape)
-                    .background(GainRed.copy(alpha = 0.1f)),
+                modifier =
+                    Modifier
+                        .size(96.dp)
+                        .clip(CircleShape)
+                        .background(GainRed.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Canvas(modifier = Modifier.size(40.dp)) {
@@ -318,11 +329,12 @@ private fun ErrorCenterArea(
                 fontFamily = FontFamily.Monospace,
                 color = TextMuted,
                 letterSpacing = 0.3.sp,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(9999.dp))
-                    .background(Surface)
-                    .border(1.dp, Border, RoundedCornerShape(9999.dp))
-                    .padding(horizontal = 14.dp, vertical = 4.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(9999.dp))
+                        .background(Surface)
+                        .border(1.dp, Border, RoundedCornerShape(9999.dp))
+                        .padding(horizontal = 14.dp, vertical = 4.dp),
             )
 
             Column(
@@ -330,12 +342,13 @@ private fun ErrorCenterArea(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(9999.dp))
-                        .background(Gold)
-                        .clickable(onClick = onRetry)
-                        .padding(vertical = 14.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(9999.dp))
+                            .background(Gold)
+                            .clickable(onClick = onRetry)
+                            .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -346,12 +359,13 @@ private fun ErrorCenterArea(
                     )
                 }
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(9999.dp))
-                        .border(1.dp, Border, RoundedCornerShape(9999.dp))
-                        .clickable(onClick = onBack)
-                        .padding(vertical = 12.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(9999.dp))
+                            .border(1.dp, Border, RoundedCornerShape(9999.dp))
+                            .clickable(onClick = onBack)
+                            .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -373,11 +387,12 @@ private fun PriceHeroCard(uiState: StockDetailUiState.Success) {
     val changeColor = if (change >= 0) gainColor else lossColor
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Row(
             verticalAlignment = Alignment.Bottom,
@@ -461,11 +476,12 @@ private fun ChartCard(
     val isMinuteSelected = selectedPeriod.klt != null && selectedPeriod.klt in 1..60
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -482,22 +498,24 @@ private fun ChartCard(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.weight(1f, fill = false),
             ) {
-                listOf(ChartPeriod.TRENDS, ChartPeriod.TRENDS_5D, ChartPeriod.DAILY, ChartPeriod.WEEKLY, ChartPeriod.MONTHLY).forEach { period ->
+                listOf(ChartPeriod.TRENDS, ChartPeriod.TRENDS_5D, ChartPeriod.DAILY, ChartPeriod.WEEKLY, ChartPeriod.MONTHLY).forEach {
+                    period ->
                     val isActive = period == selectedPeriod && !isMinuteSelected
                     Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .border(
-                                width = 1.dp,
-                                color = if (isActive) Gold else Border,
-                                shape = RoundedCornerShape(12.dp),
-                            )
-                            .background(if (isActive) GoldDim else Surface)
-                            .clickable {
-                                minutesExpanded = false
-                                onPeriodSelected(period)
-                            }
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        modifier =
+                            Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isActive) Gold else Border,
+                                    shape = RoundedCornerShape(12.dp),
+                                )
+                                .background(if (isActive) GoldDim else Surface)
+                                .clickable {
+                                    minutesExpanded = false
+                                    onPeriodSelected(period)
+                                }
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
                     ) {
                         Text(
                             text = period.localizedLabel(),
@@ -508,37 +526,47 @@ private fun ChartCard(
                 }
                 Box {
                     Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .border(
-                                width = 1.dp,
-                                color = if (isMinuteSelected || minutesExpanded) Gold else Border,
-                                shape = RoundedCornerShape(12.dp),
-                            )
-                            .background(if (isMinuteSelected || minutesExpanded) GoldDim else Surface)
-                            .clickable { minutesExpanded = !minutesExpanded }
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        modifier =
+                            Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isMinuteSelected || minutesExpanded) Gold else Border,
+                                    shape = RoundedCornerShape(12.dp),
+                                )
+                                .background(if (isMinuteSelected || minutesExpanded) GoldDim else Surface)
+                                .clickable { minutesExpanded = !minutesExpanded }
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = if (isMinuteSelected && !minutesExpanded) selectedPeriod.localizedLabel() else stringResource(Res.string.minutes_suffix),
+                                text =
+                                    if (isMinuteSelected && !minutesExpanded) {
+                                        selectedPeriod.localizedLabel()
+                                    } else {
+                                        stringResource(
+                                            Res.string.minutes_suffix,
+                                        )
+                                    },
                                 fontSize = 10.sp,
                                 color = if (isMinuteSelected || minutesExpanded) Gold else TextMuted,
                             )
                             Spacer(modifier = Modifier.width(2.dp))
                             Canvas(
-                                modifier = Modifier
-                                    .size(5.dp)
-                                    .rotate(if (minutesExpanded) 180f else 0f),
+                                modifier =
+                                    Modifier
+                                        .size(5.dp)
+                                        .rotate(if (minutesExpanded) 180f else 0f),
                             ) {
                                 val stroke = Stroke(width = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round)
                                 val color = if (isMinuteSelected || minutesExpanded) Gold else TextMuted
                                 drawPath(
-                                    path = Path().apply {
-                                        moveTo(0f, 0f)
-                                        lineTo(size.width / 2, size.height)
-                                        lineTo(size.width, 0f)
-                                    },
+                                    path =
+                                        Path().apply {
+                                            moveTo(0f, 0f)
+                                            lineTo(size.width / 2, size.height)
+                                            lineTo(size.width, 0f)
+                                        },
                                     color = color,
                                     style = stroke,
                                 )
@@ -548,12 +576,14 @@ private fun ChartCard(
                     DropdownMenu(
                         expanded = minutesExpanded,
                         onDismissRequest = { minutesExpanded = false },
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Card)
-                            .border(1.dp, Border, RoundedCornerShape(10.dp)),
+                        modifier =
+                            Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Card)
+                                .border(1.dp, Border, RoundedCornerShape(10.dp)),
                     ) {
-                        listOf(ChartPeriod.MIN_1, ChartPeriod.MIN_5, ChartPeriod.MIN_15, ChartPeriod.MIN_30, ChartPeriod.MIN_60).forEach { period ->
+                        listOf(ChartPeriod.MIN_1, ChartPeriod.MIN_5, ChartPeriod.MIN_15, ChartPeriod.MIN_30, ChartPeriod.MIN_60).forEach {
+                            period ->
                             DropdownMenuItem(
                                 text = {
                                     Text(
@@ -568,15 +598,18 @@ private fun ChartCard(
                                     minutesExpanded = false
                                     onPeriodSelected(period)
                                 },
-                                trailingIcon = if (selectedPeriod == period) {
-                                    {
-                                        Text(
-                                            text = "\u2713",
-                                            fontSize = 11.sp,
-                                            color = Gold,
-                                        )
-                                    }
-                                } else null,
+                                trailingIcon =
+                                    if (selectedPeriod == period) {
+                                        {
+                                            Text(
+                                                text = "\u2713",
+                                                fontSize = 11.sp,
+                                                color = Gold,
+                                            )
+                                        }
+                                    } else {
+                                        null
+                                    },
                             )
                         }
                     }
@@ -590,11 +623,12 @@ private fun ChartCard(
             ChartArea(chartData)
         } else {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Surface),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Surface),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -611,11 +645,12 @@ private fun ChartCard(
 private fun ChartArea(data: List<Double>) {
     val lineColor = gainColor
     Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(160.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(Surface),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(160.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Surface),
     ) {
         val w = size.width
         val h = size.height
@@ -649,14 +684,16 @@ private fun ChartArea(data: List<Double>) {
 
         drawPath(
             path = fillPath,
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    lineColor.copy(alpha = 0.3f),
-                    lineColor.copy(alpha = 0.02f),
+            brush =
+                Brush.verticalGradient(
+                    colors =
+                        listOf(
+                            lineColor.copy(alpha = 0.3f),
+                            lineColor.copy(alpha = 0.02f),
+                        ),
+                    startY = 0f,
+                    endY = h,
                 ),
-                startY = 0f,
-                endY = h,
-            ),
         )
         drawPath(
             path = linePath,
@@ -686,7 +723,7 @@ private fun MetricsGrid(uiState: StockDetailUiState.Success) {
             MetricItem(
                 stringResource(Res.string.holding_badge),
                 stringResource(Res.string.holding_quantity, uiState.quantity.toInt()),
-                Modifier.weight(1f)
+                Modifier.weight(1f),
             )
             MetricItem(
                 stringResource(Res.string.cost),
@@ -712,10 +749,11 @@ private fun MetricItem(
     valueColor: Color = TextPrimary,
 ) {
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(Card)
-            .padding(12.dp),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(10.dp))
+                .background(Card)
+                .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -739,11 +777,12 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
     val trades = uiState.transactions
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -761,10 +800,11 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = Gold,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(GoldDim)
-                    .padding(horizontal = 10.dp, vertical = 2.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(GoldDim)
+                        .padding(horizontal = 10.dp, vertical = 2.dp),
             )
         }
 
@@ -775,19 +815,21 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
                 text = stringResource(Res.string.no_trade_records),
                 fontSize = 14.sp,
                 color = TextMuted,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
             )
         } else {
             trades.forEach { trade ->
                 TradeRow(trade)
                 if (trade != trades.last()) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(Border.copy(alpha = 0.06f)),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(Border.copy(alpha = 0.06f)),
                     )
                 }
             }
@@ -797,21 +839,24 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
 
 @Composable
 private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
-    val typeLabel = when (trade.type) {
-        TransactionType.BUY -> stringResource(Res.string.buy)
-        TransactionType.SELL -> stringResource(Res.string.sell)
-        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
-    }
-    val typeColor = when (trade.type) {
-        TransactionType.BUY -> gainColor
-        TransactionType.SELL -> lossColor
-        TransactionType.DIVIDEND -> Gold
-    }
+    val typeLabel =
+        when (trade.type) {
+            TransactionType.BUY -> stringResource(Res.string.buy)
+            TransactionType.SELL -> stringResource(Res.string.sell)
+            TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
+        }
+    val typeColor =
+        when (trade.type) {
+            TransactionType.BUY -> gainColor
+            TransactionType.SELL -> lossColor
+            TransactionType.DIVIDEND -> Gold
+        }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

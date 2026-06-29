@@ -35,12 +35,13 @@ fun GainfulDialog(
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Card)
+                    .border(1.dp, Border, RoundedCornerShape(14.dp))
+                    .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(

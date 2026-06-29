@@ -1,3 +1,6 @@
+
+@file:Suppress("ktlint:standard:package-name")
+
 package com.yoke.gainful.feature.settings.`import`
 
 import androidx.lifecycle.ViewModel
@@ -25,7 +28,6 @@ class ImportViewModel(
     private val assetRepository: AssetRepository,
     private val searchAssetsUseCase: SearchAssetsUseCase,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(ImportUiState())
     val uiState: StateFlow<ImportUiState> = _uiState.asStateFlow()
 
@@ -47,9 +49,10 @@ class ImportViewModel(
             _uiState.update { it.copy(isLoading = true, hasParseError = false) }
 
             val txsWithAssets = getTransactionsWithAssetsOnceUseCase()
-            val existingIds = txsWithAssets.map { tx ->
-                "${tx.transaction.assetId}_${tx.transaction.tradeDate}_${tx.transaction.type.value}"
-            }.toSet()
+            val existingIds =
+                txsWithAssets.map { tx ->
+                    "${tx.transaction.assetId}_${tx.transaction.tradeDate}_${tx.transaction.type.value}"
+                }.toSet()
 
             val result = CsvUtil.parseCsv(intent.csvContent, intent.csvConfig, existingIds)
             if (result != null) {
@@ -74,26 +77,29 @@ class ImportViewModel(
 
         val displayItems = preview.toDisplayItems(csvConfig).toMutableList()
 
-        val codesToEnrich = displayItems
-            .filter { it.name.isBlank() || it.pinYin.isBlank() }
-            .map { it.code }
-            .distinct()
+        val codesToEnrich =
+            displayItems
+                .filter { it.name.isBlank() || it.pinYin.isBlank() }
+                .map { it.code }
+                .distinct()
 
-        val dbAssets = codesToEnrich.mapNotNull { code ->
-            val assets = assetRepository.searchAssets(code)
-            assets.find { it.innerCode == code || it.code == code }?.let { code to it }
-        }.toMap()
+        val dbAssets =
+            codesToEnrich.mapNotNull { code ->
+                val assets = assetRepository.searchAssets(code)
+                assets.find { it.innerCode == code || it.code == code }?.let { code to it }
+            }.toMap()
 
         val codesToSearch = codesToEnrich.filter { it !in dbAssets }
 
-        val searchResults = codesToSearch.map { code ->
-            viewModelScope.async {
-                runCatching {
-                    val results = searchAssetsUseCase(code)
-                    code to results.find { it.innerCode == code || it.code == code }
-                }.getOrNull() ?: (code to null)
-            }
-        }.awaitAll().toMap()
+        val searchResults =
+            codesToSearch.map { code ->
+                viewModelScope.async {
+                    runCatching {
+                        val results = searchAssetsUseCase(code)
+                        code to results.find { it.innerCode == code || it.code == code }
+                    }.getOrNull() ?: (code to null)
+                }
+            }.awaitAll().toMap()
 
         searchResults.forEach { (_, asset) ->
             if (asset != null) {
@@ -122,10 +128,11 @@ class ImportViewModel(
             val wasDuplicate = index in preview.duplicateIndices
             val newDuplicateCount = if (wasDuplicate) preview.duplicateCount - 1 else preview.duplicateCount
             it.copy(
-                preview = preview.copy(
-                    deletedIndices = deletedIndices,
-                    duplicateCount = newDuplicateCount.coerceAtLeast(0),
-                ),
+                preview =
+                    preview.copy(
+                        deletedIndices = deletedIndices,
+                        duplicateCount = newDuplicateCount.coerceAtLeast(0),
+                    ),
                 displayItems = it.displayItems.toMutableList().apply { removeAt(index) },
             )
         }
@@ -134,11 +141,12 @@ class ImportViewModel(
     private fun confirmImport(csvConfig: CsvConfig) {
         viewModelScope.launch {
             val preview = _uiState.value.preview ?: return@launch
-            val transactions = CsvUtil.parseToTransactions(
-                csvContent = preview.rawCsv,
-                config = csvConfig,
-                deletedIndices = preview.deletedIndices,
-            )
+            val transactions =
+                CsvUtil.parseToTransactions(
+                    csvContent = preview.rawCsv,
+                    config = csvConfig,
+                    deletedIndices = preview.deletedIndices,
+                )
             if (transactions.isNotEmpty()) {
                 transactionRepository.insertTransactions(transactions)
             }

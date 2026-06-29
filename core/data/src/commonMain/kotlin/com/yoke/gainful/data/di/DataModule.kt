@@ -13,10 +13,11 @@ import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.datastore.UserPreferencesDataSource
 import org.koin.dsl.module
 
-val dataModule = module {
-    single<MarketRepository> { EastMoneyMarketRepository(get()) }
-    single<AssetRepository> { OfflineAssetRepository(get()) }
-    single<TransactionRepository> { OfflineTransactionRepository(get()) }
-    single<UserPreferencesRepository> { OfflineUserPreferencesRepository(get<UserPreferencesDataSource>()) }
-    single<QuoteCacheRepository> { OfflineQuoteCacheRepository(get()) }
-}
+val dataModule =
+    module {
+        single<MarketRepository> { EastMoneyMarketRepository(get()) }
+        single<AssetRepository> { OfflineAssetRepository(get()) }
+        single<TransactionRepository> { OfflineTransactionRepository(get()) }
+        single<UserPreferencesRepository> { OfflineUserPreferencesRepository(get<UserPreferencesDataSource>()) }
+        single<QuoteCacheRepository> { OfflineQuoteCacheRepository(get()) }
+    }

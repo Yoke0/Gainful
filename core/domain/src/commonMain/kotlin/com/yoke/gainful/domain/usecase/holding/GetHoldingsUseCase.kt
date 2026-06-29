@@ -23,11 +23,13 @@ class GetHoldingsUseCase(
                                 totalCost += tx.amount
                                 quantity += tx.quantity
                             }
+
                             TransactionType.SELL -> {
                                 val avgCost = if (quantity > 0) totalCost / quantity else 0.0
                                 totalCost -= avgCost * tx.quantity
                                 quantity -= tx.quantity
                             }
+
                             TransactionType.DIVIDEND -> {
                                 totalCost -= tx.amount
                             }

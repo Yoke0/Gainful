@@ -1,3 +1,6 @@
+
+@file:Suppress("ktlint:standard:package-name")
+
 package com.yoke.gainful.feature.settings.`import`
 
 import androidx.compose.foundation.background
@@ -79,9 +82,10 @@ fun ImportScreen(
 
     val csvHeaders = stringArrayResource(Res.array.csv_headers)
     val csvTypeValues = stringArrayResource(Res.array.csv_type_values)
-    val csvConfig = remember(csvHeaders, csvTypeValues) {
-        CsvConfig(headers = csvHeaders, typeValues = csvTypeValues)
-    }
+    val csvConfig =
+        remember(csvHeaders, csvTypeValues) {
+            CsvConfig(headers = csvHeaders, typeValues = csvTypeValues)
+        }
 
     ImportScreen(
         uiState = uiState,
@@ -131,11 +135,12 @@ private fun ImportScreen(
                 actions = {
                     if (uiState.preview != null) {
                         Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(Gold)
-                                .clickable { onConfirmImport() }
-                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                            modifier =
+                                Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(Gold)
+                                    .clickable { onConfirmImport() }
+                                    .padding(horizontal = 16.dp, vertical = 6.dp),
                         ) {
                             Text(
                                 text = stringResource(Res.string.import_confirm),
@@ -229,19 +234,21 @@ private fun ImportPreviewContent(
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .navigationBarsPadding(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .navigationBarsPadding(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 itemsIndexed(
                     items = displayItems,
-                    key = { index, _ -> index }
+                    key = { index, _ -> index },
                 ) { index, item ->
                     val isDuplicate = index in preview.duplicateIndices
                     TransactionCard(
@@ -281,10 +288,11 @@ private fun DuplicateConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val confirmMessage = stringResource(
-        Res.string.import_confirm_duplicate_message,
-        duplicateCount,
-    )
+    val confirmMessage =
+        stringResource(
+            Res.string.import_confirm_duplicate_message,
+            duplicateCount,
+        )
 
     ConfirmDialog(
         title = stringResource(Res.string.import_confirm_title),
@@ -312,17 +320,18 @@ private fun UploadArea(
     onPickFile: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (hasPreview) GreenDim else Surface)
-            .border(
-                width = 2.dp,
-                color = if (hasPreview) GainGreen else Border,
-                shape = RoundedCornerShape(10.dp),
-            )
-            .clickable(onClick = onPickFile)
-            .padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(if (hasPreview) GreenDim else Surface)
+                .border(
+                    width = 2.dp,
+                    color = if (hasPreview) GainGreen else Border,
+                    shape = RoundedCornerShape(10.dp),
+                )
+                .clickable(onClick = onPickFile)
+                .padding(24.dp),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -363,11 +372,12 @@ private fun StatBox(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(6.dp))
-            .padding(8.dp),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(6.dp))
+                .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(

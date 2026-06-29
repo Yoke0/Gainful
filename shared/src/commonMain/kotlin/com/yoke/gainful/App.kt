@@ -16,6 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import com.yoke.gainful.data.repository.UserPreferencesRepository
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.GainfulTheme
 import com.yoke.gainful.di.initKoin
 import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
 import com.yoke.gainful.feature.dashboard.navigation.dashboardEntry
@@ -28,8 +30,6 @@ import com.yoke.gainful.navigation.TOP_LEVEL_NAV_ITEMS
 import com.yoke.gainful.navigation.rememberNavigationState
 import com.yoke.gainful.navigation.serializersConfig
 import com.yoke.gainful.sync.StockPriceFetchService
-import com.yoke.gainful.designsystem.theme.Background
-import com.yoke.gainful.designsystem.theme.GainfulTheme
 import com.yoke.gainful.ui.ProvideGainLossColors
 import org.koin.compose.koinInject
 
@@ -41,13 +41,14 @@ fun App() {
 
     GainfulTheme {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Background),
         ) {
             val repository = koinInject<UserPreferencesRepository>()
             val userPreferences by repository.userPreferences.collectAsState(
-                initial = com.yoke.gainful.model.UserPreferences()
+                initial = com.yoke.gainful.model.UserPreferences(),
             )
 
             ProvideGainLossColors(scheme = userPreferences.gainLossColorScheme) {
@@ -73,19 +74,21 @@ fun App() {
                             },
                         )
                     } else {
-                        val navigationState = rememberNavigationState(
-                            startKey = DashboardNavKey,
-                            topLevelKeys = TOP_LEVEL_NAV_ITEMS.keys,
-                            configuration = serializersConfig,
-                        )
+                        val navigationState =
+                            rememberNavigationState(
+                                startKey = DashboardNavKey,
+                                topLevelKeys = TOP_LEVEL_NAV_ITEMS.keys,
+                                configuration = serializersConfig,
+                            )
                         val navigator = remember { Navigator(navigationState) }
 
-                        val entryProvider = entryProvider {
-                            dashboardEntry()
-                            transactionsEntry(navigator)
-                            holdingsEntry(navigator)
-                            settingsEntry(navigator)
-                        }
+                        val entryProvider =
+                            entryProvider {
+                                dashboardEntry()
+                                transactionsEntry(navigator)
+                                holdingsEntry(navigator)
+                                settingsEntry(navigator)
+                            }
 
                         GainfulNavGraph(
                             navigationState = navigationState,

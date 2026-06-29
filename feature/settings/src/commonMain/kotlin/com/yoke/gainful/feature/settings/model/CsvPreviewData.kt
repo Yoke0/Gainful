@@ -29,11 +29,12 @@ fun CsvPreviewData.toDisplayItems(csvConfig: CsvConfig): List<TransactionDisplay
         if (rowIndex in deletedIndices) return@mapIndexed null
 
         val typeStr = if (typeIndex >= 0) row[typeIndex] else csvConfig.buyType
-        val type = when (typeStr) {
-            csvConfig.buyType -> TransactionType.BUY
-            csvConfig.sellType -> TransactionType.SELL
-            else -> TransactionType.DIVIDEND
-        }
+        val type =
+            when (typeStr) {
+                csvConfig.buyType -> TransactionType.BUY
+                csvConfig.sellType -> TransactionType.SELL
+                else -> TransactionType.DIVIDEND
+            }
         val dateStr = if (dateIndex >= 0) row[dateIndex] else ""
         val tradeDate = dateStr.parseLocalizedDateTimeToEpochMillis()
 

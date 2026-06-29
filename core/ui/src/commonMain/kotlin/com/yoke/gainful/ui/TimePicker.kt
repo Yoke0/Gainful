@@ -42,12 +42,6 @@ import com.yoke.gainful.common.extensions.pad2
 import com.yoke.gainful.designsystem.components.PrimaryButton
 import com.yoke.gainful.designsystem.components.SecondaryButton
 import com.yoke.gainful.designsystem.theme.Background
-import gainful.core.ui.generated.resources.Res
-import gainful.core.ui.generated.resources.cancel
-import gainful.core.ui.generated.resources.confirm
-import gainful.core.ui.generated.resources.now
-import gainful.core.ui.generated.resources.select_time
-import org.jetbrains.compose.resources.stringResource
 import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
 import com.yoke.gainful.designsystem.theme.GainfulTheme
@@ -57,18 +51,24 @@ import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import gainful.core.ui.generated.resources.Res
+import gainful.core.ui.generated.resources.cancel
+import gainful.core.ui.generated.resources.confirm
+import gainful.core.ui.generated.resources.now
+import gainful.core.ui.generated.resources.select_time
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-internal val TimeItemHeight = 44.dp
-internal const val VisibleItems = 5
-internal const val HalfVisible = VisibleItems / 2
+internal val TIME_ITEM_HEIGHT = 44.dp
+internal const val VISIBLE_ITEMS = 5
+internal const val HALF_VISIBLE = VISIBLE_ITEMS / 2
 
 @Composable
 internal fun TimePickerWheel(
@@ -111,9 +111,10 @@ fun TimePickerField(
     dateTimeMillis: Long?,
     onClick: () -> Unit,
 ) {
-    val time = dateTimeMillis?.let {
-        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
-    }
+    val time =
+        dateTimeMillis?.let {
+            Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
+        }
     val hasValue = time != null
     val displayText = if (hasValue) "${time.hour.pad2()}:${time.minute.pad2()}" else stringResource(Res.string.select_time)
 
@@ -126,14 +127,15 @@ fun TimePickerField(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp))
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -166,20 +168,22 @@ fun TimePickerDialog(
     onDismiss: () -> Unit,
 ) {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    val initialTime = initialSelectedTimeMillis?.let {
-        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
-    } ?: now
+    val initialTime =
+        initialSelectedTimeMillis?.let {
+            Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
+        } ?: now
     var workingHour by remember { mutableIntStateOf(initialTime.hour.coerceIn(0, 23)) }
     var workingMinute by remember { mutableIntStateOf(initialTime.minute.coerceIn(0, 59)) }
 
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Card)
+                    .border(1.dp, Border, RoundedCornerShape(14.dp))
+                    .padding(20.dp),
         ) {
             Text(
                 text = stringResource(Res.string.select_time),
@@ -241,27 +245,28 @@ internal fun WheelColumn(
 
     val startIndex = middleOffset + (initialValue - valueRange.first)
 
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = startIndex - HalfVisible,
-    )
+    val listState =
+        rememberLazyListState(
+            initialFirstVisibleItemIndex = startIndex - HALF_VISIBLE,
+        )
 
     val snapBehavior = rememberSnapFlingBehavior(listState)
 
     LaunchedEffect(initialValue) {
         val target = middleOffset + (initialValue - valueRange.first)
-        listState.scrollToItem(target - HalfVisible)
+        listState.scrollToItem(target - HALF_VISIBLE)
     }
 
     val currentValue by remember {
         derivedStateOf {
-            val centerIndex = listState.firstVisibleItemIndex + HalfVisible
+            val centerIndex = listState.firstVisibleItemIndex + HALF_VISIBLE
             val wrapped = ((centerIndex % itemCount) + itemCount) % itemCount
             (wrapped + valueRange.first).coerceIn(valueRange)
         }
     }
 
     val centerIndex by remember {
-        derivedStateOf { listState.firstVisibleItemIndex + HalfVisible }
+        derivedStateOf { listState.firstVisibleItemIndex + HALF_VISIBLE }
     }
 
     LaunchedEffect(currentValue) {
@@ -269,34 +274,36 @@ internal fun WheelColumn(
     }
 
     Box(
-        modifier = Modifier
-            .width(96.dp)
-            .height(TimeItemHeight * VisibleItems)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(10.dp)),
+        modifier =
+            Modifier
+                .width(96.dp)
+                .height(TIME_ITEM_HEIGHT * VISIBLE_ITEMS)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(10.dp)),
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(TimeItemHeight)
-                .align(Alignment.Center)
-                .background(GoldDim)
-                .drawBehind {
-                    val stroke = 1.dp.toPx()
-                    drawLine(
-                        color = Gold,
-                        start = Offset(0f, stroke / 2),
-                        end = Offset(size.width, stroke / 2),
-                        strokeWidth = stroke,
-                    )
-                    drawLine(
-                        color = Gold,
-                        start = Offset(0f, size.height - stroke / 2),
-                        end = Offset(size.width, size.height - stroke / 2),
-                        strokeWidth = stroke,
-                    )
-                },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(TIME_ITEM_HEIGHT)
+                    .align(Alignment.Center)
+                    .background(GoldDim)
+                    .drawBehind {
+                        val stroke = 1.dp.toPx()
+                        drawLine(
+                            color = Gold,
+                            start = Offset(0f, stroke / 2),
+                            end = Offset(size.width, stroke / 2),
+                            strokeWidth = stroke,
+                        )
+                        drawLine(
+                            color = Gold,
+                            start = Offset(0f, size.height - stroke / 2),
+                            end = Offset(size.width, size.height - stroke / 2),
+                            strokeWidth = stroke,
+                        )
+                    },
         )
 
         LazyColumn(
@@ -318,9 +325,10 @@ internal fun WheelColumn(
                 val color = if (distance < 0.5f) TextPrimary else TextSecondary
 
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(TimeItemHeight),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(TIME_ITEM_HEIGHT),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -344,10 +352,11 @@ fun TimePickerPreview() {
 
     GainfulTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Background)
+                    .padding(20.dp),
         ) {
             TimePickerField(
                 label = "交易时间",
@@ -370,7 +379,11 @@ fun TimePickerPreview() {
                 initialSelectedTimeMillis = timeMillis,
                 onTimeSelected = { h, m ->
                     val currentDate = Instant.fromEpochMilliseconds(timeMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
-                    timeMillis = LocalDateTime(currentDate, LocalTime(h, m)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+                    timeMillis =
+                        LocalDateTime(
+                            currentDate,
+                            LocalTime(h, m),
+                        ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
                     showDialog = false
                 },
                 onDismiss = { showDialog = false },

@@ -1,13 +1,12 @@
 package com.yoke.gainful.navigation
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
 class TopLevelBackStack<T : Any>(startKey: T) {
-
     private val topLevelStacks = mutableMapOf<T, SnapshotStateList<T>>()
 
     init {

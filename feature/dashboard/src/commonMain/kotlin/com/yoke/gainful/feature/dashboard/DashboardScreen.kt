@@ -38,7 +38,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
+import com.yoke.gainful.designsystem.components.GainfulScaffold
+import com.yoke.gainful.designsystem.components.GainfulTopAppBar
+import com.yoke.gainful.designsystem.components.bottomBarPadding
+import com.yoke.gainful.designsystem.theme.Background
+import com.yoke.gainful.designsystem.theme.Border
+import com.yoke.gainful.designsystem.theme.Card
+import com.yoke.gainful.designsystem.theme.GainGreen
+import com.yoke.gainful.designsystem.theme.Gold
+import com.yoke.gainful.designsystem.theme.GoldDim
+import com.yoke.gainful.designsystem.theme.GoldLight
+import com.yoke.gainful.designsystem.theme.GridLine
+import com.yoke.gainful.designsystem.theme.Surface
+import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.designsystem.theme.TextPrimary
+import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.HoldingDisplay
+import com.yoke.gainful.ui.gainColor
+import com.yoke.gainful.ui.lossColor
 import gainful.feature.dashboard.generated.resources.Res
 import gainful.feature.dashboard.generated.resources.dashboard_title
 import gainful.feature.dashboard.generated.resources.holdings_count
@@ -59,23 +76,6 @@ import gainful.feature.dashboard.generated.resources.total_pnl
 import gainful.feature.dashboard.generated.resources.total_pnl_label
 import gainful.feature.dashboard.generated.resources.total_profit
 import org.jetbrains.compose.resources.stringResource
-import com.yoke.gainful.designsystem.components.bottomBarPadding
-import com.yoke.gainful.designsystem.components.GainfulTopAppBar
-import com.yoke.gainful.designsystem.theme.Background
-import com.yoke.gainful.designsystem.theme.Border
-import com.yoke.gainful.designsystem.theme.Card
-import com.yoke.gainful.designsystem.theme.GainGreen
-import com.yoke.gainful.designsystem.theme.Gold
-import com.yoke.gainful.designsystem.theme.GoldDim
-import com.yoke.gainful.designsystem.theme.GoldLight
-import com.yoke.gainful.designsystem.theme.GridLine
-import com.yoke.gainful.designsystem.theme.Surface
-import com.yoke.gainful.designsystem.theme.TextMuted
-import com.yoke.gainful.designsystem.theme.TextPrimary
-import com.yoke.gainful.designsystem.theme.TextSecondary
-import com.yoke.gainful.designsystem.components.GainfulScaffold
-import com.yoke.gainful.ui.gainColor
-import com.yoke.gainful.ui.lossColor
 
 @Composable
 fun DashboardScreen(
@@ -96,20 +96,22 @@ private fun DashboardScreen(
                 title = stringResource(Res.string.dashboard_title),
                 actions = {
                     Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Card)
-                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        modifier =
+                            Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(Card)
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .clip(CircleShape)
-                                    .background(GainGreen),
+                                modifier =
+                                    Modifier
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(GainGreen),
                             )
                             Text(
                                 text = stringResource(Res.string.live_badge),
@@ -123,10 +125,11 @@ private fun DashboardScreen(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .navigationBarsPadding(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             SummaryCard(uiState)
@@ -150,11 +153,12 @@ private fun SummaryCard(state: DashboardUiState) {
     val totalCost = state.totalCost
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Text(
             text = stringResource(Res.string.total_pnl),
@@ -222,20 +226,22 @@ private fun DetailText(label: String, value: String, modifier: Modifier = Modifi
 
 @Composable
 private fun ChartCard(holdings: List<HoldingDisplay>) {
-    val chartData = remember(holdings) {
-        holdings
-            .filter { it.trends.isNotEmpty() }
-            .flatMap { it.trends.map { trend -> trend.price } }
-            .takeIf { it.isNotEmpty() }
-            ?: emptyList()
-    }
+    val chartData =
+        remember(holdings) {
+            holdings
+                .filter { it.trends.isNotEmpty() }
+                .flatMap { it.trends.map { trend -> trend.price } }
+                .takeIf { it.isNotEmpty() }
+                ?: emptyList()
+        }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -249,10 +255,11 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                 color = TextPrimary,
             )
             Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Surface)
-                    .padding(horizontal = 12.dp, vertical = 2.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Surface)
+                        .padding(horizontal = 12.dp, vertical = 2.dp),
             ) {
                 Text(
                     text = stringResource(Res.string.today_badge),
@@ -265,103 +272,108 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
         Spacer(modifier = Modifier.height(12.dp))
 
         if (chartData.size >= 2) {
-                    val minVal = chartData.min()
-                    val maxVal = chartData.max()
-                    val range = maxVal - minVal
+            val minVal = chartData.min()
+            val maxVal = chartData.max()
+            val range = maxVal - minVal
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(342f / 140f)
-                            .clip(RoundedCornerShape(8.dp)),
-                    ) {
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            val w = size.width
-                            val h = size.height
-                            val padTop = 10f
-                            val padBottom = 10f
-                            val chartH = h - padTop - padBottom
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(342f / 140f)
+                        .clip(RoundedCornerShape(8.dp)),
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val w = size.width
+                    val h = size.height
+                    val padTop = 10f
+                    val padBottom = 10f
+                    val chartH = h - padTop - padBottom
 
-                            val lineColor = Gold
-                            val gridColor = GridLine
+                    val lineColor = Gold
+                    val gridColor = GridLine
 
-                            for (i in 0..2) {
-                                val y = padTop + chartH * i / 2f
-                                drawLine(
-                                    color = gridColor,
-                                    start = Offset(0f, y),
-                                    end = Offset(w, y),
-                                    strokeWidth = 1f,
-                                )
-                            }
+                    for (i in 0..2) {
+                        val y = padTop + chartH * i / 2f
+                        drawLine(
+                            color = gridColor,
+                            start = Offset(0f, y),
+                            end = Offset(w, y),
+                            strokeWidth = 1f,
+                        )
+                    }
 
-                            val linePath = Path()
-                            val fillPath = Path()
-                            val stepX = w / (chartData.size - 1).toFloat()
+                    val linePath = Path()
+                    val fillPath = Path()
+                    val stepX = w / (chartData.size - 1).toFloat()
 
-                            chartData.forEachIndexed { index, value ->
-                                val x = index * stepX
-                                val normalized = if (range > 0) ((value - minVal) / range).toFloat() else 0.5f
-                                val y = padTop + chartH * (1f - normalized)
+                    chartData.forEachIndexed { index, value ->
+                        val x = index * stepX
+                        val normalized = if (range > 0) ((value - minVal) / range).toFloat() else 0.5f
+                        val y = padTop + chartH * (1f - normalized)
 
-                                if (index == 0) {
-                                    linePath.moveTo(x, y)
-                                    fillPath.moveTo(x, h)
-                                    fillPath.lineTo(x, y)
-                                } else {
-                                    linePath.lineTo(x, y)
-                                    fillPath.lineTo(x, y)
-                                }
-                            }
+                        if (index == 0) {
+                            linePath.moveTo(x, y)
+                            fillPath.moveTo(x, h)
+                            fillPath.lineTo(x, y)
+                        } else {
+                            linePath.lineTo(x, y)
+                            fillPath.lineTo(x, y)
+                        }
+                    }
 
-                            fillPath.lineTo(w, h)
-                            fillPath.close()
+                    fillPath.lineTo(w, h)
+                    fillPath.close()
 
-                            drawPath(
-                                path = fillPath,
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
+                    drawPath(
+                        path = fillPath,
+                        brush =
+                            Brush.verticalGradient(
+                                colors =
+                                    listOf(
                                         lineColor.copy(alpha = 0.45f),
                                         lineColor.copy(alpha = 0.12f),
                                         lineColor.copy(alpha = 0.02f),
                                     ),
-                                    startY = 0f,
-                                    endY = h,
-                                ),
-                            )
+                                startY = 0f,
+                                endY = h,
+                            ),
+                    )
 
-                            drawPath(
-                                path = linePath,
-                                color = lineColor,
-                                style = Stroke(
-                                    width = 2.5f,
-                                    cap = StrokeCap.Round,
-                                    join = StrokeJoin.Round,
-                                ),
-                            )
+                    drawPath(
+                        path = linePath,
+                        color = lineColor,
+                        style =
+                            Stroke(
+                                width = 2.5f,
+                                cap = StrokeCap.Round,
+                                join = StrokeJoin.Round,
+                            ),
+                    )
 
-                            val lastX = (chartData.size - 1) * stepX
-                            val lastNormalized = if (range > 0) ((chartData.last() - minVal) / range).toFloat() else 0.5f
-                            val lastY = padTop + chartH * (1f - lastNormalized)
-                            drawCircle(
-                                color = GoldLight,
-                                radius = 3.5f,
-                                center = Offset(lastX, lastY),
-                            )
-                            drawCircle(
-                                color = Background,
-                                radius = 1.5f,
-                                center = Offset(lastX, lastY),
-                            )
-                        }
+                    val lastX = (chartData.size - 1) * stepX
+                    val lastNormalized = if (range > 0) ((chartData.last() - minVal) / range).toFloat() else 0.5f
+                    val lastY = padTop + chartH * (1f - lastNormalized)
+                    drawCircle(
+                        color = GoldLight,
+                        radius = 3.5f,
+                        center = Offset(lastX, lastY),
+                    )
+                    drawCircle(
+                        color = Background,
+                        radius = 1.5f,
+                        center = Offset(lastX, lastY),
+                    )
+                }
             }
         } else {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(342f / 140f)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Surface),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(342f / 140f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Surface),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -433,10 +445,11 @@ private fun MetricCard(
     valueColor: Color = TextPrimary,
 ) {
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(Card)
-            .padding(16.dp),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(10.dp))
+                .background(Card)
+                .padding(16.dp),
     ) {
         Text(
             text = label,
@@ -464,11 +477,12 @@ private fun HoldingsOverviewCard(
     val totalGain = remember(holdings) { holdings.sumOf { it.totalGain } }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -481,10 +495,11 @@ private fun HoldingsOverviewCard(
                 color = TextPrimary,
             )
             Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(GoldDim)
-                    .padding(horizontal = 10.dp, vertical = 2.dp),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(GoldDim)
+                        .padding(horizontal = 10.dp, vertical = 2.dp),
             ) {
                 Text(
                     text = stringResource(Res.string.holdings_count, holdings.size),
@@ -514,10 +529,11 @@ private fun HoldingsOverviewCard(
 
         Spacer(modifier = Modifier.height(12.dp))
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Border),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Border),
         )
         Spacer(modifier = Modifier.height(12.dp))
         Row(
@@ -537,9 +553,10 @@ private fun HoldingsOverviewCard(
 @Composable
 private fun HoldingRow(name: String, gain: Double) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

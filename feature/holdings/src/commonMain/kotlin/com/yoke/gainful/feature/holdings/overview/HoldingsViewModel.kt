@@ -15,7 +15,6 @@ class HoldingsViewModel(
     private val getHoldingsDisplayUseCase: GetHoldingsDisplayUseCase,
     private val getClosedPositionsUseCase: GetClosedPositionsUseCase,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(HoldingsUiState())
     val uiState: StateFlow<HoldingsUiState> = _uiState.asStateFlow()
 
@@ -38,13 +37,14 @@ class HoldingsViewModel(
                 val totalPnl = holdings.sumOf { it.totalGain }
                 val totalBuys = holdings.sumOf { it.totalBuys }
                 val totalPnlPct = if (totalBuys > 0) (totalPnl / totalBuys) * 100 else 0.0
-                _uiState.value = _uiState.value.copy(
-                    holdings = holdings,
-                    totalValue = totalValue,
-                    totalPnl = totalPnl,
-                    totalPnlPct = totalPnlPct,
-                    isLoading = false,
-                )
+                _uiState.value =
+                    _uiState.value.copy(
+                        holdings = holdings,
+                        totalValue = totalValue,
+                        totalPnl = totalPnl,
+                        totalPnlPct = totalPnlPct,
+                        isLoading = false,
+                    )
             }
         }
         viewModelScope.launch {

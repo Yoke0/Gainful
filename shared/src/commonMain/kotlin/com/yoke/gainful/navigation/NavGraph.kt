@@ -36,10 +36,11 @@ fun GainfulNavGraph(
     val selectedIndex = keys.indexOf(navigationState.currentTopLevelKey).coerceAtLeast(0)
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background)
-            .statusBarsPadding(),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Background)
+                .statusBarsPadding(),
     ) {
         NavDisplay(
             modifier = Modifier.fillMaxSize(),
@@ -51,10 +52,11 @@ fun GainfulNavGraph(
             itemCount = navItems.size,
             selectedIndex = selectedIndex,
             visible = visible,
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .navigationBarsPadding()
-                .align(Alignment.BottomCenter)
+            modifier =
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .navigationBarsPadding()
+                    .align(Alignment.BottomCenter),
         ) {
             navItems.forEachIndexed { index, item ->
                 val selected = index == selectedIndex

@@ -10,9 +10,10 @@ data class Transaction(
     val tradeDate: Long,
     val timestamp: Long,
 ) {
-    val fee: Double get() = when (type) {
-        TransactionType.BUY -> amount - price * quantity
-        TransactionType.SELL -> price * quantity - amount
-        TransactionType.DIVIDEND -> 0.0
-    }
+    val fee: Double get() =
+        when (type) {
+            TransactionType.BUY -> amount - price * quantity
+            TransactionType.SELL -> price * quantity - amount
+            TransactionType.DIVIDEND -> 0.0
+        }
 }

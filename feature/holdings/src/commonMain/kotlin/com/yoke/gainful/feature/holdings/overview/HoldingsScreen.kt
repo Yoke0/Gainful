@@ -38,8 +38,9 @@ import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
-import com.yoke.gainful.designsystem.components.bottomBarPadding
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
+import com.yoke.gainful.designsystem.components.bottomBarPadding
 import com.yoke.gainful.designsystem.theme.Blue
 import com.yoke.gainful.designsystem.theme.BlueDark
 import com.yoke.gainful.designsystem.theme.Border
@@ -55,7 +56,6 @@ import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
-import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 import gainful.feature.holdings.generated.resources.Res
@@ -105,10 +105,11 @@ private fun HoldingsScreen(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .navigationBarsPadding(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             TotalCard(totalValue, totalPnl, totalPnlPct)
@@ -165,11 +166,12 @@ private fun <T> ListSection(
 @Composable
 private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Text(
             text = stringResource(Res.string.total_assets),
@@ -211,23 +213,26 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
 
 @Composable
 private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
-    val gradientColors = listOf(
-        listOf(Gold, GoldDark),
-        listOf(Blue, BlueDark),
-        listOf(GainGreen, GreenDim),
-        listOf(Purple, PurpleDark),
-    )
+    val gradientColors =
+        listOf(
+            listOf(Gold, GoldDark),
+            listOf(Blue, BlueDark),
+            listOf(GainGreen, GreenDim),
+            listOf(Purple, PurpleDark),
+        )
 
-    val sorted = remember(holdings) {
-        holdings.sortedByDescending { it.totalMarketValue }
-    }
+    val sorted =
+        remember(holdings) {
+            holdings.sortedByDescending { it.totalMarketValue }
+        }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -242,10 +247,11 @@ private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(1.dp)
-                    .background(Border),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(Border),
             )
         }
 
@@ -289,15 +295,17 @@ private fun HeatmapItem(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .height(80.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Brush.linearGradient(gradientColors)),
+        modifier =
+            modifier
+                .height(80.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Brush.linearGradient(gradientColors)),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(
@@ -348,12 +356,13 @@ private fun HoldingCard(
     val strokeColor = if (isPositive) gainColor else lossColor
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Card)
-            .clickable { onStockClick(holding.code, holding.name, holding.pinYin) }
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Card)
+                .clickable { onStockClick(holding.code, holding.name, holding.pinYin) }
+                .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -426,9 +435,10 @@ private fun HoldingCard(
         Sparkline(
             trends = holding.trends,
             changeAmount = holding.changeAmount,
-            modifier = Modifier
-                .width(72.dp)
-                .height(44.dp),
+            modifier =
+                Modifier
+                    .width(72.dp)
+                    .height(44.dp),
             strokeColor = strokeColor,
         )
     }
@@ -457,12 +467,13 @@ private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String, 
     val isPositive = position.realizedGain >= 0
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Card)
-            .clickable { onStockClick(position.code, position.name, position.pinYin) }
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Card)
+                .clickable { onStockClick(position.code, position.name, position.pinYin) }
+                .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -522,19 +533,20 @@ private fun Sparkline(
     strokeColor: Color = gainColor,
 ) {
     val reversedPrices = remember(trends) { trends.map { it.price }.reversed() }
-    val points = remember(reversedPrices, changeAmount) {
-        if (reversedPrices.size >= 2) {
-            val min = reversedPrices.min()
-            val max = reversedPrices.max()
-            val range = max - min
-            reversedPrices.map { price ->
-                if (range > 0) (price - min) / range else 0.5
+    val points =
+        remember(reversedPrices, changeAmount) {
+            if (reversedPrices.size >= 2) {
+                val min = reversedPrices.min()
+                val max = reversedPrices.max()
+                val range = max - min
+                reversedPrices.map { price ->
+                    if (range > 0) (price - min) / range else 0.5
+                }
+            } else {
+                val direction = if (changeAmount >= 0) "up" else "down"
+                generateSparkline(direction)
             }
-        } else {
-            val direction = if (changeAmount >= 0) "up" else "down"
-            generateSparkline(direction)
         }
-    }
 
     Canvas(modifier = modifier) {
         val w = size.width
@@ -555,11 +567,12 @@ private fun Sparkline(
         drawPath(
             path = linePath,
             color = strokeColor,
-            style = Stroke(
-                width = 2f,
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Round,
-            ),
+            style =
+                Stroke(
+                    width = 2f,
+                    cap = StrokeCap.Round,
+                    join = StrokeJoin.Round,
+                ),
         )
     }
 }
@@ -571,11 +584,12 @@ private fun generateSparkline(direction: String): List<Double> {
     for (i in 0..20) {
         val t = i / 20.0
         val wave = sin(t * PI * 3) * 0.08 + (((seed + i * 7) % 100) / 100.0 - 0.5) * 0.06
-        y = if (direction == "up") {
-            0.8 - t * 0.5 + wave
-        } else {
-            0.2 + t * 0.5 + wave
-        }
+        y =
+            if (direction == "up") {
+                0.8 - t * 0.5 + wave
+            } else {
+                0.2 + t * 0.5 + wave
+            }
         y = y.coerceIn(0.05, 0.95)
         points.add(y)
     }

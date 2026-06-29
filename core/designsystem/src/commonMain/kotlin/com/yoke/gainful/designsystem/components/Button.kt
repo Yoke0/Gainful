@@ -47,12 +47,13 @@ fun NavButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onClick)
-            .background(Surface)
-            .border(1.dp, Border, CircleShape),
+        modifier =
+            modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onClick)
+                .background(Surface)
+                .border(1.dp, Border, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -73,12 +74,13 @@ fun PrimaryButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(50))
-            .background(color.copy(alpha = if (enabled) 1f else 0.4f))
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+        modifier =
+            modifier
+                .height(36.dp)
+                .clip(RoundedCornerShape(50))
+                .background(color.copy(alpha = if (enabled) 1f else 0.4f))
+                .clickable(enabled = enabled, onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -98,13 +100,14 @@ fun SecondaryButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(50))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(50))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+        modifier =
+            modifier
+                .height(36.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(50))
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -131,12 +134,13 @@ fun SelectChip(
     val textColor = if (isSelected) activeColor else TextSecondary
 
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .border(1.dp, borderColor, RoundedCornerShape(50))
-            .background(bgColor)
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(50))
+                .border(1.dp, borderColor, RoundedCornerShape(50))
+                .background(bgColor)
+                .clickable(onClick = onClick)
+                .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(text = icon, fontSize = 18.sp)
@@ -157,13 +161,14 @@ fun SquareIconButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .width(44.dp)
-            .height(44.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick),
+        modifier =
+            modifier
+                .width(44.dp)
+                .height(44.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(10.dp))
+                .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -181,10 +186,11 @@ private fun ButtonPreview() {
 
     GainfulTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Background)
+                    .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(text = "NavButton", fontSize = 13.sp, color = TextSecondary)
@@ -209,23 +215,29 @@ private fun ButtonPreview() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 SelectChip(
-                    label = "Buy", icon = "\uD83D\uDCC8",
+                    label = "Buy",
+                    icon = "\uD83D\uDCC8",
                     isSelected = selectedType == 0,
-                    activeColor = Gold, activeBackground = GoldDim,
+                    activeColor = Gold,
+                    activeBackground = GoldDim,
                     modifier = Modifier.weight(1f),
                     onClick = { selectedType = 0 },
                 )
                 SelectChip(
-                    label = "Sell", icon = "\uD83D\uDCC9",
+                    label = "Sell",
+                    icon = "\uD83D\uDCC9",
                     isSelected = selectedType == 1,
-                    activeColor = GainRed, activeBackground = GainRed.copy(alpha = 0.15f),
+                    activeColor = GainRed,
+                    activeBackground = GainRed.copy(alpha = 0.15f),
                     modifier = Modifier.weight(1f),
                     onClick = { selectedType = 1 },
                 )
                 SelectChip(
-                    label = "Dividend", icon = "\uD83D\uDCB5",
+                    label = "Dividend",
+                    icon = "\uD83D\uDCB5",
                     isSelected = selectedType == 2,
-                    activeColor = Gold, activeBackground = GoldDim,
+                    activeColor = Gold,
+                    activeBackground = GoldDim,
                     modifier = Modifier.weight(1f),
                     onClick = { selectedType = 2 },
                 )

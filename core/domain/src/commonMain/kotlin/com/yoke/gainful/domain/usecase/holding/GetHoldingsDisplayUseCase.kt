@@ -63,14 +63,15 @@ class GetHoldingsDisplayUseCase(
             runCatching {
                 val quote = marketRepository.getQuote(quoteId) ?: return@runCatching
                 val trends = marketRepository.getTrends(quoteId, ndays = 1)
-                val snapshot = QuoteSnapshot(
-                    quoteId = quoteId,
-                    code = quote.code,
-                    name = quote.name,
-                    quote = quote,
-                    trends = trends,
-                    lastUpdated = Clock.System.now().toEpochMilliseconds(),
-                )
+                val snapshot =
+                    QuoteSnapshot(
+                        quoteId = quoteId,
+                        code = quote.code,
+                        name = quote.name,
+                        quote = quote,
+                        trends = trends,
+                        lastUpdated = Clock.System.now().toEpochMilliseconds(),
+                    )
                 quoteCacheRepository.upsert(snapshot)
             }
         }
@@ -124,9 +125,10 @@ class GetHoldingsDisplayUseCase(
         transactions: List<Transaction>,
         assets: List<Asset>,
     ): List<HoldingDisplay> {
-        val assetMap = assets
-            .groupBy { it.unifiedCode.ifBlank { it.code } }
-            .mapValues { (_, group) -> group.firstOrNull { it.quoteId.isNotBlank() } ?: group.first() }
+        val assetMap =
+            assets
+                .groupBy { it.unifiedCode.ifBlank { it.code } }
+                .mapValues { (_, group) -> group.firstOrNull { it.quoteId.isNotBlank() } ?: group.first() }
 
         return transactions
             .groupBy { it.assetId }
@@ -151,12 +153,14 @@ class GetHoldingsDisplayUseCase(
                     totalCost += tx.amount
                     quantity += tx.quantity
                 }
+
                 TransactionType.SELL -> {
                     totalSells += tx.amount
                     val avgCost = if (quantity > 0) totalCost / quantity else 0.0
                     totalCost -= avgCost * tx.quantity
                     quantity -= tx.quantity
                 }
+
                 TransactionType.DIVIDEND -> {
                     totalDividends += tx.amount
                     totalCost -= tx.amount

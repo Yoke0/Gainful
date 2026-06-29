@@ -18,19 +18,24 @@ class GetStockDetailUseCase(
 ) {
     suspend operator fun invoke(stockCode: String): StockDetailResult {
         val assets = assetRepository.getAssets().firstOrNull() ?: emptyList()
-        val matches = assets.filter {
-            it.code == stockCode || it.unifiedCode == stockCode || it.innerCode == stockCode
-        }
+        val matches =
+            assets.filter {
+                it.code == stockCode || it.unifiedCode == stockCode || it.innerCode == stockCode
+            }
         val asset = matches.firstOrNull { it.quoteId.isNotBlank() } ?: matches.firstOrNull()
 
-        val quote = if (asset?.quoteId != null) {
-            marketRepository.getQuote(asset.quoteId)
-        } else null
+        val quote =
+            if (asset?.quoteId != null) {
+                marketRepository.getQuote(asset.quoteId)
+            } else {
+                null
+            }
 
         val transactions = transactionRepository.getTransactions().firstOrNull() ?: emptyList()
-        val assetTransactions = transactions.filter {
-            it.assetId == stockCode || it.assetId == asset?.unifiedCode || it.assetId == asset?.innerCode
-        }
+        val assetTransactions =
+            transactions.filter {
+                it.assetId == stockCode || it.assetId == asset?.unifiedCode || it.assetId == asset?.innerCode
+            }
 
         var quantity = 0.0
         var totalCost = 0.0
@@ -46,12 +51,14 @@ class GetStockDetailUseCase(
                     totalCost += tx.amount
                     quantity += tx.quantity
                 }
+
                 TransactionType.SELL -> {
                     totalSells += tx.amount
                     avgCost = if (quantity > 0) totalCost / quantity else 0.0
                     totalCost -= avgCost * tx.quantity
                     quantity -= tx.quantity
                 }
+
                 TransactionType.DIVIDEND -> {
                     totalDividends += tx.amount
                     totalCost -= tx.amount
@@ -63,13 +70,16 @@ class GetStockDetailUseCase(
             avgCost = totalCost / quantity
         }
 
-        val kLines = if (asset?.quoteId != null) {
-            try {
-                marketRepository.getKLines(asset.quoteId, KLinePeriod.DAILY, limit = 30)
-            } catch (_: Exception) {
+        val kLines =
+            if (asset?.quoteId != null) {
+                try {
+                    marketRepository.getKLines(asset.quoteId, KLinePeriod.DAILY, limit = 30)
+                } catch (_: Exception) {
+                    emptyList()
+                }
+            } else {
                 emptyList()
             }
-        } else emptyList()
 
         return StockDetailResult(
             code = stockCode,
@@ -90,17 +100,18 @@ class GetStockDetailUseCase(
     suspend fun fetchKLines(quoteId: String, period: ChartPeriod): List<KLine> {
         if (period.isTrends) return emptyList()
         val klt = period.klt ?: return emptyList()
-        val kLinePeriod = when (klt) {
-            1 -> KLinePeriod.MIN_1
-            5 -> KLinePeriod.MIN_5
-            15 -> KLinePeriod.MIN_15
-            30 -> KLinePeriod.MIN_30
-            60 -> KLinePeriod.MIN_60
-            101 -> KLinePeriod.DAILY
-            102 -> KLinePeriod.WEEKLY
-            103 -> KLinePeriod.MONTHLY
-            else -> KLinePeriod.DAILY
-        }
+        val kLinePeriod =
+            when (klt) {
+                1 -> KLinePeriod.MIN_1
+                5 -> KLinePeriod.MIN_5
+                15 -> KLinePeriod.MIN_15
+                30 -> KLinePeriod.MIN_30
+                60 -> KLinePeriod.MIN_60
+                101 -> KLinePeriod.DAILY
+                102 -> KLinePeriod.WEEKLY
+                103 -> KLinePeriod.MONTHLY
+                else -> KLinePeriod.DAILY
+            }
         return try {
             marketRepository.getKLines(quoteId, kLinePeriod, limit = 120)
         } catch (_: Exception) {

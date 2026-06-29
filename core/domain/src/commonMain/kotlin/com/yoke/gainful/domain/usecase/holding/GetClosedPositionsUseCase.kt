@@ -26,9 +26,10 @@ class GetClosedPositionsUseCase(
         transactions: List<Transaction>,
         assets: List<Asset>,
     ): List<ClosedPosition> {
-        val assetMap = assets
-            .groupBy { it.unifiedCode.ifBlank { it.code } }
-            .mapValues { (_, group) -> group.first() }
+        val assetMap =
+            assets
+                .groupBy { it.unifiedCode.ifBlank { it.code } }
+                .mapValues { (_, group) -> group.first() }
 
         return transactions
             .groupBy { it.assetId }
@@ -55,12 +56,14 @@ class GetClosedPositionsUseCase(
                     totalBuys += tx.amount
                     quantity += tx.quantity
                 }
+
                 TransactionType.SELL -> {
                     totalSells += tx.amount
                     quantity -= tx.quantity
                     lastSellPrice = tx.price
                     lastSellDate = tx.tradeDate
                 }
+
                 TransactionType.DIVIDEND -> {
                     totalDividends += tx.amount
                 }

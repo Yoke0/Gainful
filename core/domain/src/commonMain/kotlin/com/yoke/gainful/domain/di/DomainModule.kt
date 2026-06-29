@@ -13,16 +13,17 @@ import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnce
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsUseCase
 import org.koin.dsl.module
 
-val domainModule = module {
-    factory { GetHoldingsUseCase(get()) }
-    factory { GetHoldingsDisplayUseCase(get(), get(), get(), get()) }
-    factory { GetClosedPositionsUseCase(get(), get()) }
-    factory { GetStockDetailUseCase(get(), get(), get()) }
-    factory { GetTransactionsUseCase(get()) }
-    factory { GetTransactionsWithAssetsUseCase(get(), get()) }
-    factory { GetTransactionsWithAssetsOnceUseCase(get(), get()) }
-    factory { SearchAssetsUseCase(get()) }
-    factory { InsertAssetUseCase(get()) }
-    factory { AddTransactionUseCase(get()) }
-    factory { DeleteTransactionUseCase(get()) }
-}
+val domainModule =
+    module {
+        factory { GetHoldingsUseCase(get()) }
+        factory { GetHoldingsDisplayUseCase(get(), get(), get(), get()) }
+        factory { GetClosedPositionsUseCase(get(), get()) }
+        factory { GetStockDetailUseCase(get(), get(), get()) }
+        factory { GetTransactionsUseCase(get()) }
+        factory { GetTransactionsWithAssetsUseCase(get(), get()) }
+        factory { GetTransactionsWithAssetsOnceUseCase(get(), get()) }
+        factory { SearchAssetsUseCase(get()) }
+        factory { InsertAssetUseCase(get()) }
+        factory { AddTransactionUseCase(get()) }
+        factory { DeleteTransactionUseCase(get()) }
+    }

@@ -32,14 +32,15 @@ fun <T : Any> rememberPersistentViewModelStoreNavEntryDecorator(
 private class PersistentViewModelStoreDecorator<T : Any>(
     private val registry: ViewModelStoreRegistry,
 ) : NavEntryDecorator<T>(
-    onPop = { key -> registry.clear(key) },
-    decorate = { entry ->
-        val store = registry.getOrCreate(entry.contentKey)
-        val owner = object : ViewModelStoreOwner {
-            override val viewModelStore: ViewModelStore get() = store
-        }
-        CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
-            entry.Content()
-        }
-    },
-)
+        onPop = { key -> registry.clear(key) },
+        decorate = { entry ->
+            val store = registry.getOrCreate(entry.contentKey)
+            val owner =
+                object : ViewModelStoreOwner {
+                    override val viewModelStore: ViewModelStore get() = store
+                }
+            CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
+                entry.Content()
+            }
+        },
+    )

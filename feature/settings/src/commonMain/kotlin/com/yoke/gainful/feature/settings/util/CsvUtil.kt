@@ -2,16 +2,15 @@ package com.yoke.gainful.feature.settings.util
 
 import com.yoke.gainful.common.extensions.formatLocalizedDateTime
 import com.yoke.gainful.common.extensions.parseLocalizedDateTimeToEpochMillis
+import com.yoke.gainful.domain.usecase.transaction.TransactionWithAsset
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.feature.settings.model.CsvPreviewData
-import com.yoke.gainful.domain.usecase.transaction.TransactionWithAsset
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 object CsvUtil {
-
     fun generateCsv(
         transactions: List<TransactionWithAsset>,
         config: CsvConfig,
@@ -19,14 +18,15 @@ object CsvUtil {
         val sb = StringBuilder()
         sb.appendLine(config.headers.joinToString(","))
         transactions.forEach { tx ->
-            val typeStr = when (tx.transaction.type) {
-                TransactionType.BUY -> config.buyType
-                TransactionType.SELL -> config.sellType
-                TransactionType.DIVIDEND -> config.dividendType
-            }
+            val typeStr =
+                when (tx.transaction.type) {
+                    TransactionType.BUY -> config.buyType
+                    TransactionType.SELL -> config.sellType
+                    TransactionType.DIVIDEND -> config.dividendType
+                }
             val dateStr = tx.transaction.tradeDate.formatLocalizedDateTime()
             sb.appendLine(
-                "$dateStr,${tx.transaction.assetId},${tx.name},${typeStr},${tx.transaction.quantity},${tx.transaction.price},${tx.transaction.amount}"
+                "$dateStr,${tx.transaction.assetId},${tx.name},$typeStr,${tx.transaction.quantity},${tx.transaction.price},${tx.transaction.amount}",
             )
         }
         return sb.toString()
@@ -112,12 +112,13 @@ object CsvUtil {
             if (code.isBlank()) continue
 
             val typeStr = if (typeIndex >= 0) values[typeIndex] else config.buyType
-            val type = when (typeStr) {
-                config.buyType -> TransactionType.BUY
-                config.sellType -> TransactionType.SELL
-                config.dividendType -> TransactionType.DIVIDEND
-                else -> TransactionType.BUY
-            }
+            val type =
+                when (typeStr) {
+                    config.buyType -> TransactionType.BUY
+                    config.sellType -> TransactionType.SELL
+                    config.dividendType -> TransactionType.DIVIDEND
+                    else -> TransactionType.BUY
+                }
 
             val quantity = if (quantityIndex >= 0) values[quantityIndex].toDoubleOrNull() ?: 0.0 else 0.0
             val price = if (priceIndex >= 0) values[priceIndex].toDoubleOrNull() ?: 0.0 else 0.0
@@ -136,7 +137,7 @@ object CsvUtil {
                     amount = amount,
                     tradeDate = tradeDateMs,
                     timestamp = Clock.System.now().toEpochMilliseconds(),
-                )
+                ),
             )
         }
         return transactions

@@ -38,9 +38,10 @@ fun GainfulTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(56.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -77,11 +78,12 @@ fun GainfulTopAppBar(
 @Composable
 fun BackNavigationIcon(onClick: () -> Unit) {
     Box(
-        modifier = Modifier
-            .size(32.dp)
-            .clip(CircleShape)
-            .background(Card)
-            .clickable(onClick = onClick),
+        modifier =
+            Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(Card)
+                .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -137,10 +139,11 @@ private fun GainfulTopAppBarWithActionsPreview() {
             modifier = Modifier.background(Background),
             actions = {
                 Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Gold)
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Gold)
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
                 ) {
                     Text(
                         text = "+ Add",

@@ -7,5 +7,6 @@ expect fun rememberCsvFileUtil(): CsvFileUtil
 
 interface CsvFileUtil {
     fun saveFile(fileName: String, content: String, onResult: (Boolean) -> Unit)
+
     fun pickFile(onResult: (String?, String?) -> Unit)
 }

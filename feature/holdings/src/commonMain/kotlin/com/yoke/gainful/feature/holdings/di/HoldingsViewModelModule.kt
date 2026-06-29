@@ -1,11 +1,12 @@
 package com.yoke.gainful.feature.holdings.di
 
-import com.yoke.gainful.feature.holdings.overview.HoldingsViewModel
 import com.yoke.gainful.feature.holdings.detail.StockDetailViewModel
+import com.yoke.gainful.feature.holdings.overview.HoldingsViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-val holdingsViewModelModule = module {
-    viewModel { HoldingsViewModel(get(), get()) }
-    viewModel { params -> StockDetailViewModel(get(), params.get(), params.get(), params.get()) }
-}
+val holdingsViewModelModule =
+    module {
+        viewModel { HoldingsViewModel(get(), get()) }
+        viewModel { params -> StockDetailViewModel(get(), params.get(), params.get(), params.get()) }
+    }

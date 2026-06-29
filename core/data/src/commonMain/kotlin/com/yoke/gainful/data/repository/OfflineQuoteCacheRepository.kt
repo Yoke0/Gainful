@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.map
 class OfflineQuoteCacheRepository(
     private val dao: QuoteSnapshotDao,
 ) : QuoteCacheRepository {
-
     override suspend fun getByQuoteIds(quoteIds: List<String>): List<QuoteSnapshot> {
         return dao.getByQuoteIds(quoteIds).map { it.toDomain() }
     }

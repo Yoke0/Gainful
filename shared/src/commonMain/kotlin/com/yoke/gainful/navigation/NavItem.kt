@@ -2,14 +2,14 @@ package com.yoke.gainful.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
-import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
-import com.yoke.gainful.feature.holdings.navigation.HoldingsNavKey
-import com.yoke.gainful.feature.settings.navigation.SettingsNavKey
-import com.yoke.gainful.feature.transactions.navigation.TransactionsNavKey
 import com.yoke.gainful.designsystem.components.DashboardIcon
 import com.yoke.gainful.designsystem.components.HoldingsIcon
 import com.yoke.gainful.designsystem.components.RecordsIcon
 import com.yoke.gainful.designsystem.components.SettingsIcon
+import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
+import com.yoke.gainful.feature.holdings.navigation.HoldingsNavKey
+import com.yoke.gainful.feature.settings.navigation.SettingsNavKey
+import com.yoke.gainful.feature.transactions.navigation.TransactionsNavKey
 import gainful.shared.generated.resources.Res
 import gainful.shared.generated.resources.nav_dashboard
 import gainful.shared.generated.resources.nav_holdings
@@ -22,21 +22,26 @@ data class TopLevelNavItem(
     val icon: @Composable (isSelected: Boolean) -> Unit,
 )
 
-val TOP_LEVEL_NAV_ITEMS: Map<NavKey, TopLevelNavItem> = mapOf(
-    DashboardNavKey to TopLevelNavItem(
-        label = { stringResource(Res.string.nav_dashboard) },
-        icon = { DashboardIcon(isSelected = it) },
-    ),
-    TransactionsNavKey to TopLevelNavItem(
-        label = { stringResource(Res.string.nav_transactions) },
-        icon = { RecordsIcon(isSelected = it) },
-    ),
-    HoldingsNavKey to TopLevelNavItem(
-        label = { stringResource(Res.string.nav_holdings) },
-        icon = { HoldingsIcon(isSelected = it) },
-    ),
-    SettingsNavKey to TopLevelNavItem(
-        label = { stringResource(Res.string.nav_settings) },
-        icon = { SettingsIcon(isSelected = it) },
-    ),
-)
+val TOP_LEVEL_NAV_ITEMS: Map<NavKey, TopLevelNavItem> =
+    mapOf(
+        DashboardNavKey to
+            TopLevelNavItem(
+                label = { stringResource(Res.string.nav_dashboard) },
+                icon = { DashboardIcon(isSelected = it) },
+            ),
+        TransactionsNavKey to
+            TopLevelNavItem(
+                label = { stringResource(Res.string.nav_transactions) },
+                icon = { RecordsIcon(isSelected = it) },
+            ),
+        HoldingsNavKey to
+            TopLevelNavItem(
+                label = { stringResource(Res.string.nav_holdings) },
+                icon = { HoldingsIcon(isSelected = it) },
+            ),
+        SettingsNavKey to
+            TopLevelNavItem(
+                label = { stringResource(Res.string.nav_settings) },
+                icon = { SettingsIcon(isSelected = it) },
+            ),
+    )

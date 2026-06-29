@@ -17,53 +17,57 @@ import io.ktor.client.request.parameter
 internal class EastMoneyApiImpl(
     private val client: HttpClient,
 ) : EastMoneyApi {
-
     override suspend fun getQuote(secId: String): QuoteData? {
-        val resp: ApiResponse<QuoteData> = client.get(QUOTE_URL) {
-            quoteParams(secId = secId)
-        }.body()
+        val resp: ApiResponse<QuoteData> =
+            client.get(QUOTE_URL) {
+                quoteParams(secId = secId)
+            }.body()
         return resp.data
     }
 
     override suspend fun getBatchQuotes(secIds: List<String>): List<QuoteData> {
-        val resp: ApiResponse<BatchQuoteData> = client.get(BATCH_URL) {
-            quoteParams(secIds = secIds)
-        }.body()
+        val resp: ApiResponse<BatchQuoteData> =
+            client.get(BATCH_URL) {
+                quoteParams(secIds = secIds)
+            }.body()
         return resp.data?.diff ?: emptyList()
     }
 
     override suspend fun getTrends(secId: String, ndays: Int): TrendData {
-        val resp: ApiResponse<List<TrendItem>> = client.get(TREND_URL) {
-            parameter("secid", secId)
-            parameter("iscr", 0)
-            parameter("iscca", 0)
-            parameter("ndays", ndays)
-            parameter("forcect", 1)
-        }.body()
+        val resp: ApiResponse<List<TrendItem>> =
+            client.get(TREND_URL) {
+                parameter("secid", secId)
+                parameter("iscr", 0)
+                parameter("iscca", 0)
+                parameter("ndays", ndays)
+                parameter("forcect", 1)
+            }.body()
         return TrendData(data = resp.data ?: emptyList())
     }
 
     override suspend fun getKLines(secId: String, klt: Int, fqt: Int, limit: Int): KLineData? {
-        val resp: ApiResponse<KLineData> = client.get(KLINE_URL) {
-            parameter("secid", secId)
-            parameter("fields1", COMMON_FIELDS1)
-            parameter("fields2", KLINE_FIELDS2)
-            parameter("klt", klt)
-            parameter("fqt", fqt)
-            parameter("lmt", limit)
-            parameter("end", "20500101")
-            parameter("fltt", 2)
-        }.body()
+        val resp: ApiResponse<KLineData> =
+            client.get(KLINE_URL) {
+                parameter("secid", secId)
+                parameter("fields1", COMMON_FIELDS1)
+                parameter("fields2", KLINE_FIELDS2)
+                parameter("klt", klt)
+                parameter("fqt", fqt)
+                parameter("lmt", limit)
+                parameter("end", "20500101")
+                parameter("fltt", 2)
+            }.body()
         return resp.data
     }
 
     override suspend fun search(query: String, count: Int): List<SearchItemDto> {
-        val resp: SearchResponse = client.get(SEARCH_URL) {
-            parameter("input", query)
-            parameter("type", 14)
-            parameter("token", SEARCH_TOKEN)
-            parameter("count", count)
-        }.body()
+        val resp: SearchResponse =
+            client.get(SEARCH_URL) {
+                parameter("input", query)
+                parameter("type", 14)
+                parameter("token", SEARCH_TOKEN)
+                parameter("count", count)
+            }.body()
         return resp.codeTable?.data ?: emptyList()
     }
 

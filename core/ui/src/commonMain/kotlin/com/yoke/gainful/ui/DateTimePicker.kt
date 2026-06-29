@@ -91,9 +91,10 @@ fun DateTimePickerField(
     dateTimeMillis: Long?,
     onClick: () -> Unit,
 ) {
-    val dateTime = dateTimeMillis?.let {
-        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
-    }
+    val dateTime =
+        dateTimeMillis?.let {
+            Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
+        }
     val hasValue = dateTime != null
 
     Column {
@@ -105,14 +106,15 @@ fun DateTimePickerField(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp))
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -123,17 +125,25 @@ fun DateTimePickerField(
             Spacer(modifier = Modifier.width(8.dp))
             if (hasValue) {
                 Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = TextPrimary, fontFamily = FontFamily.Monospace)) {
-                            append(stringResource(Res.string.date_format, dateTime.date.year, dateTime.date.month.number, dateTime.date.day))
-                        }
-                        withStyle(SpanStyle(color = TextMuted)) {
-                            append(" · ")
-                        }
-                        withStyle(SpanStyle(color = Gold, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace)) {
-                            append("${dateTime.hour.pad2()}:${dateTime.minute.pad2()}")
-                        }
-                    },
+                    text =
+                        buildAnnotatedString {
+                            withStyle(SpanStyle(color = TextPrimary, fontFamily = FontFamily.Monospace)) {
+                                append(
+                                    stringResource(
+                                        Res.string.date_format,
+                                        dateTime.date.year,
+                                        dateTime.date.month.number,
+                                        dateTime.date.day,
+                                    ),
+                                )
+                            }
+                            withStyle(SpanStyle(color = TextMuted)) {
+                                append(" · ")
+                            }
+                            withStyle(SpanStyle(color = Gold, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace)) {
+                                append("${dateTime.hour.pad2()}:${dateTime.minute.pad2()}")
+                            }
+                        },
                     fontSize = 15.sp,
                     modifier = Modifier.weight(1f),
                 )
@@ -163,9 +173,10 @@ fun DateTimePickerDialog(
 ) {
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    val initialDateTime = initialSelectedDateTimeMillis?.let {
-        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
-    } ?: now
+    val initialDateTime =
+        initialSelectedDateTimeMillis?.let {
+            Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault())
+        } ?: now
     val initDate = initialDateTime.date
     var calendarYear by remember { mutableIntStateOf(initDate.year) }
     var calendarMonth by remember { mutableIntStateOf(initDate.month.number - 1) }
@@ -173,47 +184,60 @@ fun DateTimePickerDialog(
     var workingHour by remember { mutableIntStateOf(initialDateTime.hour.coerceIn(0, 23)) }
     var workingMinute by remember { mutableIntStateOf(initialDateTime.minute.coerceIn(0, 59)) }
 
-    val monthNames = listOf(
-        stringResource(Res.string.month_1),
-        stringResource(Res.string.month_2),
-        stringResource(Res.string.month_3),
-        stringResource(Res.string.month_4),
-        stringResource(Res.string.month_5),
-        stringResource(Res.string.month_6),
-        stringResource(Res.string.month_7),
-        stringResource(Res.string.month_8),
-        stringResource(Res.string.month_9),
-        stringResource(Res.string.month_10),
-        stringResource(Res.string.month_11),
-        stringResource(Res.string.month_12),
-    )
-    val weekdays = listOf(
-        stringResource(Res.string.weekday_monday),
-        stringResource(Res.string.weekday_tuesday),
-        stringResource(Res.string.weekday_wednesday),
-        stringResource(Res.string.weekday_thursday),
-        stringResource(Res.string.weekday_friday),
-        stringResource(Res.string.weekday_saturday),
-        stringResource(Res.string.weekday_sunday),
-    )
+    val monthNames =
+        listOf(
+            stringResource(Res.string.month_1),
+            stringResource(Res.string.month_2),
+            stringResource(Res.string.month_3),
+            stringResource(Res.string.month_4),
+            stringResource(Res.string.month_5),
+            stringResource(Res.string.month_6),
+            stringResource(Res.string.month_7),
+            stringResource(Res.string.month_8),
+            stringResource(Res.string.month_9),
+            stringResource(Res.string.month_10),
+            stringResource(Res.string.month_11),
+            stringResource(Res.string.month_12),
+        )
+    val weekdays =
+        listOf(
+            stringResource(Res.string.weekday_monday),
+            stringResource(Res.string.weekday_tuesday),
+            stringResource(Res.string.weekday_wednesday),
+            stringResource(Res.string.weekday_thursday),
+            stringResource(Res.string.weekday_friday),
+            stringResource(Res.string.weekday_saturday),
+            stringResource(Res.string.weekday_sunday),
+        )
 
     fun prevMonth() {
-        if (calendarMonth == 0) { calendarMonth = 11; calendarYear-- } else calendarMonth--
+        if (calendarMonth == 0) {
+            calendarMonth = 11
+            calendarYear--
+        } else {
+            calendarMonth--
+        }
     }
 
     fun nextMonth() {
-        if (calendarMonth == 11) { calendarMonth = 0; calendarYear++ } else calendarMonth++
+        if (calendarMonth == 11) {
+            calendarMonth = 0
+            calendarYear++
+        } else {
+            calendarMonth++
+        }
     }
 
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Card)
+                    .border(1.dp, Border, RoundedCornerShape(14.dp))
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
         ) {
             Text(
                 text = stringResource(Res.string.select_datetime),
@@ -270,10 +294,11 @@ fun DateTimePickerDialog(
 
             Spacer(modifier = Modifier.height(12.dp))
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Border),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Border),
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -299,10 +324,11 @@ fun DateTimePickerDialog(
                     label = stringResource(Res.string.confirm),
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        val ldt = LocalDateTime(
-                            selectedDate,
-                            LocalTime(workingHour, workingMinute),
-                        )
+                        val ldt =
+                            LocalDateTime(
+                                selectedDate,
+                                LocalTime(workingHour, workingMinute),
+                            )
                         onDateTimeSelected(ldt.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds())
                     },
                 )
@@ -319,10 +345,11 @@ fun DateTimePickerPreview() {
 
     GainfulTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Background)
+                    .padding(20.dp),
         ) {
             DateTimePickerField(
                 label = "日期与时间",

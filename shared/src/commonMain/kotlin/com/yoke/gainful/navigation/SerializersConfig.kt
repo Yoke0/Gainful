@@ -13,16 +13,18 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
-val serializersConfig = SavedStateConfiguration {
-    serializersModule = SerializersModule {
-        polymorphic(NavKey::class) {
-            subclass(DashboardNavKey::class, DashboardNavKey.serializer())
-            subclass(TransactionsNavKey::class, TransactionsNavKey.serializer())
-            subclass(HoldingsNavKey::class, HoldingsNavKey.serializer())
-            subclass(SettingsNavKey::class, SettingsNavKey.serializer())
-            subclass(AddTransactionNavKey::class, AddTransactionNavKey.serializer())
-            subclass(ImportTransactionsNavKey::class, ImportTransactionsNavKey.serializer())
-            subclass(StockDetailNavKey::class, StockDetailNavKey.serializer())
-        }
+val serializersConfig =
+    SavedStateConfiguration {
+        serializersModule =
+            SerializersModule {
+                polymorphic(NavKey::class) {
+                    subclass(DashboardNavKey::class, DashboardNavKey.serializer())
+                    subclass(TransactionsNavKey::class, TransactionsNavKey.serializer())
+                    subclass(HoldingsNavKey::class, HoldingsNavKey.serializer())
+                    subclass(SettingsNavKey::class, SettingsNavKey.serializer())
+                    subclass(AddTransactionNavKey::class, AddTransactionNavKey.serializer())
+                    subclass(ImportTransactionsNavKey::class, ImportTransactionsNavKey.serializer())
+                    subclass(StockDetailNavKey::class, StockDetailNavKey.serializer())
+                }
+            }
     }
-}

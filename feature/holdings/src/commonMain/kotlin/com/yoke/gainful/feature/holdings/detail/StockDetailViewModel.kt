@@ -21,10 +21,10 @@ class StockDetailViewModel(
     stockName: String,
     stockPinYin: String,
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow<StockDetailUiState>(
-        StockDetailUiState.Loading(code = stockCode, name = stockName, pinYin = stockPinYin)
-    )
+    private val _uiState =
+        MutableStateFlow<StockDetailUiState>(
+            StockDetailUiState.Loading(code = stockCode, name = stockName, pinYin = stockPinYin),
+        )
     val uiState: StateFlow<StockDetailUiState> = _uiState.asStateFlow()
 
     private var quoteId: String? = null
@@ -43,41 +43,45 @@ class StockDetailViewModel(
 
     private fun loadData() {
         val current = _uiState.value
-        val (name, pinYin) = when (current) {
-            is StockDetailUiState.Loading -> current.name to current.pinYin
-            is StockDetailUiState.Error -> current.name to current.pinYin
-            is StockDetailUiState.Success -> current.name to current.pinYin
-        }
+        val (name, pinYin) =
+            when (current) {
+                is StockDetailUiState.Loading -> current.name to current.pinYin
+                is StockDetailUiState.Error -> current.name to current.pinYin
+                is StockDetailUiState.Success -> current.name to current.pinYin
+            }
         _uiState.value = StockDetailUiState.Loading(code = stockCode, name = name, pinYin = pinYin)
         viewModelScope.launch {
-            val result = runCatching {
-                val start = TimeSource.Monotonic.markNow()
-                val data = getStockDetailUseCase(stockCode)
-                delay((MIN_LOADING_MS - start.elapsedNow().inWholeMilliseconds).coerceAtLeast(0).milliseconds)
-                data
-            }
+            val result =
+                runCatching {
+                    val start = TimeSource.Monotonic.markNow()
+                    val data = getStockDetailUseCase(stockCode)
+                    delay((MIN_LOADING_MS - start.elapsedNow().inWholeMilliseconds).coerceAtLeast(0).milliseconds)
+                    data
+                }
             result.onSuccess { data ->
                 quoteId = data.quoteId
-                _uiState.value = StockDetailUiState.Success(
-                    code = data.code,
-                    name = data.quote?.name ?: data.name,
-                    pinYin = data.pinYin,
-                    quote = data.quote,
-                    quantity = data.quantity,
-                    averageCost = data.averageCost,
-                    totalBuys = data.totalBuys,
-                    totalSells = data.totalSells,
-                    totalDividends = data.totalDividends,
-                    transactions = data.transactions,
-                    kLines = data.kLines,
-                )
+                _uiState.value =
+                    StockDetailUiState.Success(
+                        code = data.code,
+                        name = data.quote?.name ?: data.name,
+                        pinYin = data.pinYin,
+                        quote = data.quote,
+                        quantity = data.quantity,
+                        averageCost = data.averageCost,
+                        totalBuys = data.totalBuys,
+                        totalSells = data.totalSells,
+                        totalDividends = data.totalDividends,
+                        transactions = data.transactions,
+                        kLines = data.kLines,
+                    )
             }.onFailure { e ->
-                _uiState.value = StockDetailUiState.Error(
-                    code = stockCode,
-                    name = name,
-                    pinYin = pinYin,
-                    errorMessage = e.message ?: "Unknown error",
-                )
+                _uiState.value =
+                    StockDetailUiState.Error(
+                        code = stockCode,
+                        name = name,
+                        pinYin = pinYin,
+                        errorMessage = e.message ?: "Unknown error",
+                    )
             }
         }
     }
@@ -88,13 +92,18 @@ class StockDetailViewModel(
         val qid = quoteId ?: return
         _uiState.value = current.copy(selectedPeriod = period)
         viewModelScope.launch {
-            val kLines = runCatching {
-                if (period.isTrends) emptyList()
-                else getStockDetailUseCase.fetchKLines(qid, period)
-            }.getOrNull() ?: return@launch
-            _uiState.value = _uiState.value.let { state ->
-                if (state is StockDetailUiState.Success) state.copy(kLines = kLines) else state
-            }
+            val kLines =
+                runCatching {
+                    if (period.isTrends) {
+                        emptyList()
+                    } else {
+                        getStockDetailUseCase.fetchKLines(qid, period)
+                    }
+                }.getOrNull() ?: return@launch
+            _uiState.value =
+                _uiState.value.let { state ->
+                    if (state is StockDetailUiState.Success) state.copy(kLines = kLines) else state
+                }
         }
     }
 

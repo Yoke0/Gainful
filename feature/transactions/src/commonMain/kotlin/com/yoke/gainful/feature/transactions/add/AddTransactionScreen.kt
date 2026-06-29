@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatLocalizedDate
 import com.yoke.gainful.designsystem.components.BackNavigationIcon
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.PrimaryButton
 import com.yoke.gainful.designsystem.components.SelectChip
@@ -61,7 +62,6 @@ import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.DateTimePickerDialog
 import com.yoke.gainful.ui.DateTimePickerField
-import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
@@ -161,10 +161,11 @@ private fun AddTransactionScreen(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .navigationBarsPadding(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             TypeSelector(
@@ -188,29 +189,34 @@ private fun AddTransactionScreen(
             )
 
             when (uiState.type) {
-                TransactionType.DIVIDEND -> DividendFields(
-                    amount = uiState.amount,
-                    dateTimeMillis = uiState.dateTimeMillis,
-                    onAmountChanged = { onIntent(AddTransactionIntent.AmountChanged(it)) },
-                    onDateClicked = { onIntent(AddTransactionIntent.ShowCalendar) },
-                    amountError = uiState.amountError,
-                )
-                else -> TradeFields(
-                    type = uiState.type,
-                    amount = uiState.amount,
-                    price = uiState.price,
-                    quantity = uiState.quantity,
-                    fee = computeFee(),
-                    dateTimeMillis = uiState.dateTimeMillis,
-                    onAmountChanged = { onIntent(AddTransactionIntent.AmountChanged(it)) },
-                    onPriceChanged = { onIntent(AddTransactionIntent.PriceChanged(it)) },
-                    onQuantityChanged = { onIntent(AddTransactionIntent.QuantityChanged(it)) },
-                    onDateClicked = { onIntent(AddTransactionIntent.ShowCalendar) },
-                    amountError = uiState.amountError,
-                    priceError = uiState.priceError,
-                    quantityError = uiState.quantityError,
-                    feeError = uiState.feeError,
-                )
+                TransactionType.DIVIDEND -> {
+                    DividendFields(
+                        amount = uiState.amount,
+                        dateTimeMillis = uiState.dateTimeMillis,
+                        onAmountChanged = { onIntent(AddTransactionIntent.AmountChanged(it)) },
+                        onDateClicked = { onIntent(AddTransactionIntent.ShowCalendar) },
+                        amountError = uiState.amountError,
+                    )
+                }
+
+                else -> {
+                    TradeFields(
+                        type = uiState.type,
+                        amount = uiState.amount,
+                        price = uiState.price,
+                        quantity = uiState.quantity,
+                        fee = computeFee(),
+                        dateTimeMillis = uiState.dateTimeMillis,
+                        onAmountChanged = { onIntent(AddTransactionIntent.AmountChanged(it)) },
+                        onPriceChanged = { onIntent(AddTransactionIntent.PriceChanged(it)) },
+                        onQuantityChanged = { onIntent(AddTransactionIntent.QuantityChanged(it)) },
+                        onDateClicked = { onIntent(AddTransactionIntent.ShowCalendar) },
+                        amountError = uiState.amountError,
+                        priceError = uiState.priceError,
+                        quantityError = uiState.quantityError,
+                        feeError = uiState.feeError,
+                    )
+                }
             }
 
             TransactionSummary(
@@ -330,12 +336,13 @@ private fun StockPlaceholder(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .height(44.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp),
+        modifier =
+            modifier
+                .height(44.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Surface)
+                .border(1.dp, Border, RoundedCornerShape(10.dp))
+                .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
@@ -353,12 +360,13 @@ private fun SelectedStockInfo(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .height(44.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(GoldDim)
-            .border(1.dp, Gold.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp),
+        modifier =
+            modifier
+                .height(44.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(GoldDim)
+                .border(1.dp, Gold.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -376,11 +384,12 @@ private fun SelectedStockInfo(
         )
         Spacer(modifier = Modifier.weight(1f))
         Box(
-            modifier = Modifier
-                .size(24.dp)
-                .clip(CircleShape)
-                .clickable(onClick = onRemove)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onRemove)
+                    .padding(4.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -403,12 +412,13 @@ private fun AssetSearchExpandable(
 ) {
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp))
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -421,10 +431,11 @@ private fun AssetSearchExpandable(
                 value = query,
                 onValueChange = onQueryChanged,
                 modifier = Modifier.weight(1f).padding(vertical = 8.dp),
-                textStyle = TextStyle(
-                    fontSize = 15.sp,
-                    color = TextPrimary,
-                ),
+                textStyle =
+                    TextStyle(
+                        fontSize = 15.sp,
+                        color = TextPrimary,
+                    ),
                 singleLine = true,
                 cursorBrush = SolidColor(Gold),
                 decorationBox = { innerTextField ->
@@ -440,11 +451,12 @@ private fun AssetSearchExpandable(
             )
             if (query.isNotBlank()) {
                 Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .clickable { onQueryChanged("") }
-                        .padding(4.dp),
+                    modifier =
+                        Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .clickable { onQueryChanged("") }
+                            .padding(4.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -458,12 +470,13 @@ private fun AssetSearchExpandable(
 
         if (showSuggestions && suggestions.isNotEmpty()) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Card)
-                    .border(1.dp, Border, RoundedCornerShape(10.dp)),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Card)
+                        .border(1.dp, Border, RoundedCornerShape(10.dp)),
             ) {
                 suggestions.take(6).forEach { asset ->
                     SuggestionItem(
@@ -477,13 +490,14 @@ private fun AssetSearchExpandable(
 
         if (showSuggestions && suggestions.isEmpty() && query.isNotBlank()) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Card)
-                    .border(1.dp, Border, RoundedCornerShape(10.dp))
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Card)
+                        .border(1.dp, Border, RoundedCornerShape(10.dp))
+                        .padding(16.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -499,22 +513,23 @@ private fun AssetSearchExpandable(
             HoldingsQuickSelect(
                 holdings = holdings,
                 onHoldingSelected = { holding ->
-                    val asset = Asset(
-                        innerCode = holding.code,
-                        code = holding.code,
-                        name = holding.name,
-                        pinYin = holding.pinYin,
-                        id = holding.assetId,
-                        jys = "",
-                        classify = "",
-                        marketType = "",
-                        typeName = "",
-                        securityType = "",
-                        market = 0,
-                        typeUS = "",
-                        quoteId = "",
-                        unifiedCode = holding.assetId,
-                    )
+                    val asset =
+                        Asset(
+                            innerCode = holding.code,
+                            code = holding.code,
+                            name = holding.name,
+                            pinYin = holding.pinYin,
+                            id = holding.assetId,
+                            jys = "",
+                            classify = "",
+                            marketType = "",
+                            typeName = "",
+                            securityType = "",
+                            market = 0,
+                            typeUS = "",
+                            quoteId = "",
+                            unifiedCode = holding.assetId,
+                        )
                     onAssetSelected(asset)
                 },
             )
@@ -529,10 +544,11 @@ private fun SuggestionItem(
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -552,9 +568,10 @@ private fun SuggestionItem(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
                             color = Gold,
-                            modifier = Modifier
-                                .background(GoldDim, RoundedCornerShape(10.dp))
-                                .padding(horizontal = 8.dp, vertical = 1.dp),
+                            modifier =
+                                Modifier
+                                    .background(GoldDim, RoundedCornerShape(10.dp))
+                                    .padding(horizontal = 8.dp, vertical = 1.dp),
                         )
                     }
                 }
@@ -596,16 +613,18 @@ private fun HoldingsQuickSelect(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextSecondary,
-                modifier = Modifier
-                    .background(Surface, RoundedCornerShape(10.dp))
-                    .padding(horizontal = 8.dp, vertical = 1.dp),
+                modifier =
+                    Modifier
+                        .background(Surface, RoundedCornerShape(10.dp))
+                        .padding(horizontal = 8.dp, vertical = 1.dp),
             )
         }
         Spacer(modifier = Modifier.height(6.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             holdings.sortedByDescending { it.quantity }.forEach { holding ->
@@ -624,12 +643,13 @@ private fun HoldingChip(
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .border(1.dp, Border, RoundedCornerShape(50))
-            .background(Surface)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp),
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(50))
+                .border(1.dp, Border, RoundedCornerShape(50))
+                .background(Surface)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -679,12 +699,14 @@ private fun TradeFields(
     val isBuy = type == TransactionType.BUY
     val amountHint = if (isBuy) stringResource(Res.string.buy_amount_hint) else stringResource(Res.string.sell_amount_hint)
     val feeHint = if (isBuy) stringResource(Res.string.buy_fee_hint) else stringResource(Res.string.sell_fee_hint)
-    val decimalKeyboard = KeyboardOptions(
-        keyboardType = KeyboardType.Decimal
-    )
-    val integerKeyboard = KeyboardOptions(
-        keyboardType = KeyboardType.Number
-    )
+    val decimalKeyboard =
+        KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+        )
+    val integerKeyboard =
+        KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+        )
 
     SectionWithLabel(stringResource(Res.string.trade_details_section)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -756,9 +778,10 @@ private fun DividendFields(
     onDateClicked: () -> Unit,
     amountError: Boolean = false,
 ) {
-    val decimalKeyboard = KeyboardOptions(
-        keyboardType = KeyboardType.Decimal
-    )
+    val decimalKeyboard =
+        KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+        )
 
     SectionWithLabel(stringResource(Res.string.dividend_details_section)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -806,12 +829,13 @@ private fun FormField(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(6.dp))
-                .background(if (readOnly) Surface2 else Surface)
-                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (readOnly) Surface2 else Surface)
+                    .border(1.dp, borderColor, RoundedCornerShape(6.dp))
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (prefix != null) {
@@ -835,10 +859,11 @@ private fun FormField(
                         value = value,
                         onValueChange = onValueChange,
                         modifier = Modifier.fillMaxWidth(),
-                        textStyle = TextStyle(
-                            fontSize = 15.sp,
-                            color = if (readOnly) TextSecondary else TextPrimary,
-                        ),
+                        textStyle =
+                            TextStyle(
+                                fontSize = 15.sp,
+                                color = if (readOnly) TextSecondary else TextPrimary,
+                            ),
                         singleLine = true,
                         readOnly = readOnly,
                         keyboardOptions = keyboardOptions,
@@ -877,34 +902,38 @@ private fun TransactionSummary(
     val hasContent = asset != null || amount.isNotBlank()
     if (!hasContent) return
 
-    val typeLabel = when (type) {
-        TransactionType.BUY -> stringResource(Res.string.buy)
-        TransactionType.SELL -> stringResource(Res.string.sell)
-        TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
-    }
+    val typeLabel =
+        when (type) {
+            TransactionType.BUY -> stringResource(Res.string.buy)
+            TransactionType.SELL -> stringResource(Res.string.sell)
+            TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
+        }
 
     val amountVal = amount.toDoubleOrNull() ?: 0.0
-    val pnlText = when {
-        amountVal <= 0 -> "—"
-        type == TransactionType.SELL -> "+${amountVal.formatLocalized()}"
-        type == TransactionType.DIVIDEND -> "+${amountVal.formatLocalized()}"
-        else -> "-${amountVal.formatLocalized()}"
-    }
-    val pnlColor = when {
-        amountVal <= 0 -> TextPrimary
-        type == TransactionType.SELL -> gainColor
-        type == TransactionType.DIVIDEND -> gainColor
-        else -> lossColor
-    }
+    val pnlText =
+        when {
+            amountVal <= 0 -> "—"
+            type == TransactionType.SELL -> "+${amountVal.formatLocalized()}"
+            type == TransactionType.DIVIDEND -> "+${amountVal.formatLocalized()}"
+            else -> "-${amountVal.formatLocalized()}"
+        }
+    val pnlColor =
+        when {
+            amountVal <= 0 -> TextPrimary
+            type == TransactionType.SELL -> gainColor
+            type == TransactionType.DIVIDEND -> gainColor
+            else -> lossColor
+        }
 
     SectionWithLabel(stringResource(Res.string.transaction_summary)) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp))
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .padding(16.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(modifier = Modifier.fillMaxWidth()) {
@@ -970,9 +999,10 @@ private fun SectionWithLabel(
 ) {
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -983,10 +1013,11 @@ private fun SectionWithLabel(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(1.dp)
-                    .background(Border),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(Border),
             )
         }
         content()

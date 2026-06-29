@@ -95,34 +95,36 @@ fun TransactionCard(
     val isPressed = remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (isPressed.value) 0.97f else 1f, label = "scale")
 
-    val borderColor = when {
-        isDuplicate -> GainRed
-        isPressed.value -> GainRed.copy(alpha = 0.5f)
-        else -> Border
-    }
+    val borderColor =
+        when {
+            isDuplicate -> GainRed
+            isPressed.value -> GainRed.copy(alpha = 0.5f)
+            else -> Border
+        }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .scale(scale)
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (isPressed.value) Card.copy(alpha = 0.8f) else Card)
-            .border(1.dp, borderColor, RoundedCornerShape(10.dp))
-            .pointerInput(Unit) {
-                if (onDelete != null) {
-                    detectTapGestures(
-                        onPress = {
-                            isPressed.value = true
-                            tryAwaitRelease()
-                            isPressed.value = false
-                        },
-                        onLongPress = {
-                            isPressed.value = false
-                            showDeleteDialog = true
-                        },
-                    )
-                }
-            },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .scale(scale)
+                .clip(RoundedCornerShape(10.dp))
+                .background(if (isPressed.value) Card.copy(alpha = 0.8f) else Card)
+                .border(1.dp, borderColor, RoundedCornerShape(10.dp))
+                .pointerInput(Unit) {
+                    if (onDelete != null) {
+                        detectTapGestures(
+                            onPress = {
+                                isPressed.value = true
+                                tryAwaitRelease()
+                                isPressed.value = false
+                            },
+                            onLongPress = {
+                                isPressed.value = false
+                                showDeleteDialog = true
+                            },
+                        )
+                    }
+                },
     ) {
         TransactionCardHeader(item = item)
         if (item.type != TransactionType.DIVIDEND) {
@@ -133,27 +135,31 @@ fun TransactionCard(
 
 @Composable
 private fun TransactionCardHeader(item: TransactionDisplayItem) {
-    val typeColor = when (item.type) {
-        TransactionType.BUY -> gainColor
-        TransactionType.SELL -> lossColor
-        TransactionType.DIVIDEND -> Gold
-    }
-    val typeBgColor = when (item.type) {
-        TransactionType.BUY -> gainDimColor
-        TransactionType.SELL -> lossDimColor
-        TransactionType.DIVIDEND -> GoldDim
-    }
-    val typeLabel = when (item.type) {
-        TransactionType.BUY -> stringResource(Res.string.trade_type_buy)
-        TransactionType.SELL -> stringResource(Res.string.trade_type_sell)
-        TransactionType.DIVIDEND -> stringResource(Res.string.trade_type_dividend)
-    }
+    val typeColor =
+        when (item.type) {
+            TransactionType.BUY -> gainColor
+            TransactionType.SELL -> lossColor
+            TransactionType.DIVIDEND -> Gold
+        }
+    val typeBgColor =
+        when (item.type) {
+            TransactionType.BUY -> gainDimColor
+            TransactionType.SELL -> lossDimColor
+            TransactionType.DIVIDEND -> GoldDim
+        }
+    val typeLabel =
+        when (item.type) {
+            TransactionType.BUY -> stringResource(Res.string.trade_type_buy)
+            TransactionType.SELL -> stringResource(Res.string.trade_type_sell)
+            TransactionType.DIVIDEND -> stringResource(Res.string.trade_type_dividend)
+        }
     val amountPrefix = if (item.type == TransactionType.BUY) "-" else "+"
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -170,10 +176,11 @@ private fun TransactionCardHeader(item: TransactionDisplayItem) {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(typeBgColor)
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                    modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(typeBgColor)
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
                 ) {
                     Text(
                         text = typeLabel,
@@ -213,22 +220,25 @@ private fun TransactionCardHeader(item: TransactionDisplayItem) {
 
 @Composable
 private fun TransactionCardDetails(item: TransactionDisplayItem) {
-    val fee = when (item.type) {
-        TransactionType.BUY -> item.amount - item.price * item.quantity
-        TransactionType.SELL -> item.price * item.quantity - item.amount
-        else -> 0.0
-    }
+    val fee =
+        when (item.type) {
+            TransactionType.BUY -> item.amount - item.price * item.quantity
+            TransactionType.SELL -> item.price * item.quantity - item.amount
+            else -> 0.0
+        }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Border),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Border),
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -283,21 +293,24 @@ private fun TransactionDeleteDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val typeLabel = when (item.type) {
-        TransactionType.BUY -> stringResource(Res.string.trade_type_buy)
-        TransactionType.SELL -> stringResource(Res.string.trade_type_sell)
-        TransactionType.DIVIDEND -> stringResource(Res.string.trade_type_dividend)
-    }
-    val typeColor = when (item.type) {
-        TransactionType.BUY -> gainColor
-        TransactionType.SELL -> lossColor
-        TransactionType.DIVIDEND -> Gold
-    }
-    val typeBgColor = when (item.type) {
-        TransactionType.BUY -> gainDimColor
-        TransactionType.SELL -> lossDimColor
-        TransactionType.DIVIDEND -> GoldDim
-    }
+    val typeLabel =
+        when (item.type) {
+            TransactionType.BUY -> stringResource(Res.string.trade_type_buy)
+            TransactionType.SELL -> stringResource(Res.string.trade_type_sell)
+            TransactionType.DIVIDEND -> stringResource(Res.string.trade_type_dividend)
+        }
+    val typeColor =
+        when (item.type) {
+            TransactionType.BUY -> gainColor
+            TransactionType.SELL -> lossColor
+            TransactionType.DIVIDEND -> Gold
+        }
+    val typeBgColor =
+        when (item.type) {
+            TransactionType.BUY -> gainDimColor
+            TransactionType.SELL -> lossDimColor
+            TransactionType.DIVIDEND -> GoldDim
+        }
 
     ConfirmDialog(
         title = stringResource(Res.string.confirm_delete),
@@ -322,10 +335,11 @@ private fun TransactionDeleteDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(typeBgColor)
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        modifier =
+                            Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(typeBgColor)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
                     ) {
                         Text(
                             text = typeLabel,
@@ -356,51 +370,56 @@ private fun TransactionDeleteDialog(
 @Preview
 @Composable
 private fun TransactionCardPreview() {
-    val tradeDate = LocalDateTime(2026, 1, 1, 10, 0, 0)
-        .toInstant(TimeZone.currentSystemDefault())
-        .toEpochMilliseconds()
+    val tradeDate =
+        LocalDateTime(2026, 1, 1, 10, 0, 0)
+            .toInstant(TimeZone.currentSystemDefault())
+            .toEpochMilliseconds()
 
     Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .background(Background),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .background(Background),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         TransactionCard(
-            item = TransactionDisplayItem(
-                name = "贵州茅台",
-                code = "SH600519",
-                pinYin = "GZMT",
-                type = TransactionType.BUY,
-                quantity = 100.0,
-                price = 1800.00,
-                amount = 180500.00,
-                tradeDate = tradeDate,
-            ),
+            item =
+                TransactionDisplayItem(
+                    name = "贵州茅台",
+                    code = "SH600519",
+                    pinYin = "GZMT",
+                    type = TransactionType.BUY,
+                    quantity = 100.0,
+                    price = 1800.00,
+                    amount = 180500.00,
+                    tradeDate = tradeDate,
+                ),
         )
         TransactionCard(
-            item = TransactionDisplayItem(
-                name = "贵州茅台",
-                code = "SH600519",
-                pinYin = "GZMT",
-                type = TransactionType.SELL,
-                quantity = 100.0,
-                price = 1850.00,
-                amount = 184500.00,
-                tradeDate = tradeDate,
-            ),
+            item =
+                TransactionDisplayItem(
+                    name = "贵州茅台",
+                    code = "SH600519",
+                    pinYin = "GZMT",
+                    type = TransactionType.SELL,
+                    quantity = 100.0,
+                    price = 1850.00,
+                    amount = 184500.00,
+                    tradeDate = tradeDate,
+                ),
         )
         TransactionCard(
-            item = TransactionDisplayItem(
-                name = "贵州茅台",
-                code = "SH600519",
-                pinYin = "GZMT",
-                type = TransactionType.DIVIDEND,
-                quantity = 0.0,
-                price = 0.0,
-                amount = 200.00,
-                tradeDate = tradeDate,
-            ),
+            item =
+                TransactionDisplayItem(
+                    name = "贵州茅台",
+                    code = "SH600519",
+                    pinYin = "GZMT",
+                    type = TransactionType.DIVIDEND,
+                    quantity = 0.0,
+                    price = 0.0,
+                    amount = 200.00,
+                    tradeDate = tradeDate,
+                ),
         )
     }
 }

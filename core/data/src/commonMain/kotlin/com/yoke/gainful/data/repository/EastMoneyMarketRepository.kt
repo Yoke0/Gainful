@@ -15,7 +15,6 @@ import com.yoke.gainful.network.EastMoneyApi
 class EastMoneyMarketRepository(
     private val api: EastMoneyApi,
 ) : MarketRepository {
-
     override suspend fun search(query: String, count: Int): List<Asset> {
         return api.search(query, count).mapNotNull { it.toAsset() }
     }

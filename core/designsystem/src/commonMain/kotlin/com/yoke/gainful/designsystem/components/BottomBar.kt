@@ -7,8 +7,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -64,29 +64,32 @@ fun BottomBar(
     )
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(BottomBarHeight)
-            .alpha(alpha)
-            .clip(RoundedCornerShape(22.dp))
-            .background(Surface.copy(alpha = 0.88f))
-            .padding(8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(BottomBarHeight)
+                .alpha(alpha)
+                .clip(RoundedCornerShape(22.dp))
+                .background(Surface.copy(alpha = 0.88f))
+                .padding(8.dp),
     ) {
         if (rowSize.width > 0) {
             Box(
-                modifier = Modifier
-                    .offset(x = animatedOffset)
-                    .width(tabWidthDp)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(GoldDim),
+                modifier =
+                    Modifier
+                        .offset(x = animatedOffset)
+                        .width(tabWidthDp)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(GoldDim),
             )
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .onGloballyPositioned { rowSize = it.size },
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .onGloballyPositioned { rowSize = it.size },
             verticalAlignment = Alignment.CenterVertically,
             content = content,
         )
@@ -101,10 +104,11 @@ fun BottomBarItem(
     label: @Composable () -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 6.dp),
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

@@ -52,9 +52,10 @@ fun SplashScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Background),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -64,9 +65,10 @@ fun SplashScreen(
             Image(
                 painter = painterResource(Res.drawable.app_icon),
                 contentDescription = stringResource(Res.string.app_name),
-                modifier = Modifier
-                    .size(88.dp)
-                    .clip(RoundedCornerShape(22.dp)),
+                modifier =
+                    Modifier
+                        .size(88.dp)
+                        .clip(RoundedCornerShape(22.dp)),
             )
 
             Spacer(modifier = Modifier.height(24.dp))

@@ -3,7 +3,6 @@ package com.yoke.gainful.navigation
 import androidx.navigation3.runtime.NavKey
 
 class Navigator(val state: NavigationState) {
-
     fun navigate(key: NavKey) {
         when (key) {
             state.currentTopLevelKey -> clearSubStack()
@@ -15,8 +14,14 @@ class Navigator(val state: NavigationState) {
     fun goBack() {
         when (state.currentKey) {
             state.startKey -> { /* System handles exit */ }
-            state.currentTopLevelKey -> state.topLevelStack.removeLastOrNull()
-            else -> state.currentSubStack.removeLastOrNull()
+
+            state.currentTopLevelKey -> {
+                state.topLevelStack.removeLastOrNull()
+            }
+
+            else -> {
+                state.currentSubStack.removeLastOrNull()
+            }
         }
     }
 

@@ -4,19 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.domain.usecase.transaction.DeleteTransactionUseCase
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsUseCase
+import com.yoke.gainful.model.TransactionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.yoke.gainful.model.TransactionType
 
 class TransactionsViewModel(
     private val getTransactionsWithAssetsUseCase: GetTransactionsWithAssetsUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(TransactionsUiState())
     val uiState: StateFlow<TransactionsUiState> = _uiState.asStateFlow()
 

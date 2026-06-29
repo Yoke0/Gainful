@@ -17,9 +17,10 @@ fun GainfulScaffold(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Background)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(Background),
     ) {
         appTopBar()
 

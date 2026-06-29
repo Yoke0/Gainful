@@ -10,7 +10,7 @@ val versionName = property("VERSION_NAME").toString()
 kotlin {
     listOf(
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     )
 
     jvm()
@@ -54,7 +54,7 @@ abstract class GenerateBuildConfigTask : DefaultTask() {
             |object BuildConfig {
             |    const val APP_VERSION = "${versionName.get()}"
             |}
-            """.trimMargin()
+            """.trimMargin(),
         )
     }
 }

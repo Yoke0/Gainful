@@ -13,7 +13,8 @@ enum class ChartPeriod(
     MIN_5(klt = 5),
     MIN_15(klt = 15),
     MIN_30(klt = 30),
-    MIN_60(klt = 60);
+    MIN_60(klt = 60),
+    ;
 
     val isTrends: Boolean
         get() = klt == null

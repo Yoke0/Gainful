@@ -19,14 +19,15 @@ data class GainLossColors(
     val lossDim: Color,
 )
 
-val LocalGainLossColors = staticCompositionLocalOf {
-    GainLossColors(
-        gain = GainGreen,
-        loss = GainRed,
-        gainDim = GreenDim,
-        lossDim = RedDim,
-    )
-}
+val LocalGainLossColors =
+    staticCompositionLocalOf {
+        GainLossColors(
+            gain = GainGreen,
+            loss = GainRed,
+            gainDim = GreenDim,
+            lossDim = RedDim,
+        )
+    }
 
 val gainColor: Color
     @Composable get() = LocalGainLossColors.current.gain
@@ -40,20 +41,26 @@ val gainDimColor: Color
 val lossDimColor: Color
     @Composable get() = LocalGainLossColors.current.lossDim
 
-fun GainLossColorScheme.toColors(): GainLossColors = when (this) {
-    GainLossColorScheme.RED_UP -> GainLossColors(
-        gain = GainRed,
-        loss = GainGreen,
-        gainDim = RedDim,
-        lossDim = GreenDim,
-    )
-    GainLossColorScheme.GREEN_UP -> GainLossColors(
-        gain = GainGreen,
-        loss = GainRed,
-        gainDim = GreenDim,
-        lossDim = RedDim,
-    )
-}
+fun GainLossColorScheme.toColors(): GainLossColors =
+    when (this) {
+        GainLossColorScheme.RED_UP -> {
+            GainLossColors(
+                gain = GainRed,
+                loss = GainGreen,
+                gainDim = RedDim,
+                lossDim = GreenDim,
+            )
+        }
+
+        GainLossColorScheme.GREEN_UP -> {
+            GainLossColors(
+                gain = GainGreen,
+                loss = GainRed,
+                gainDim = GreenDim,
+                lossDim = RedDim,
+            )
+        }
+    }
 
 @Composable
 fun ProvideGainLossColors(

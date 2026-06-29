@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.map
 class OfflineAssetRepository(
     private val dao: AssetDao,
 ) : AssetRepository {
-
     override fun getAssets(): Flow<List<Asset>> {
         return dao.getAll().map { entities -> entities.map { it.toDomain() } }
     }

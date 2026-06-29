@@ -18,27 +18,29 @@ class Converters {
 
     @TypeConverter
     fun fromStockTrendList(trends: List<StockTrend>): String {
-        val dtos = trends.map {
-            StockTrendDto(
-                time = it.time,
-                price = it.price,
-                volume = it.volume,
-                averagePrice = it.averagePrice,
-            )
-        }
+        val dtos =
+            trends.map {
+                StockTrendDto(
+                    time = it.time,
+                    price = it.price,
+                    volume = it.volume,
+                    averagePrice = it.averagePrice,
+                )
+            }
         return json.encodeToString(dtos)
     }
 
     @TypeConverter
-    fun toStockTrendList(jsonStr: String): List<StockTrend> = runCatching {
-        val dtos = json.decodeFromString<List<StockTrendDto>>(jsonStr)
-        dtos.map { dto ->
-            StockTrend(
-                time = dto.time,
-                price = dto.price,
-                volume = dto.volume,
-                averagePrice = dto.averagePrice,
-            )
-        }
-    }.getOrDefault(emptyList())
+    fun toStockTrendList(jsonStr: String): List<StockTrend> =
+        runCatching {
+            val dtos = json.decodeFromString<List<StockTrendDto>>(jsonStr)
+            dtos.map { dto ->
+                StockTrend(
+                    time = dto.time,
+                    price = dto.price,
+                    volume = dto.volume,
+                    averagePrice = dto.averagePrice,
+                )
+            }
+        }.getOrDefault(emptyList())
 }

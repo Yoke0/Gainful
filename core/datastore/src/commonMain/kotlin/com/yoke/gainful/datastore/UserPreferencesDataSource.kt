@@ -21,18 +21,20 @@ class UserPreferencesDataSource(
         val GAIN_LOSS_COLOR_SCHEME = intPreferencesKey("gain_loss_color_scheme")
     }
 
-    val userPreferences: Flow<UserPreferences> = dataStore.data.map { prefs ->
-        UserPreferences(
-            refreshMinutes = prefs[Keys.REFRESH_MINUTES] ?: UserPreferences().refreshMinutes,
-            openHour = prefs[Keys.OPEN_HOUR] ?: UserPreferences().openHour,
-            openMinute = prefs[Keys.OPEN_MINUTE] ?: UserPreferences().openMinute,
-            closeHour = prefs[Keys.CLOSE_HOUR] ?: UserPreferences().closeHour,
-            closeMinute = prefs[Keys.CLOSE_MINUTE] ?: UserPreferences().closeMinute,
-            gainLossColorScheme = prefs[Keys.GAIN_LOSS_COLOR_SCHEME]?.let {
-                GainLossColorScheme.entries.getOrElse(it) { GainLossColorScheme.RED_UP }
-            } ?: UserPreferences().gainLossColorScheme,
-        )
-    }
+    val userPreferences: Flow<UserPreferences> =
+        dataStore.data.map { prefs ->
+            UserPreferences(
+                refreshMinutes = prefs[Keys.REFRESH_MINUTES] ?: UserPreferences().refreshMinutes,
+                openHour = prefs[Keys.OPEN_HOUR] ?: UserPreferences().openHour,
+                openMinute = prefs[Keys.OPEN_MINUTE] ?: UserPreferences().openMinute,
+                closeHour = prefs[Keys.CLOSE_HOUR] ?: UserPreferences().closeHour,
+                closeMinute = prefs[Keys.CLOSE_MINUTE] ?: UserPreferences().closeMinute,
+                gainLossColorScheme =
+                    prefs[Keys.GAIN_LOSS_COLOR_SCHEME]?.let {
+                        GainLossColorScheme.entries.getOrElse(it) { GainLossColorScheme.RED_UP }
+                    } ?: UserPreferences().gainLossColorScheme,
+            )
+        }
 
     suspend fun setRefreshMinutes(minutes: Int) {
         dataStore.edit { it[Keys.REFRESH_MINUTES] = minutes }

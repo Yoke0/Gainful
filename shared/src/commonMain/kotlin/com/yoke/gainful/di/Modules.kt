@@ -11,14 +11,16 @@ import com.yoke.gainful.network.di.networkModule
 import com.yoke.gainful.sync.di.syncModule
 import org.koin.core.module.Module
 
-fun allModules(): List<Module> = platformModules + listOf(
-    networkModule,
-    dataModule,
-    domainModule,
-    syncModule,
-    navigationModule,
-    dashboardViewModelModule,
-    transactionsViewModelModule,
-    holdingsViewModelModule,
-    settingsViewModelModule,
-)
+fun allModules(): List<Module> =
+    platformModules +
+        listOf(
+            networkModule,
+            dataModule,
+            domainModule,
+            syncModule,
+            navigationModule,
+            dashboardViewModelModule,
+            transactionsViewModelModule,
+            holdingsViewModelModule,
+            settingsViewModelModule,
+        )

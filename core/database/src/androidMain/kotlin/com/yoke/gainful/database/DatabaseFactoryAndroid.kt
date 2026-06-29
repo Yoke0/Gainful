@@ -8,6 +8,6 @@ fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<GainfulDatabase> 
     val dbFile = context.getDatabasePath(DATABASE_NAME)
     return Room.databaseBuilder<GainfulDatabase>(
         context = context,
-        name = dbFile.absolutePath
+        name = dbFile.absolutePath,
     )
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.PrimaryButton
 import com.yoke.gainful.designsystem.components.bottomBarPadding
@@ -43,7 +44,6 @@ import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.TransactionType
-import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.TransactionCard
 import com.yoke.gainful.ui.TransactionDisplayItem
 import com.yoke.gainful.ui.gainColor
@@ -77,20 +77,22 @@ fun TransactionsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val filteredTrades = when (uiState.filterType) {
-        TransactionType.BUY -> uiState.transactions.filter { it.type == TransactionType.BUY }
-        TransactionType.SELL -> uiState.transactions.filter { it.type == TransactionType.SELL }
-        TransactionType.DIVIDEND -> uiState.transactions.filter { it.type == TransactionType.DIVIDEND }
-        null -> uiState.transactions
-    }
+    val filteredTrades =
+        when (uiState.filterType) {
+            TransactionType.BUY -> uiState.transactions.filter { it.type == TransactionType.BUY }
+            TransactionType.SELL -> uiState.transactions.filter { it.type == TransactionType.SELL }
+            TransactionType.DIVIDEND -> uiState.transactions.filter { it.type == TransactionType.DIVIDEND }
+            null -> uiState.transactions
+        }
 
     val buyCount = uiState.transactions.count { it.type == TransactionType.BUY }
     val sellCount = uiState.transactions.count { it.type == TransactionType.SELL }
     val divCount = uiState.transactions.count { it.type == TransactionType.DIVIDEND }
 
-    val groups = remember(filteredTrades) {
-        filteredTrades.groupBy { getTimeGroupIndex(it.tradeDate) }
-    }
+    val groups =
+        remember(filteredTrades) {
+            filteredTrades.groupBy { getTimeGroupIndex(it.tradeDate) }
+        }
     val groupOrder = stringArrayResource(Res.array.time_groups)
 
     TransactionsScreen(
@@ -136,10 +138,11 @@ private fun TransactionsScreen(
         },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .navigationBarsPadding(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(
@@ -163,7 +166,10 @@ private fun TransactionsScreen(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                SummaryItem(stringResource(Res.string.summary_total), stringResource(Res.string.trade_count_unit, uiState.transactions.size))
+                SummaryItem(
+                    stringResource(Res.string.summary_total),
+                    stringResource(Res.string.trade_count_unit, uiState.transactions.size),
+                )
                 SummaryItem(stringResource(Res.string.summary_buy), "$buyCount", gainColor)
                 SummaryItem(stringResource(Res.string.summary_sell), "$sellCount", lossColor)
                 SummaryItem(stringResource(Res.string.summary_dividend), "$divCount", Gold)
@@ -179,16 +185,17 @@ private fun TransactionsScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items.forEach { trade ->
                                 TransactionCard(
-                                    item = TransactionDisplayItem(
-                                        name = trade.name,
-                                        code = trade.code,
-                                        pinYin = trade.pinYin,
-                                        type = trade.type,
-                                        quantity = trade.quantity,
-                                        price = trade.price,
-                                        amount = trade.amount,
-                                        tradeDate = trade.tradeDate,
-                                    ),
+                                    item =
+                                        TransactionDisplayItem(
+                                            name = trade.name,
+                                            code = trade.code,
+                                            pinYin = trade.pinYin,
+                                            type = trade.type,
+                                            quantity = trade.quantity,
+                                            price = trade.price,
+                                            amount = trade.amount,
+                                            tradeDate = trade.tradeDate,
+                                        ),
                                     onDelete = { onDeleteTrade(trade) },
                                 )
                             }
@@ -204,29 +211,33 @@ private fun TransactionsScreen(
 
 @Composable
 private fun FilterTab(text: String, isActive: Boolean, activeColor: Color?, onClick: () -> Unit) {
-    val bgColor = when {
-        isActive && activeColor != null -> activeColor.copy(alpha = 0.12f)
-        isActive -> GoldDim
-        else -> Surface
-    }
-    val textColor = when {
-        isActive && activeColor != null -> activeColor
-        isActive -> Gold
-        else -> TextSecondary
-    }
-    val borderColor = when {
-        isActive && activeColor != null -> activeColor
-        isActive -> Gold
-        else -> Border
-    }
+    val bgColor =
+        when {
+            isActive && activeColor != null -> activeColor.copy(alpha = 0.12f)
+            isActive -> GoldDim
+            else -> Surface
+        }
+    val textColor =
+        when {
+            isActive && activeColor != null -> activeColor
+            isActive -> Gold
+            else -> TextSecondary
+        }
+    val borderColor =
+        when {
+            isActive && activeColor != null -> activeColor
+            isActive -> Gold
+            else -> Border
+        }
 
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
-            .background(bgColor)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(20.dp))
+                .background(bgColor)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
         Text(
             text = text,
@@ -269,10 +280,11 @@ private fun TimeGroupHeader(title: String, count: Int) {
             color = TextSecondary,
         )
         Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(Surface)
-                .padding(horizontal = 10.dp, vertical = 2.dp),
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Surface)
+                    .padding(horizontal = 10.dp, vertical = 2.dp),
         ) {
             Text(
                 text = stringResource(Res.string.trade_count_unit, count),
@@ -287,21 +299,23 @@ private fun TimeGroupHeader(title: String, count: Int) {
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Card)
-            .border(1.dp, Border, RoundedCornerShape(14.dp))
-            .padding(40.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier
-                .width(48.dp)
-                .height(48.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Surface2)
-                .border(1.dp, Border, RoundedCornerShape(24.dp)),
+            modifier =
+                Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Surface2)
+                    .border(1.dp, Border, RoundedCornerShape(24.dp)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -336,9 +350,10 @@ private fun getTimeGroupIndex(timestamp: Long): Int {
 }
 
 private fun getDaysAgo(timestamp: Long): Int {
-    val tradeDate = Instant.fromEpochMilliseconds(timestamp)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .date
+    val tradeDate =
+        Instant.fromEpochMilliseconds(timestamp)
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
     val now = Clock.System.now()
     val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
     return (today.toEpochDays() - tradeDate.toEpochDays()).toInt()

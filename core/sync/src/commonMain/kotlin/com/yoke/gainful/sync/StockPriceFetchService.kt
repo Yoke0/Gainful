@@ -38,22 +38,23 @@ class StockPriceFetchService(
     fun start() {
         if (isRunning) return
         isRunning = true
-        fetchJob = scope.launch {
-            while (currentCoroutineContext().isActive) {
-                val prefs = userPreferencesRepository.userPreferences.first()
-                val now = Clock.System.now()
-                val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
-                val time = localDateTime.time
-                val openTime = LocalTime(prefs.openHour, prefs.openMinute)
-                val closeTime = LocalTime(prefs.closeHour, prefs.closeMinute)
+        fetchJob =
+            scope.launch {
+                while (currentCoroutineContext().isActive) {
+                    val prefs = userPreferencesRepository.userPreferences.first()
+                    val now = Clock.System.now()
+                    val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
+                    val time = localDateTime.time
+                    val openTime = LocalTime(prefs.openHour, prefs.openMinute)
+                    val closeTime = LocalTime(prefs.closeHour, prefs.closeMinute)
 
-                if (time in openTime..closeTime) {
-                    fetchAllHoldings()
+                    if (time in openTime..closeTime) {
+                        fetchAllHoldings()
+                    }
+
+                    delay(prefs.refreshMinutes.minutes)
                 }
-
-                delay(prefs.refreshMinutes.minutes)
             }
-        }
     }
 
     fun stop() {
@@ -62,43 +63,46 @@ class StockPriceFetchService(
         fetchJob = null
     }
 
-    suspend fun fetchOnce(): Boolean = runCatching {
-        val assets = assetRepository.getAssets().first()
-        val holdings = assets.filter { it.quoteId.isNotBlank() }
-        if (holdings.isEmpty()) return@runCatching false
-        fetchAllHoldings()
-        true
-    }.getOrDefault(false)
+    suspend fun fetchOnce(): Boolean =
+        runCatching {
+            val assets = assetRepository.getAssets().first()
+            val holdings = assets.filter { it.quoteId.isNotBlank() }
+            if (holdings.isEmpty()) return@runCatching false
+            fetchAllHoldings()
+            true
+        }.getOrDefault(false)
 
     private suspend fun fetchAllHoldings() {
         val assets = runCatching { assetRepository.getAssets().first() }.getOrNull() ?: return
         val holdings = assets.filter { it.quoteId.isNotBlank() }
 
-        val snapshots = coroutineScope {
-            holdings.map { asset ->
-                async { fetchSingleQuote(asset.quoteId) }
-            }.mapNotNull { it.await() }
-        }
+        val snapshots =
+            coroutineScope {
+                holdings.map { asset ->
+                    async { fetchSingleQuote(asset.quoteId) }
+                }.mapNotNull { it.await() }
+            }
 
         if (snapshots.isNotEmpty()) {
             quoteCacheRepository.upsertAll(snapshots)
         }
     }
 
-    private suspend fun fetchSingleQuote(quoteId: String): QuoteSnapshot? = runCatching {
-        coroutineScope {
-            val quoteDeferred = async { marketRepository.getQuote(quoteId) }
-            val trendsDeferred = async { marketRepository.getTrends(quoteId, ndays = 1) }
-            val quote = quoteDeferred.await() ?: return@coroutineScope null
-            val trends = trendsDeferred.await()
-            QuoteSnapshot(
-                quoteId = quoteId,
-                code = quote.code,
-                name = quote.name,
-                quote = quote,
-                trends = trends,
-                lastUpdated = Clock.System.now().toEpochMilliseconds(),
-            )
-        }
-    }.getOrNull()
+    private suspend fun fetchSingleQuote(quoteId: String): QuoteSnapshot? =
+        runCatching {
+            coroutineScope {
+                val quoteDeferred = async { marketRepository.getQuote(quoteId) }
+                val trendsDeferred = async { marketRepository.getTrends(quoteId, ndays = 1) }
+                val quote = quoteDeferred.await() ?: return@coroutineScope null
+                val trends = trendsDeferred.await()
+                QuoteSnapshot(
+                    quoteId = quoteId,
+                    code = quote.code,
+                    name = quote.name,
+                    quote = quote,
+                    trends = trends,
+                    lastUpdated = Clock.System.now().toEpochMilliseconds(),
+                )
+            }
+        }.getOrNull()
 }

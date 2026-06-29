@@ -50,18 +50,20 @@ fun LoadingDots(
             val alpha by transition.animateFloat(
                 initialValue = 0.2f,
                 targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 700, delayMillis = delay, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse,
-                ),
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(durationMillis = 700, delayMillis = delay, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse,
+                    ),
             )
             val scale by transition.animateFloat(
                 initialValue = 0.75f,
                 targetValue = 1.15f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 700, delayMillis = delay, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse,
-                ),
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(durationMillis = 700, delayMillis = delay, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse,
+                    ),
             )
 
             Canvas(modifier = Modifier.size(size)) {
@@ -80,34 +82,38 @@ fun LoadingSpinner(modifier: Modifier = Modifier) {
     val outerRotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(2000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
     )
     val midRotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = -360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1400, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1400, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
     )
     val coreAlpha by infiniteTransition.animateFloat(
         initialValue = 0.15f,
         targetValue = 0.45f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1800, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1800, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
     )
     val coreScale by infiniteTransition.animateFloat(
         initialValue = 0.85f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1800, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1800, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
     )
 
     Box(
@@ -153,18 +159,20 @@ fun LoadingSpinner(modifier: Modifier = Modifier) {
             }
         }
         Box(
-            modifier = Modifier
-                .size(48.dp)
-                .scale(coreScale)
-                .alpha(coreAlpha)
-                .clip(CircleShape)
-                .background(Gold),
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .scale(coreScale)
+                    .alpha(coreAlpha)
+                    .clip(CircleShape)
+                    .background(Gold),
         )
         Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(Background),
+            modifier =
+                Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(Background),
         )
     }
 }
@@ -174,9 +182,10 @@ fun LoadingSpinner(modifier: Modifier = Modifier) {
 private fun LoadingDotsPreview() {
     GainfulTheme {
         Column(
-            modifier = Modifier
-                .size(200.dp)
-                .background(Background),
+            modifier =
+                Modifier
+                    .size(200.dp)
+                    .background(Background),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -192,9 +201,10 @@ private fun LoadingDotsPreview() {
 private fun LoadingSpinnerPreview() {
     GainfulTheme {
         Box(
-            modifier = Modifier
-                .size(200.dp)
-                .background(Background),
+            modifier =
+                Modifier
+                    .size(200.dp)
+                    .background(Background),
             contentAlignment = Alignment.Center,
         ) {
             LoadingSpinner()

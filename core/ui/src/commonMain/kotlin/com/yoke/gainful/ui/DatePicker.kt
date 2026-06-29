@@ -94,10 +94,11 @@ fun DatePickerField(
     dateMillis: Long?,
     onClick: () -> Unit,
 ) {
-    val dateStr = dateMillis?.let {
-        val d = Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date
-        stringResource(Res.string.date_format, d.year, d.month.number, d.day)
-    }
+    val dateStr =
+        dateMillis?.let {
+            val d = Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date
+            stringResource(Res.string.date_format, d.year, d.month.number, d.day)
+        }
     val displayText = dateStr ?: stringResource(Res.string.select_date)
 
     Column {
@@ -109,14 +110,15 @@ fun DatePickerField(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp))
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -149,9 +151,10 @@ fun CalendarDialog(
     selectableToTodayOnly: Boolean = false,
 ) {
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val selectedDate = initialSelectedDateMillis?.let {
-        Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date
-    }
+    val selectedDate =
+        initialSelectedDateMillis?.let {
+            Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date
+        }
     val initialYear = selectedDate?.year ?: today.year
     val initialMonth = (selectedDate?.month?.number ?: today.month.number) - 1
 
@@ -159,37 +162,59 @@ fun CalendarDialog(
     var month by remember { mutableIntStateOf(initialMonth) }
     var tempSelected by remember { mutableStateOf(selectedDate ?: today) }
 
-    val monthNames = listOf(
-        stringResource(Res.string.month_1), stringResource(Res.string.month_2),
-        stringResource(Res.string.month_3), stringResource(Res.string.month_4),
-        stringResource(Res.string.month_5), stringResource(Res.string.month_6),
-        stringResource(Res.string.month_7), stringResource(Res.string.month_8),
-        stringResource(Res.string.month_9), stringResource(Res.string.month_10),
-        stringResource(Res.string.month_11), stringResource(Res.string.month_12),
-    )
-    val weekdays = listOf(
-        stringResource(Res.string.weekday_monday), stringResource(Res.string.weekday_tuesday),
-        stringResource(Res.string.weekday_wednesday), stringResource(Res.string.weekday_thursday),
-        stringResource(Res.string.weekday_friday), stringResource(Res.string.weekday_saturday),
-        stringResource(Res.string.weekday_sunday),
-    )
+    val monthNames =
+        listOf(
+            stringResource(Res.string.month_1),
+            stringResource(Res.string.month_2),
+            stringResource(Res.string.month_3),
+            stringResource(Res.string.month_4),
+            stringResource(Res.string.month_5),
+            stringResource(Res.string.month_6),
+            stringResource(Res.string.month_7),
+            stringResource(Res.string.month_8),
+            stringResource(Res.string.month_9),
+            stringResource(Res.string.month_10),
+            stringResource(Res.string.month_11),
+            stringResource(Res.string.month_12),
+        )
+    val weekdays =
+        listOf(
+            stringResource(Res.string.weekday_monday),
+            stringResource(Res.string.weekday_tuesday),
+            stringResource(Res.string.weekday_wednesday),
+            stringResource(Res.string.weekday_thursday),
+            stringResource(Res.string.weekday_friday),
+            stringResource(Res.string.weekday_saturday),
+            stringResource(Res.string.weekday_sunday),
+        )
 
     fun prevMonth() {
-        if (month == 0) { month = 11; year-- } else month--
+        if (month == 0) {
+            month = 11
+            year--
+        } else {
+            month--
+        }
     }
 
     fun nextMonth() {
-        if (month == 11) { month = 0; year++ } else month++
+        if (month == 11) {
+            month = 0
+            year++
+        } else {
+            month++
+        }
     }
 
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .border(1.dp, Border, RoundedCornerShape(14.dp))
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Card)
+                    .border(1.dp, Border, RoundedCornerShape(14.dp))
+                    .padding(20.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -255,7 +280,7 @@ fun CalendarDialog(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         onDateSelected(
-                            LocalDateTime(tempSelected, LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+                            LocalDateTime(tempSelected, LocalTime(0, 0)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
                         )
                     },
                 )
@@ -292,32 +317,35 @@ internal fun CalendarGrid(
                         val isToday = date == today
                         val isSelected = date == tempSelected
                         val isAfterToday = selectableToTodayOnly && date > today
-                        val bgColor = when {
-                            isSelected && !isAfterToday -> Gold
-                            isToday -> GoldDim
-                            else -> Color.Transparent
-                        }
-                        val textColor = when {
-                            isSelected && !isAfterToday -> Background
-                            isToday -> TextPrimary
-                            isAfterToday -> TextMuted.copy(alpha = 0.4f)
-                            else -> TextSecondary
-                        }
+                        val bgColor =
+                            when {
+                                isSelected && !isAfterToday -> Gold
+                                isToday -> GoldDim
+                                else -> Color.Transparent
+                            }
+                        val textColor =
+                            when {
+                                isSelected && !isAfterToday -> Background
+                                isToday -> TextPrimary
+                                isAfterToday -> TextMuted.copy(alpha = 0.4f)
+                                else -> TextSecondary
+                            }
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .then(
-                                    if (isAfterToday) Modifier else Modifier.clickable { onDayClick(date) }
-                                )
-                                .background(bgColor),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .then(
+                                        if (isAfterToday) Modifier else Modifier.clickable { onDayClick(date) },
+                                    )
+                                    .background(bgColor),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = "$dayNum",
                                 fontSize = 15.sp,
-                                fontWeight = if (isSelected && !isAfterToday || isToday) FontWeight.Bold else FontWeight.SemiBold,
+                                fontWeight = if ((isSelected && !isAfterToday) || isToday) FontWeight.Bold else FontWeight.SemiBold,
                                 color = textColor,
                                 fontFamily = FontFamily.Monospace,
                             )
@@ -339,10 +367,11 @@ fun DatePickerPreview() {
 
     GainfulTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Background)
+                    .padding(20.dp),
         ) {
             DatePickerField(
                 label = "交易日期",
@@ -352,10 +381,13 @@ fun DatePickerPreview() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val dateStr = if (dateMillis > 0) {
-                val d = Instant.fromEpochMilliseconds(dateMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
-                "${d.year}-${d.month.number.pad2()}-${d.day.pad2()}"
-            } else "未选择"
+            val dateStr =
+                if (dateMillis > 0) {
+                    val d = Instant.fromEpochMilliseconds(dateMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    "${d.year}-${d.month.number.pad2()}-${d.day.pad2()}"
+                } else {
+                    "未选择"
+                }
             Text(
                 text = "已选日期：$dateStr",
                 fontSize = 15.sp,

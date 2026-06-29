@@ -5,7 +5,8 @@ import com.yoke.gainful.datastore.createDataStore
 import com.yoke.gainful.datastore.getDatastorePath
 import org.koin.dsl.module
 
-val datastoreModule = module {
-    single { createDataStore(getDatastorePath()) }
-    single { UserPreferencesDataSource(get()) }
-}
+val datastoreModule =
+    module {
+        single { createDataStore(getDatastorePath()) }
+        single { UserPreferencesDataSource(get()) }
+    }

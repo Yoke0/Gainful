@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.BuildConfig
 import com.yoke.gainful.designsystem.components.GainfulDialog
+import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.bottomBarPadding
 import com.yoke.gainful.designsystem.theme.Background
@@ -50,7 +51,6 @@ import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.file.rememberCsvFileUtil
 import com.yoke.gainful.model.GainLossColorScheme
-import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.ui.TimePickerDialog
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.about_group
@@ -103,9 +103,10 @@ fun SettingsScreen(
     val fileUtil = rememberCsvFileUtil()
     val csvHeaders = stringArrayResource(Res.array.csv_headers)
     val csvTypeValues = stringArrayResource(Res.array.csv_type_values)
-    val csvConfig = remember(csvHeaders, csvTypeValues) {
-        CsvConfig(headers = csvHeaders, typeValues = csvTypeValues)
-    }
+    val csvConfig =
+        remember(csvHeaders, csvTypeValues) {
+            CsvConfig(headers = csvHeaders, typeValues = csvTypeValues)
+        }
 
     LaunchedEffect(uiState.exportCsvContent) {
         uiState.exportCsvContent?.let { csv ->
@@ -125,14 +126,16 @@ fun SettingsScreen(
     )
 
     if (uiState.showTimePicker) {
-        val (initHour, initMinute) = when (uiState.timePickerTarget) {
-            TimePickerTarget.OPEN -> uiState.openHour to uiState.openMinute
-            TimePickerTarget.CLOSE -> uiState.closeHour to uiState.closeMinute
-        }
-        val initMillis = LocalDateTime(
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date,
-            LocalTime(initHour, initMinute)
-        ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        val (initHour, initMinute) =
+            when (uiState.timePickerTarget) {
+                TimePickerTarget.OPEN -> uiState.openHour to uiState.openMinute
+                TimePickerTarget.CLOSE -> uiState.closeHour to uiState.closeMinute
+            }
+        val initMillis =
+            LocalDateTime(
+                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date,
+                LocalTime(initHour, initMinute),
+            ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
         TimePickerDialog(
             initialSelectedTimeMillis = initMillis,
@@ -191,12 +194,13 @@ private fun SettingsScreen(
             GainfulTopAppBar(
                 title = stringResource(Res.string.settings_title),
             )
-        }
+        },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             SettingsGroup(title = stringResource(Res.string.settings_data_group)) {
@@ -278,11 +282,12 @@ private fun SettingsGroup(
             modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
         )
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(10.dp)),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp)),
         ) {
             content()
         }
@@ -300,10 +305,11 @@ private fun SettingRow(
 ) {
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 12.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -335,10 +341,11 @@ private fun SettingRow(
         }
         if (showBorder) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Border),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Border),
             )
         }
     }
@@ -352,10 +359,11 @@ private fun ColorSettingRow(
 ) {
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 12.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -376,10 +384,11 @@ private fun ColorSettingRow(
                     val upColor = if (scheme == GainLossColorScheme.RED_UP) GainRed else GainGreen
                     val downColor = if (scheme == GainLossColorScheme.RED_UP) GainGreen else GainRed
                     Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(upColor),
+                        modifier =
+                            Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(upColor),
                     )
                     Text(
                         text = stringResource(Res.string.gain_label),
@@ -387,10 +396,11 @@ private fun ColorSettingRow(
                         color = TextSecondary,
                     )
                     Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(downColor),
+                        modifier =
+                            Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(downColor),
                     )
                     Text(
                         text = stringResource(Res.string.loss_label),
@@ -406,10 +416,11 @@ private fun ColorSettingRow(
             }
         }
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Border),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Border),
         )
     }
 }
@@ -462,10 +473,11 @@ private fun ExportResultDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(GreenDim),
+                    modifier =
+                        Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(GreenDim),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -515,25 +527,27 @@ private fun ColorPickerDialog(
                 val isSelected = scheme == workingSelection
                 val upColor = if (scheme == GainLossColorScheme.RED_UP) GainRed else GainGreen
                 val downColor = if (scheme == GainLossColorScheme.RED_UP) GainGreen else GainRed
-                val label = if (scheme == GainLossColorScheme.RED_UP) {
-                    stringResource(Res.string.color_red_up)
-                } else {
-                    stringResource(Res.string.color_green_up)
-                }
+                val label =
+                    if (scheme == GainLossColorScheme.RED_UP) {
+                        stringResource(Res.string.color_red_up)
+                    } else {
+                        stringResource(Res.string.color_green_up)
+                    }
 
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(if (isSelected) GoldDim else Surface)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) Gold else Border,
-                            shape = RoundedCornerShape(6.dp),
-                        )
-                        .clickable { workingSelection = scheme }
-                        .padding(vertical = 12.dp, horizontal = 12.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(if (isSelected) GoldDim else Surface)
+                            .border(
+                                width = 1.dp,
+                                color = if (isSelected) Gold else Border,
+                                shape = RoundedCornerShape(6.dp),
+                            )
+                            .clickable { workingSelection = scheme }
+                            .padding(vertical = 12.dp, horizontal = 12.dp),
                 ) {
                     Text(
                         text = label,
@@ -567,7 +581,10 @@ private fun ColorPickerDialog(
         buttons = {
             DialogButtons(
                 onDismiss = onDismiss,
-                onConfirm = { onConfirm(workingSelection); onDismiss() },
+                onConfirm = {
+                    onConfirm(workingSelection)
+                    onDismiss()
+                },
                 confirmText = stringResource(Res.string.confirm),
             )
         },
@@ -589,18 +606,19 @@ private fun FrequencyPickerDialog(
             listOf(1, 3, 10).forEach { minutes ->
                 val isSelected = minutes == workingSelection
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(if (isSelected) GoldDim else Surface)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) Gold else Border,
-                            shape = RoundedCornerShape(6.dp),
-                        )
-                        .clickable { workingSelection = minutes }
-                        .padding(vertical = 12.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(if (isSelected) GoldDim else Surface)
+                            .border(
+                                width = 1.dp,
+                                color = if (isSelected) Gold else Border,
+                                shape = RoundedCornerShape(6.dp),
+                            )
+                            .clickable { workingSelection = minutes }
+                            .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -615,7 +633,10 @@ private fun FrequencyPickerDialog(
         buttons = {
             DialogButtons(
                 onDismiss = onDismiss,
-                onConfirm = { onConfirm(workingSelection); onDismiss() },
+                onConfirm = {
+                    onConfirm(workingSelection)
+                    onDismiss()
+                },
                 confirmText = stringResource(Res.string.confirm),
             )
         },
@@ -633,13 +654,14 @@ private fun DialogButtons(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(36.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(50))
-                .clickable(onClick = onDismiss),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .height(36.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(50))
+                    .clickable(onClick = onDismiss),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -650,12 +672,13 @@ private fun DialogButtons(
             )
         }
         Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(36.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Gold)
-                .clickable(onClick = onConfirm),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .height(36.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Gold)
+                    .clickable(onClick = onConfirm),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -674,12 +697,13 @@ private fun GoldFullButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(36.dp)
-            .clip(RoundedCornerShape(50))
-            .background(Gold)
-            .clickable(onClick = onClick),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(36.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Gold)
+                .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 class OfflineUserPreferencesRepository(
     private val dataSource: UserPreferencesDataSource,
 ) : UserPreferencesRepository {
-
     override val userPreferences: Flow<UserPreferences> = dataSource.userPreferences
 
     override suspend fun setRefreshMinutes(minutes: Int) {
