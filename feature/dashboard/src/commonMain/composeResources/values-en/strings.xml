@@ -17,6 +17,7 @@
     <string name="holdings_overflow">%1$d more holdings…</string>
     <string name="holdings_quantity_label">Quantity: </string>
     <string name="total_pnl_label">Total P&amp;L: </string>
+    <string name="daily_pnl">Daily P&amp;L</string>
     <string name="buy">Buy</string>
     <string name="sell">Sell</string>
     <string name="dividend">Dividend</string>

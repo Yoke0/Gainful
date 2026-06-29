@@ -17,6 +17,7 @@
     <string name="holdings_overflow">还有 %1$d 个标的…</string>
     <string name="holdings_quantity_label">持仓数量: </string>
     <string name="total_pnl_label">合计盈亏: </string>
+    <string name="daily_pnl">当日盈亏</string>
     <string name="buy">买入</string>
     <string name="sell">卖出</string>
     <string name="dividend">股息</string>

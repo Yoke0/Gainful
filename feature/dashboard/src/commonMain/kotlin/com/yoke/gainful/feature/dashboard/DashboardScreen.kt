@@ -57,6 +57,7 @@ import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 import gainful.feature.dashboard.generated.resources.Res
+import gainful.feature.dashboard.generated.resources.daily_pnl
 import gainful.feature.dashboard.generated.resources.dashboard_title
 import gainful.feature.dashboard.generated.resources.holdings_count
 import gainful.feature.dashboard.generated.resources.holdings_overflow
@@ -132,6 +133,8 @@ private fun DashboardScreen(
                     .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+            DailyPnlCard(uiState.holdings)
+
             SummaryCard(uiState)
 
             ChartCard(uiState.holdings)
@@ -202,6 +205,52 @@ private fun SummaryCard(state: DashboardUiState) {
                 stringResource(Res.string.total_cost_label),
                 totalCost.formatLocalized(),
                 Modifier.alignByBaseline(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DailyPnlCard(holdings: List<HoldingDisplay>) {
+    val totalDailyGain = remember(holdings) { holdings.sumOf { it.changeAmount * it.quantity } }
+    val totalMarketValue = remember(holdings) { holdings.sumOf { it.totalMarketValue } }
+    val previousDayValue = totalMarketValue - totalDailyGain
+    val totalDailyGainPercent = if (previousDayValue > 0) (totalDailyGain / previousDayValue) * 100 else 0.0
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.daily_pnl),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextSecondary,
+            letterSpacing = 0.5.sp,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text(
+                text = totalDailyGain.formatSigned(),
+                fontSize = 36.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = if (totalDailyGain >= 0) Gold else lossColor,
+                letterSpacing = (-0.5).sp,
+                modifier = Modifier.alignByBaseline(),
+            )
+            Text(
+                text = totalDailyGainPercent.formatSigned() + "%",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (totalDailyGainPercent >= 0) gainColor else lossColor,
+                modifier = Modifier.alignByBaseline(),
             )
         }
     }
