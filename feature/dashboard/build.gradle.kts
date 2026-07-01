@@ -51,6 +51,7 @@ kotlin {
             implementation(libs.compose.components.resources)
             api(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
         }
     }
 }
