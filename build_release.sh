@@ -40,7 +40,7 @@ if [ -f "$SIGNING_PROPS_FILE" ]; then
 fi
 
 if [ -n "$STORE_FILE" ] && [ -f "$STORE_FILE" ]; then
-    SIGNED_APK="$APK_DIR/app-release-v${VERSION}.apk"
+    SIGNED_APK="$APK_DIR/Gainful-v${VERSION}.apk"
 
     echo ">>> Signing APK..."
     "$APKSIGNER" sign \
@@ -59,7 +59,7 @@ if [ -n "$STORE_FILE" ] && [ -f "$STORE_FILE" ]; then
     echo ">>> Signed APK: $SIGNED_APK"
 else
     echo ">>> WARNING: No signing config found. Release APK is unsigned."
-    mv "$UNSIGNED_APK" "$APK_DIR/app-release-v${VERSION}-unsigned.apk"
+    mv "$UNSIGNED_APK" "$APK_DIR/Gainful-v${VERSION}-unsigned.apk"
 fi
 
 # --- Summary ---
