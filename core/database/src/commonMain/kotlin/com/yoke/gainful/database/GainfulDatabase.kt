@@ -9,15 +9,17 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.yoke.gainful.database.dao.AssetDao
+import com.yoke.gainful.database.dao.KLineCacheDao
 import com.yoke.gainful.database.dao.QuoteSnapshotDao
 import com.yoke.gainful.database.dao.TransactionDao
 import com.yoke.gainful.database.model.AssetEntity
+import com.yoke.gainful.database.model.KLineCacheEntity
 import com.yoke.gainful.database.model.QuoteSnapshotEntity
 import com.yoke.gainful.database.model.TransactionEntity
 
 @Database(
-    entities = [AssetEntity::class, TransactionEntity::class, QuoteSnapshotEntity::class],
-    version = 4,
+    entities = [AssetEntity::class, TransactionEntity::class, QuoteSnapshotEntity::class, KLineCacheEntity::class],
+    version = 5,
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(GainfulDatabaseConstructor::class)
@@ -27,6 +29,8 @@ abstract class GainfulDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
 
     abstract fun quoteSnapshotDao(): QuoteSnapshotDao
+
+    abstract fun kLineCacheDao(): KLineCacheDao
 
     companion object {
         val MIGRATION_1_2 =
@@ -100,6 +104,30 @@ abstract class GainfulDatabase : RoomDatabase() {
                             `trend_data` TEXT NOT NULL,
                             `last_updated` INTEGER NOT NULL,
                             PRIMARY KEY(`quote_id`)
+                        )
+                        """.trimIndent(),
+                    )
+                }
+            }
+
+        val MIGRATION_4_5 =
+            object : Migration(4, 5) {
+                override fun migrate(connection: SQLiteConnection) {
+                    connection.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS `kline_cache` (
+                            `asset_id` TEXT NOT NULL,
+                            `date` TEXT NOT NULL,
+                            `open` REAL NOT NULL,
+                            `close` REAL NOT NULL,
+                            `high` REAL NOT NULL,
+                            `low` REAL NOT NULL,
+                            `volume` INTEGER NOT NULL,
+                            `turnover` REAL NOT NULL,
+                            `change_percent` REAL NOT NULL,
+                            `change_amount` REAL NOT NULL,
+                            `last_updated` INTEGER NOT NULL,
+                            PRIMARY KEY(`asset_id`, `date`)
                         )
                         """.trimIndent(),
                     )

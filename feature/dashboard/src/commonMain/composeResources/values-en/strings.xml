@@ -46,4 +46,5 @@
     <string name="weekday_thu">Thu</string>
     <string name="weekday_fri">Fri</string>
     <string name="weekday_sat">Sat</string>
+    <string name="no_transactions">No transaction records</string>
 </resources>

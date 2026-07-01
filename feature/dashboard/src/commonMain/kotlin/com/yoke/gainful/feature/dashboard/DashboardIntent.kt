@@ -10,4 +10,8 @@ sealed interface DashboardIntent {
     data class SelectPnlPeriod(val periodType: PnlPeriodType) : DashboardIntent
 
     data class NavigatePnlPeriod(val direction: Int) : DashboardIntent
+
+    data class SelectPnlCell(val year: Int, val month: Int, val day: Int) : DashboardIntent
+
+    data object DismissPnlDetail : DashboardIntent
 }

@@ -2,8 +2,10 @@ package com.yoke.gainful.data.di
 
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.EastMoneyMarketRepository
+import com.yoke.gainful.data.repository.KLineCacheRepository
 import com.yoke.gainful.data.repository.MarketRepository
 import com.yoke.gainful.data.repository.OfflineAssetRepository
+import com.yoke.gainful.data.repository.OfflineKLineCacheRepository
 import com.yoke.gainful.data.repository.OfflineQuoteCacheRepository
 import com.yoke.gainful.data.repository.OfflineTransactionRepository
 import com.yoke.gainful.data.repository.OfflineUserPreferencesRepository
@@ -20,4 +22,5 @@ val dataModule =
         single<TransactionRepository> { OfflineTransactionRepository(get()) }
         single<UserPreferencesRepository> { OfflineUserPreferencesRepository(get<UserPreferencesDataSource>()) }
         single<QuoteCacheRepository> { OfflineQuoteCacheRepository(get()) }
+        single<KLineCacheRepository> { OfflineKLineCacheRepository(get()) }
     }

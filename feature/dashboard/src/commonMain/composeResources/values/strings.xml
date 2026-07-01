@@ -46,4 +46,5 @@
     <string name="weekday_thu">四</string>
     <string name="weekday_fri">五</string>
     <string name="weekday_sat">六</string>
+    <string name="no_transactions">暂无交易记录</string>
 </resources>

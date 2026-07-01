@@ -88,6 +88,7 @@ import gainful.feature.dashboard.generated.resources.holdings_quantity_label
 import gainful.feature.dashboard.generated.resources.holdings_trend
 import gainful.feature.dashboard.generated.resources.key_metrics
 import gainful.feature.dashboard.generated.resources.live_badge
+import gainful.feature.dashboard.generated.resources.no_transactions
 import gainful.feature.dashboard.generated.resources.no_trend_data
 import gainful.feature.dashboard.generated.resources.pnl_current_period
 import gainful.feature.dashboard.generated.resources.pnl_day_label
@@ -183,11 +184,6 @@ private fun DashboardScreen(
                     .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            PnlOverviewCard(
-                uiState = uiState,
-                onIntent = onIntent,
-            )
-
             DailyPnlCard(uiState.holdings)
 
             SummaryCard(uiState)
@@ -196,10 +192,23 @@ private fun DashboardScreen(
 
             MetricsSection(uiState)
 
+            PnlOverviewCard(
+                uiState = uiState,
+                onIntent = onIntent,
+            )
+
             HoldingsOverviewCard(holdings = uiState.holdings)
 
             Spacer(modifier = Modifier.bottomBarPadding())
         }
+    }
+
+    if (uiState.selectedPnlDate != null) {
+        StockPnlDetailDialog(
+            date = uiState.selectedPnlDate,
+            details = uiState.stockPnlDetails,
+            onDismiss = { onIntent(DashboardIntent.DismissPnlDetail) },
+        )
     }
 }
 
@@ -288,7 +297,21 @@ private fun PnlOverviewCard(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        if (pnlData != null) {
+        if (uiState.holdings.isEmpty() && allTransactionsEmpty(uiState)) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 20.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(Res.string.no_transactions),
+                    fontSize = 14.sp,
+                    color = TextMuted,
+                )
+            }
+        } else if (pnlData != null) {
             val columns =
                 when (uiState.selectedPnlPeriod) {
                     PnlPeriodType.DAY -> 7
@@ -315,6 +338,9 @@ private fun PnlOverviewCard(
                 cells = pnlData.cells,
                 columns = columns,
                 periodType = uiState.selectedPnlPeriod,
+                onCellClick = { year, month, day ->
+                    onIntent(DashboardIntent.SelectPnlCell(year, month, day))
+                },
             )
         }
     }
@@ -538,6 +564,7 @@ private fun PnlGrid(
     cells: List<PnlCell>,
     columns: Int,
     periodType: PnlPeriodType,
+    onCellClick: (year: Int, month: Int, day: Int) -> Unit = { _, _, _ -> },
 ) {
     val rows = cells.chunked(columns)
 
@@ -557,6 +584,11 @@ private fun PnlGrid(
                             cell = cell,
                             periodType = periodType,
                             modifier = Modifier.weight(1f),
+                            onClick = {
+                                if (!cell.isFuture && !cell.isPadding && cell.day > 0) {
+                                    onCellClick(cell.year, cell.month, cell.day)
+                                }
+                            },
                         )
                     }
                 }
@@ -573,6 +605,7 @@ private fun PnlCellItem(
     cell: PnlCell,
     periodType: PnlPeriodType,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     val label = cellLabel(cell, periodType)
 
@@ -631,6 +664,7 @@ private fun PnlCellItem(
                         }
                     },
                 )
+                .clickable { onClick() }
                 .padding(horizontal = 4.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -646,9 +680,9 @@ private fun PnlCellItem(
                 if (cell.isPadding) {
                     ""
                 } else if (cell.isEmpty) {
-                    "—"
+                    "0.00"
                 } else {
-                    cell.value?.formatSigned(decimals = 2) ?: "—"
+                    cell.value?.formatSigned(decimals = 2) ?: "0.00"
                 },
             maxFontSize = 11.sp,
             minFontSize = 6.sp,
@@ -1174,5 +1208,145 @@ private fun SummaryBadge(label: String, value: String, isPositive: Boolean = fal
             fontWeight = FontWeight.SemiBold,
             color = if (isPositive) gainColor else TextPrimary,
         )
+    }
+}
+
+private fun allTransactionsEmpty(uiState: DashboardUiState): Boolean {
+    return uiState.totalBuys == 0.0 && uiState.totalSells == 0.0 && uiState.totalDividends == 0.0
+}
+
+@Composable
+private fun StockPnlDetailDialog(
+    date: kotlinx.datetime.LocalDate,
+    details: List<com.yoke.gainful.model.StockPnlDetail>,
+    onDismiss: () -> Unit,
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Card,
+        title = {
+            Text(
+                text = "${date.year}年${date.month.ordinal + 1}月${date.day}日",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+            )
+        },
+        text = {
+            if (details.isEmpty()) {
+                Text(
+                    text = "当日无交易记录",
+                    fontSize = 14.sp,
+                    color = TextMuted,
+                )
+            } else {
+                androidx.compose.foundation.lazy.LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(details.size) { index ->
+                        val detail = details[index]
+                        StockPnlDetailItem(detail)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text(
+                    text = "关闭",
+                    color = Gold,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun StockPnlDetailItem(detail: com.yoke.gainful.model.StockPnlDetail) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Surface)
+                .padding(12.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = detail.stockName,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary,
+            )
+            Text(
+                text = detail.pnl.formatSigned(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (detail.pnl >= 0) gainColor else lossColor,
+            )
+        }
+
+        // Position info
+        if (detail.hasPosition) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "持仓 ${detail.positionQuantity.toInt()}股",
+                    fontSize = 12.sp,
+                    color = TextMuted,
+                )
+                if (detail.positionPnl != 0.0) {
+                    Text(
+                        text = detail.positionPnl.formatSigned(),
+                        fontSize = 12.sp,
+                        color = if (detail.positionPnl >= 0) gainColor else lossColor,
+                    )
+                }
+            }
+        }
+
+        // Trade info
+        if (detail.hasTrade) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                val typeName =
+                    when (detail.tradeType) {
+                        com.yoke.gainful.model.TransactionType.BUY -> "买入"
+                        com.yoke.gainful.model.TransactionType.SELL -> "卖出"
+                        com.yoke.gainful.model.TransactionType.DIVIDEND -> "分红"
+                        else -> ""
+                    }
+                Text(
+                    text = "$typeName ${detail.tradeQuantity.toInt()}股",
+                    fontSize = 12.sp,
+                    color = TextMuted,
+                )
+                val price = detail.tradePrice
+                if (price != null) {
+                    Text(
+                        text = "¥${price.formatLocalized()}",
+                        fontSize = 12.sp,
+                        color = TextMuted,
+                    )
+                }
+                if (detail.fee > 0) {
+                    Text(
+                        text = "手续费 ¥${detail.fee.formatLocalized()}",
+                        fontSize = 12.sp,
+                        color = TextMuted,
+                    )
+                }
+            }
+        }
     }
 }

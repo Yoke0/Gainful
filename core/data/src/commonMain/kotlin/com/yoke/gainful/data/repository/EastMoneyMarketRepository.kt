@@ -35,9 +35,10 @@ class EastMoneyMarketRepository(
         secId: String,
         period: KLinePeriod,
         fqType: FqType,
-        limit: Int,
+        startDate: String,
+        endDate: String,
     ): List<KLine> {
-        return api.getKLines(secId, klt = period.value, fqt = fqType.value, limit = limit)
+        return api.getKLines(secId, klt = period.value, fqt = fqType.value, beg = startDate, end = endDate)
             ?.toKLineList() ?: emptyList()
     }
 }

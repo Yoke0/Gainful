@@ -10,9 +10,15 @@ interface EastMoneyApi {
 
     suspend fun getBatchQuotes(secIds: List<String>): List<QuoteData>
 
-    suspend fun getTrends(secId: String, ndays: Int = 1): TrendData
+    suspend fun getTrends(secId: String, ndays: Int): TrendData
 
-    suspend fun getKLines(secId: String, klt: Int = 101, fqt: Int = 1, limit: Int = 120): KLineData?
+    suspend fun getKLines(
+        secId: String,
+        klt: Int,
+        fqt: Int,
+        beg: String,
+        end: String,
+    ): KLineData?
 
-    suspend fun search(query: String, count: Int = 10): List<SearchItemDto>
+    suspend fun search(query: String, count: Int): List<SearchItemDto>
 }

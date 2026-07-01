@@ -20,6 +20,7 @@ interface MarketRepository {
         secId: String,
         period: KLinePeriod = KLinePeriod.DAILY,
         fqType: FqType = FqType.QFQ,
-        limit: Int = 120,
+        startDate: String = "0",
+        endDate: String = "20500101",
     ): List<KLine>
 }

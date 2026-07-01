@@ -167,7 +167,7 @@ class EastMoneyApiImplTest {
                     },
                 )
 
-            val trend = api.getTrends("1.600519")
+            val trend = api.getTrends("1.600519", ndays = 1)
             assertNotNull(trend)
             assertTrue(trend.data.isEmpty())
         }
@@ -186,7 +186,7 @@ class EastMoneyApiImplTest {
                     },
                 )
 
-            val kline = api.getKLines("1.600519", klt = 101, limit = 3)
+            val kline = api.getKLines("1.600519", klt = 101, fqt = 1, beg = "20240101", end = "20240131")
 
             assertNotNull(kline)
             assertEquals("600519", kline.code)
@@ -210,7 +210,7 @@ class EastMoneyApiImplTest {
                     },
                 )
 
-            assertEquals(null, api.getKLines("1.600519"))
+            assertEquals(null, api.getKLines("1.600519", klt = 101, fqt = 1, beg = "0", end = "20500101"))
         }
 
     @Test
@@ -227,7 +227,7 @@ class EastMoneyApiImplTest {
                     },
                 )
 
-            val results = api.search("茅台")
+            val results = api.search("茅台", count = 10)
 
             assertEquals(1, results.size)
             assertEquals("600519", results[0].code)
@@ -252,7 +252,7 @@ class EastMoneyApiImplTest {
                     },
                 )
 
-            assertTrue(api.search("不存在").isEmpty())
+            assertTrue(api.search("不存在", count = 10).isEmpty())
         }
 
     companion object {

@@ -45,7 +45,13 @@ internal class EastMoneyApiImpl(
         return TrendData(data = resp.data ?: emptyList())
     }
 
-    override suspend fun getKLines(secId: String, klt: Int, fqt: Int, limit: Int): KLineData? {
+    override suspend fun getKLines(
+        secId: String,
+        klt: Int,
+        fqt: Int,
+        beg: String,
+        end: String,
+    ): KLineData? {
         val resp: ApiResponse<KLineData> =
             client.get(KLINE_URL) {
                 parameter("secid", secId)
@@ -53,8 +59,8 @@ internal class EastMoneyApiImpl(
                 parameter("fields2", KLINE_FIELDS2)
                 parameter("klt", klt)
                 parameter("fqt", fqt)
-                parameter("lmt", limit)
-                parameter("end", "20500101")
+                parameter("beg", beg)
+                parameter("end", end)
                 parameter("fltt", 2)
             }.body()
         return resp.data

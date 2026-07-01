@@ -36,3 +36,19 @@ data class PnlData(
     val totalPnl: Double,
     val cells: List<PnlCell>,
 )
+
+data class StockPnlDetail(
+    val assetId: String,
+    val stockName: String,
+    val positionPnl: Double = 0.0,
+    val positionQuantity: Double = 0.0,
+    val tradePnl: Double = 0.0,
+    val tradeType: TransactionType? = null,
+    val tradePrice: Double? = null,
+    val tradeQuantity: Double = 0.0,
+    val fee: Double = 0.0,
+) {
+    val pnl: Double get() = positionPnl + tradePnl - fee
+    val hasPosition: Boolean get() = positionQuantity > 0
+    val hasTrade: Boolean get() = tradeType != null
+}

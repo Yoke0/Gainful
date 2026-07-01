@@ -10,6 +10,7 @@ fun createDatabase(builder: RoomDatabase.Builder<GainfulDatabase>): GainfulDatab
             GainfulDatabase.MIGRATION_1_2,
             GainfulDatabase.MIGRATION_2_3,
             GainfulDatabase.MIGRATION_3_4,
+            GainfulDatabase.MIGRATION_4_5,
         )
         .build()
 }

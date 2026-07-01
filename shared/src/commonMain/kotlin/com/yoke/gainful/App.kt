@@ -29,6 +29,7 @@ import com.yoke.gainful.navigation.Navigator
 import com.yoke.gainful.navigation.TOP_LEVEL_NAV_ITEMS
 import com.yoke.gainful.navigation.rememberNavigationState
 import com.yoke.gainful.navigation.serializersConfig
+import com.yoke.gainful.sync.KLineFetchService
 import com.yoke.gainful.sync.StockPriceFetchService
 import com.yoke.gainful.ui.ProvideGainLossColors
 import org.koin.compose.koinInject
@@ -38,6 +39,7 @@ fun App() {
     initKoin()
 
     val fetchService = koinInject<StockPriceFetchService>()
+    val kLineFetchService = koinInject<KLineFetchService>()
 
     GainfulTheme {
         Box(
@@ -67,7 +69,10 @@ fun App() {
                 ) { isSplash ->
                     if (isSplash) {
                         SplashScreen(
-                            onInit = { fetchService.fetchOnce() },
+                            onInit = {
+                                fetchService.fetchOnce()
+                                kLineFetchService.fetchAll()
+                            },
                             onSplashFinished = {
                                 showSplash = false
                                 fetchService.start()

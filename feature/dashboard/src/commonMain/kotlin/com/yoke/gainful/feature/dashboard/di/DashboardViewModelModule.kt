@@ -7,6 +7,6 @@ import org.koin.dsl.module
 
 val dashboardViewModelModule =
     module {
-        single { GetPnlDataUseCase() }
-        viewModel { DashboardViewModel(get(), get(), get()) }
+        single { GetPnlDataUseCase(get()) }
+        viewModel { DashboardViewModel(get(), get(), get(), get()) }
     }

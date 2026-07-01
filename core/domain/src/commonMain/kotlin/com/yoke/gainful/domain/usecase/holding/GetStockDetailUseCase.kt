@@ -72,11 +72,9 @@ class GetStockDetailUseCase(
 
         val kLines =
             if (asset?.quoteId != null) {
-                try {
-                    marketRepository.getKLines(asset.quoteId, KLinePeriod.DAILY, limit = 30)
-                } catch (_: Exception) {
-                    emptyList()
-                }
+                runCatching {
+                    marketRepository.getKLines(asset.quoteId, KLinePeriod.DAILY)
+                }.getOrDefault(emptyList())
             } else {
                 emptyList()
             }
@@ -112,11 +110,9 @@ class GetStockDetailUseCase(
                 103 -> KLinePeriod.MONTHLY
                 else -> KLinePeriod.DAILY
             }
-        return try {
-            marketRepository.getKLines(quoteId, kLinePeriod, limit = 120)
-        } catch (_: Exception) {
-            emptyList()
-        }
+        return runCatching {
+            marketRepository.getKLines(quoteId, kLinePeriod)
+        }.getOrDefault(emptyList())
     }
 }
 
