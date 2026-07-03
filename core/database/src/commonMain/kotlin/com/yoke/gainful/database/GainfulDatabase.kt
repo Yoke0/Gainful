@@ -10,16 +10,18 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.yoke.gainful.database.dao.AssetDao
 import com.yoke.gainful.database.dao.KLineCacheDao
+import com.yoke.gainful.database.dao.PnlCacheDao
 import com.yoke.gainful.database.dao.QuoteSnapshotDao
 import com.yoke.gainful.database.dao.TransactionDao
 import com.yoke.gainful.database.model.AssetEntity
 import com.yoke.gainful.database.model.KLineCacheEntity
+import com.yoke.gainful.database.model.PnlCacheEntity
 import com.yoke.gainful.database.model.QuoteSnapshotEntity
 import com.yoke.gainful.database.model.TransactionEntity
 
 @Database(
-    entities = [AssetEntity::class, TransactionEntity::class, QuoteSnapshotEntity::class, KLineCacheEntity::class],
-    version = 5,
+    entities = [AssetEntity::class, TransactionEntity::class, QuoteSnapshotEntity::class, KLineCacheEntity::class, PnlCacheEntity::class],
+    version = 6,
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(GainfulDatabaseConstructor::class)
@@ -31,6 +33,8 @@ abstract class GainfulDatabase : RoomDatabase() {
     abstract fun quoteSnapshotDao(): QuoteSnapshotDao
 
     abstract fun kLineCacheDao(): KLineCacheDao
+
+    abstract fun pnlCacheDao(): PnlCacheDao
 
     companion object {
         val MIGRATION_1_2 =
@@ -128,6 +132,22 @@ abstract class GainfulDatabase : RoomDatabase() {
                             `change_amount` REAL NOT NULL,
                             `last_updated` INTEGER NOT NULL,
                             PRIMARY KEY(`asset_id`, `date`)
+                        )
+                        """.trimIndent(),
+                    )
+                }
+            }
+
+        val MIGRATION_5_6 =
+            object : Migration(5, 6) {
+                override fun migrate(connection: SQLiteConnection) {
+                    connection.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS `pnl_cache` (
+                            `date` TEXT NOT NULL,
+                            `pnl` REAL NOT NULL,
+                            `last_updated` INTEGER NOT NULL,
+                            PRIMARY KEY(`date`)
                         )
                         """.trimIndent(),
                     )

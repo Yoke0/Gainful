@@ -7,5 +7,5 @@ import org.koin.dsl.module
 val syncModule =
     module {
         single { StockPriceFetchService(get(), get(), get(), get()) }
-        single { KLineFetchService(get(), get(), get(), get()) }
+        single { KLineFetchService(get(), get(), get(), get(), get()) }
     }

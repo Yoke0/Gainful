@@ -18,4 +18,5 @@ val databaseModule =
         single { get<GainfulDatabase>().transactionDao() }
         single { get<GainfulDatabase>().quoteSnapshotDao() }
         single { get<GainfulDatabase>().kLineCacheDao() }
+        single { get<GainfulDatabase>().pnlCacheDao() }
     }

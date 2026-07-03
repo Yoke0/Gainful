@@ -4,6 +4,7 @@ import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.KLineCacheRepository
 import com.yoke.gainful.data.repository.MarketRepository
 import com.yoke.gainful.data.repository.TransactionRepository
+import com.yoke.gainful.domain.usecase.dashboard.ComputePnlUseCase
 import com.yoke.gainful.model.KLinePeriod
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
@@ -24,6 +25,7 @@ class KLineFetchService(
     private val marketRepository: MarketRepository,
     private val transactionRepository: TransactionRepository,
     private val kLineCacheRepository: KLineCacheRepository,
+    private val computePnlUseCase: ComputePnlUseCase,
 ) {
     private fun today(): LocalDate =
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -122,6 +124,7 @@ class KLineFetchService(
                 }.forEach { it.await() }
             }
 
+            computePnlUseCase()
             true
         }.getOrDefault(false)
 }
