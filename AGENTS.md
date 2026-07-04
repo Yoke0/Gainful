@@ -17,10 +17,14 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
   - `common/` — Utilities, extensions, constants
   - `model/` — Data models (DTOs, Entities)
   - `ui/` — Common UI components, theme colors (see [UI Components](#ui-components) below)
+  - `designsystem/` — Design system tokens, shared styling
   - `data/` — Repository interfaces + offline implementations
   - `database/` — Room with BundledSQLiteDriver (cross-platform)
+  - `datastore/` — Preferences DataStore (settings)
   - `network/` — Ktor HTTP client (expect/actual per platform)
-  - `domain/` — UseCases
+  - `domain/` — UseCases (see [Domain UseCases](#domain-usecases) below)
+  - `sync/` — Background data sync (stock price fetching, KLine caching)
+  - `file/` — File I/O utilities
   - `navigation/` — Navigation config (Navigation3)
 
 - `feature/` — Feature modules (per business)
@@ -81,6 +85,24 @@ Run tests after making changes. CI runs `./gradlew allTests`.
 - `core/data/` defines interfaces; `core/database/` and `core/network/` provide implementations
 
 - `shared/` is the aggregator — depends on all `core/` and `feature/` modules
+
+## Domain UseCases
+
+Located in `core/domain/src/commonMain/kotlin/com/yoke/gainful/domain/usecase/`:
+
+- **`asset/`** — `SearchAssetsUseCase`, `GetStockDetailUseCase`
+- **`dashboard/`** — `ComputePnlUseCase` (daily PnL calculation), `GetPnlDataUseCase` (period PnL aggregation + stock detail)
+- **`holding/`** — `GetHoldingsUseCase`, `GetHoldingsDisplayUseCase` (with live quotes), `GetClosedPositionsUseCase`
+- **`transaction/`** — `GetTransactionsUseCase`, `AddTransactionUseCase`, `UpdateTransactionUseCase`, `DeleteTransactionUseCase`, `GetTransactionDetailUseCase`
+
+Key calculation formulas are documented in [`docs/stock-calculation-rules.md`](docs/stock-calculation-rules.md).
+
+## Documentation
+
+- `docs/stock-calculation-rules.md` — Stock calculation rules and formulas (PnL, holdings, fees, aggregation)
+- `docs/CHANGELOG.md` / `docs/CHANGELOG_EN.md` — Release changelogs
+- `docs/README_EN.md` — English version of the README
+- `docs/private/` — Internal design specs (HTML mockups, API field references)
 
 ## Git Commit Convention
 

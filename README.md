@@ -32,14 +32,18 @@ Gainful/
 │   ├── common/                # 通用工具、扩展函数、常量
 │   ├── model/                 # 数据模型（DTO、Entity）
 │   ├── ui/                    # 通用 UI 组件、主题
+│   ├── designsystem/          # 设计系统 tokens、共享样式
 │   ├── data/                  # Repository 接口
 │   ├── database/              # 本地数据源（Room + BundledSQLiteDriver）
+│   ├── datastore/             # 偏好设置 DataStore
 │   ├── network/               # 远程数据源（Ktor）
 │   ├── domain/                # UseCase（按业务分包）
-│   │   ├── transaction/       # 交易相关
+│   │   ├── asset/             # 资产搜索
+│   │   ├── dashboard/         # 仪表盘（盈亏计算）
 │   │   ├── holding/           # 持仓相关
-│   │   ├── portfolio/         # 组合概览
-│   │   └── asset/             # 资产搜索
+│   │   └── transaction/       # 交易相关
+│   ├── sync/                  # 后台数据同步（行情拉取、K线缓存）
+│   ├── file/                  # 文件 I/O 工具
 │   └── navigation/            # 导航配置（Navigation3）
 ├── feature/                   # 功能模块（按业务拆分）
 │   ├── dashboard/             # 仪表盘
