@@ -44,4 +44,5 @@
     <string name="delete">Delete</string>
     <string name="delete_confirm_text">Are you sure you want to delete this transaction?</string>
     <string name="delete_confirm_suffix">This action cannot be undone</string>
+    <string name="treemap_other">Other</string>
 </resources>

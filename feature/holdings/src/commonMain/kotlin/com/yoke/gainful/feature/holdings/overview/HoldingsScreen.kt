@@ -4,7 +4,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -34,27 +32,19 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.bottomBarPadding
-import com.yoke.gainful.designsystem.theme.Blue
-import com.yoke.gainful.designsystem.theme.BlueDark
-import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
-import com.yoke.gainful.designsystem.theme.GainGreen
-import com.yoke.gainful.designsystem.theme.Gold
-import com.yoke.gainful.designsystem.theme.GoldDark
-import com.yoke.gainful.designsystem.theme.GreenDim
-import com.yoke.gainful.designsystem.theme.Purple
-import com.yoke.gainful.designsystem.theme.PurpleDark
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
+import com.yoke.gainful.ui.MarketCapTreemap
+import com.yoke.gainful.ui.TreemapItem
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 import gainful.feature.holdings.generated.resources.Res
@@ -112,7 +102,27 @@ private fun HoldingsScreen(
         ) {
             TotalCard(totalValue, totalPnl, totalPnlPct)
 
-            HeatmapCard(holdings, totalValue)
+            if (holdings.isNotEmpty()) {
+                val treemapItems =
+                    remember(holdings, totalValue) {
+                        holdings.map { holding ->
+                            val pct = if (totalValue > 0) (holding.totalMarketValue / totalValue) * 100 else 0.0
+                            TreemapItem(name = holding.name, percentage = pct.toFloat())
+                        }
+                    }
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Card)
+                            .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    SectionHeader(title = stringResource(Res.string.investment_weight))
+                    MarketCapTreemap(items = treemapItems)
+                }
+            }
 
             ListSection(
                 title = stringResource(Res.string.holdings_detail_header),
@@ -205,141 +215,6 @@ private fun TotalCard(totalValue: Double, totalPnl: Double, totalPnlPct: Double)
                 fontFamily = FontFamily.Monospace,
                 color = if (totalPnlPct >= 0) gainColor else lossColor,
             )
-        }
-    }
-}
-
-@Composable
-private fun HeatmapCard(holdings: List<HoldingDisplay>, totalValue: Double) {
-    val gradientColors =
-        listOf(
-            listOf(Gold, GoldDark),
-            listOf(Blue, BlueDark),
-            listOf(GainGreen, GreenDim),
-            listOf(Purple, PurpleDark),
-        )
-
-    val sorted =
-        remember(holdings) {
-            holdings.sortedByDescending { it.totalMarketValue }
-        }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .padding(20.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 12.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.investment_weight),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextMuted,
-                letterSpacing = 0.6.sp,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .height(1.dp)
-                        .background(Border),
-            )
-        }
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            sorted.chunked(2).forEach { row ->
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    row.forEachIndexed { _, holding ->
-                        val pct = if (totalValue > 0) (holding.totalMarketValue / totalValue) * 100 else 0.0
-                        val colors = gradientColors[(sorted.indexOf(holding)) % gradientColors.size]
-
-                        HeatmapItem(
-                            name = holding.name,
-                            code = holding.pinYin.ifBlank { holding.code },
-                            pct = pct,
-                            amount = holding.totalMarketValue,
-                            gradientColors = colors,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                    if (row.size < 2) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HeatmapItem(
-    name: String,
-    code: String,
-    pct: Double,
-    amount: Double,
-    gradientColors: List<Color>,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier =
-            modifier
-                .height(80.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Brush.linearGradient(gradientColors)),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-            ) {
-                Text(
-                    text = name,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.alignByBaseline(),
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = code,
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.White.copy(alpha = 0.5f),
-                    modifier = Modifier.alignByBaseline(),
-                )
-            }
-            Column {
-                Text(
-                    text = "${pct.formatLocalized()}%",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.White,
-                )
-                Text(
-                    text = amount.formatCompact(),
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.White.copy(alpha = 0.7f),
-                )
-            }
         }
     }
 }

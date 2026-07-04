@@ -20,8 +20,15 @@ val Card = Color(0xFF131B2E)
 
 val Blue = Color(0xFF4285F4)
 val BlueDark = Color(0xFF2A5FC1)
+val Teal = Color(0xFF1ABC9C)
+val Orange = Color(0xFFE67E22)
 val Purple = Color(0xFFAB47BC)
 val PurpleDark = Color(0xFF7B2D8B)
+val LightBlue = Color(0xFF3498DB)
+val LightGreen = Color(0xFF27AE60)
+val Coral = Color(0xFFD94F4F)
+val Amber = Color(0xFFD4850A)
+val Pink = Color(0xFFC2185B)
 
 val GridLine = Color(0x08FFFFFF)
 
