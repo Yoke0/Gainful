@@ -385,7 +385,7 @@ private fun TransactionCardPreview() {
         TransactionCard(
             item =
                 TransactionDisplayItem(
-                    name = "贵州茅台",
+                    name = "Kweichow Moutai",
                     code = "SH600519",
                     pinYin = "GZMT",
                     type = TransactionType.BUY,
@@ -398,7 +398,7 @@ private fun TransactionCardPreview() {
         TransactionCard(
             item =
                 TransactionDisplayItem(
-                    name = "贵州茅台",
+                    name = "Kweichow Moutai",
                     code = "SH600519",
                     pinYin = "GZMT",
                     type = TransactionType.SELL,
@@ -411,7 +411,7 @@ private fun TransactionCardPreview() {
         TransactionCard(
             item =
                 TransactionDisplayItem(
-                    name = "贵州茅台",
+                    name = "Kweichow Moutai",
                     code = "SH600519",
                     pinYin = "GZMT",
                     type = TransactionType.DIVIDEND,

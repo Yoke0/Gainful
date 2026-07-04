@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +53,8 @@ import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.file.rememberCsvFileUtil
 import com.yoke.gainful.model.GainLossColorScheme
 import com.yoke.gainful.ui.TimePickerDialog
+import gainful.core.designsystem.generated.resources.ic_check
+import gainful.core.designsystem.generated.resources.ic_chevron_down
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.about_group
 import gainful.feature.settings.generated.resources.app_version
@@ -90,9 +93,11 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 @Composable
 fun SettingsScreen(
@@ -331,10 +336,11 @@ private fun SettingRow(
                     fontFamily = if (valueColor == Gold) FontFamily.Monospace else FontFamily.Default,
                 )
                 if (showArrow) {
-                    Text(
-                        text = "\u25BE",
-                        fontSize = 12.sp,
-                        color = TextMuted,
+                    Icon(
+                        painter = painterResource(DsRes.drawable.ic_chevron_down),
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = TextMuted,
                     )
                 }
             }
@@ -408,10 +414,11 @@ private fun ColorSettingRow(
                         color = TextSecondary,
                     )
                 }
-                Text(
-                    text = "\u25BE",
-                    fontSize = 12.sp,
-                    color = TextMuted,
+                Icon(
+                    painter = painterResource(DsRes.drawable.ic_chevron_down),
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = TextMuted,
                 )
             }
         }
@@ -480,11 +487,11 @@ private fun ExportResultDialog(
                             .background(GreenDim),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "\u2713",
-                        fontSize = 24.sp,
-                        color = GainGreen,
-                        fontWeight = FontWeight.Bold,
+                    Icon(
+                        painter = painterResource(DsRes.drawable.ic_check),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = GainGreen,
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))

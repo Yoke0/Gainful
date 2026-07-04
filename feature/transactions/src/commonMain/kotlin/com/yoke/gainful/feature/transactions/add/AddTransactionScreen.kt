@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +67,11 @@ import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
 import com.yoke.gainful.ui.lossDimColor
+import gainful.core.designsystem.generated.resources.ic_close
+import gainful.core.designsystem.generated.resources.ic_coin_dollar
+import gainful.core.designsystem.generated.resources.ic_search
+import gainful.core.designsystem.generated.resources.ic_trending_down
+import gainful.core.designsystem.generated.resources.ic_trending_up
 import gainful.feature.transactions.generated.resources.Res
 import gainful.feature.transactions.generated.resources.add_transaction_title
 import gainful.feature.transactions.generated.resources.asset_section
@@ -103,7 +109,9 @@ import gainful.feature.transactions.generated.resources.trade_price
 import gainful.feature.transactions.generated.resources.trade_quantity
 import gainful.feature.transactions.generated.resources.transaction_summary
 import gainful.feature.transactions.generated.resources.type_label
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 @Composable
 fun AddTransactionScreen(
@@ -242,7 +250,8 @@ private fun TypeSelector(
         ) {
             SelectChip(
                 label = stringResource(Res.string.buy),
-                icon = "📈",
+                icon = painterResource(DsRes.drawable.ic_trending_up),
+                iconTint = TextSecondary,
                 isSelected = selectedType == TransactionType.BUY,
                 activeColor = gainColor,
                 activeBackground = gainDimColor,
@@ -251,7 +260,8 @@ private fun TypeSelector(
             )
             SelectChip(
                 label = stringResource(Res.string.sell),
-                icon = "📉",
+                icon = painterResource(DsRes.drawable.ic_trending_down),
+                iconTint = TextSecondary,
                 isSelected = selectedType == TransactionType.SELL,
                 activeColor = lossColor,
                 activeBackground = lossDimColor,
@@ -260,7 +270,8 @@ private fun TypeSelector(
             )
             SelectChip(
                 label = stringResource(Res.string.dividend),
-                icon = "💵",
+                icon = painterResource(DsRes.drawable.ic_coin_dollar),
+                iconTint = TextSecondary,
                 isSelected = selectedType == TransactionType.DIVIDEND,
                 activeColor = Gold,
                 activeBackground = GoldDim,
@@ -305,7 +316,7 @@ private fun AssetSelectorSection(
 
             if (type == TransactionType.BUY) {
                 SquareIconButton(
-                    icon = if (showSearch) "✕" else "🔍",
+                    icon = if (showSearch) painterResource(DsRes.drawable.ic_close) else painterResource(DsRes.drawable.ic_search),
                     onClick = onToggleSearch,
                 )
             }
@@ -392,10 +403,11 @@ private fun SelectedStockInfo(
                     .padding(4.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = "✕",
-                fontSize = 12.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_close),
+                contentDescription = null,
+                modifier = Modifier.size(12.dp),
+                tint = TextMuted,
             )
         }
     }
@@ -421,10 +433,11 @@ private fun AssetSearchExpandable(
                     .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "🔍",
-                fontSize = 18.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_search),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = TextMuted,
             )
             Spacer(modifier = Modifier.width(8.dp))
             BasicTextField(
@@ -459,10 +472,11 @@ private fun AssetSearchExpandable(
                             .padding(4.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "✕",
-                        fontSize = 12.sp,
-                        color = TextMuted,
+                    Icon(
+                        painter = painterResource(DsRes.drawable.ic_close),
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = TextMuted,
                     )
                 }
             }

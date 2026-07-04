@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +53,8 @@ import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import gainful.core.designsystem.generated.resources.ic_chevron_down
+import gainful.core.designsystem.generated.resources.ic_clock
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
 import gainful.core.ui.generated.resources.confirm
@@ -61,10 +65,12 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.time.Clock
 import kotlin.time.Instant
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 internal val TIME_ITEM_HEIGHT = 44.dp
 internal const val VISIBLE_ITEMS = 5
@@ -138,10 +144,11 @@ fun TimePickerField(
                     .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "\uD83D\uDD50",
-                fontSize = 16.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_clock),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = TextMuted,
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -152,10 +159,11 @@ fun TimePickerField(
                 fontWeight = if (hasValue) FontWeight.SemiBold else FontWeight.Normal,
                 modifier = Modifier.weight(1f),
             )
-            Text(
-                text = "\u25BE",
-                fontSize = 14.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_chevron_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = TextMuted,
             )
         }
     }
@@ -359,7 +367,7 @@ fun TimePickerPreview() {
                     .padding(20.dp),
         ) {
             TimePickerField(
-                label = "交易时间",
+                label = "Trade Time",
                 dateTimeMillis = timeMillis,
                 onClick = { showDialog = true },
             )
@@ -368,7 +376,7 @@ fun TimePickerPreview() {
 
             val time = Instant.fromEpochMilliseconds(timeMillis).toLocalDateTime(TimeZone.currentSystemDefault())
             Text(
-                text = "已选时间：${time.hour.pad2()}:${time.minute.pad2()}",
+                text = "Selected: ${time.hour.pad2()}:${time.minute.pad2()}",
                 fontSize = 15.sp,
                 color = TextSecondary,
             )

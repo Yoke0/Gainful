@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -69,6 +70,7 @@ import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
+import gainful.core.designsystem.generated.resources.ic_check
 import gainful.feature.holdings.generated.resources.Res
 import gainful.feature.holdings.generated.resources.amplitude
 import gainful.feature.holdings.generated.resources.back_to_holdings
@@ -108,7 +110,9 @@ import gainful.feature.holdings.generated.resources.trend
 import gainful.feature.holdings.generated.resources.turnover
 import gainful.feature.holdings.generated.resources.turnover_rate
 import gainful.feature.holdings.generated.resources.volume
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 @Composable
 private fun ChartPeriod.localizedLabel(): String =
@@ -601,10 +605,11 @@ private fun ChartCard(
                                 trailingIcon =
                                     if (selectedPeriod == period) {
                                         {
-                                            Text(
-                                                text = "\u2713",
-                                                fontSize = 11.sp,
-                                                color = Gold,
+                                            Icon(
+                                                painter = painterResource(DsRes.drawable.ic_check),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(11.dp),
+                                                tint = Gold,
                                             )
                                         }
                                     } else {

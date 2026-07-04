@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +29,9 @@ import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import gainful.core.designsystem.generated.resources.Res
+import gainful.core.designsystem.generated.resources.ic_arrow_back
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun GainfulTopAppBar(
@@ -86,10 +90,11 @@ fun BackNavigationIcon(onClick: () -> Unit) {
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = "\u2039",
-            fontSize = 20.sp,
-            color = TextSecondary,
+        Icon(
+            painter = painterResource(Res.drawable.ic_arrow_back),
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = TextSecondary,
         )
     }
 }

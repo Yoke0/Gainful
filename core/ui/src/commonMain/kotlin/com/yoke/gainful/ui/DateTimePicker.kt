@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,8 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.yoke.gainful.common.extensions.formatLocalizedDateTime
 import com.yoke.gainful.common.extensions.pad2
-import com.yoke.gainful.designsystem.components.NavButton
+import com.yoke.gainful.designsystem.components.NavIconButton
 import com.yoke.gainful.designsystem.components.PrimaryButton
 import com.yoke.gainful.designsystem.components.SecondaryButton
 import com.yoke.gainful.designsystem.theme.Background
@@ -50,6 +53,10 @@ import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import gainful.core.designsystem.generated.resources.ic_calendar
+import gainful.core.designsystem.generated.resources.ic_chevron_down
+import gainful.core.designsystem.generated.resources.ic_chevron_left
+import gainful.core.designsystem.generated.resources.ic_chevron_right
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
 import gainful.core.ui.generated.resources.confirm
@@ -81,9 +88,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Instant
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 @Composable
 fun DateTimePickerField(
@@ -117,10 +126,11 @@ fun DateTimePickerField(
                     .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "\uD83D\uDCC5",
-                fontSize = 16.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_calendar),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = TextMuted,
             )
             Spacer(modifier = Modifier.width(8.dp))
             if (hasValue) {
@@ -155,10 +165,11 @@ fun DateTimePickerField(
                     modifier = Modifier.weight(1f),
                 )
             }
-            Text(
-                text = "\u25BE",
-                fontSize = 14.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_chevron_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = TextMuted,
             )
         }
     }
@@ -261,8 +272,8 @@ fun DateTimePickerDialog(
                     color = TextPrimary,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    NavButton("‹") { prevMonth() }
-                    NavButton("›") { nextMonth() }
+                    NavIconButton(painterResource(DsRes.drawable.ic_chevron_left)) { prevMonth() }
+                    NavIconButton(painterResource(DsRes.drawable.ic_chevron_right)) { nextMonth() }
                 }
             }
 
@@ -352,16 +363,15 @@ fun DateTimePickerPreview() {
                     .padding(20.dp),
         ) {
             DateTimePickerField(
-                label = "日期与时间",
+                label = "Date & Time",
                 dateTimeMillis = dateTimeMillis,
                 onClick = { showDialog = true },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val dt = Instant.fromEpochMilliseconds(dateTimeMillis).toLocalDateTime(TimeZone.currentSystemDefault())
             Text(
-                text = "已选：${dt.date.year}-${dt.date.month.number.pad2()}-${dt.date.day.pad2()} ${dt.hour.pad2()}:${dt.minute.pad2()}",
+                text = "Selected: ${dateTimeMillis.formatLocalizedDateTime()}",
                 fontSize = 15.sp,
                 color = TextSecondary,
             )
