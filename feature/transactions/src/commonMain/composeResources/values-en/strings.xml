@@ -1,7 +1,7 @@
 <resources>
     <!-- Transactions Overview -->
     <string name="transactions_title">Transactions</string>
-    <string name="add_button">+ Add</string>
+    <string name="add_button">Add</string>
     <string name="all">All</string>
     <string name="buy">Buy</string>
     <string name="sell">Sell</string>

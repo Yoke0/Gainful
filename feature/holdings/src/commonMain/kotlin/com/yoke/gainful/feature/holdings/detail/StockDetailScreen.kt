@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,6 +55,7 @@ import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.LoadingDots
 import com.yoke.gainful.designsystem.components.LoadingSpinner
+import com.yoke.gainful.designsystem.components.bottomBarPadding
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
@@ -179,14 +179,15 @@ private fun StockDetailScreen(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .navigationBarsPadding(),
+                            .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     PriceHeroCard(uiState)
                     ChartCard(uiState.selectedPeriod, uiState.kLines.map { it.close }, onPeriodSelected)
                     MetricsGrid(uiState)
                     TradesCard(uiState)
+
+                    Spacer(modifier = Modifier.bottomBarPadding())
                 }
             }
         }

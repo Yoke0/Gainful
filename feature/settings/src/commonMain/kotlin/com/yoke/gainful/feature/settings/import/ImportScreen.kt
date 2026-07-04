@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,6 +54,7 @@ import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.file.rememberCsvFileUtil
 import com.yoke.gainful.ui.TransactionCard
 import com.yoke.gainful.ui.TransactionDisplayItem
+import gainful.core.designsystem.generated.resources.ic_upload
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.cancel
 import gainful.feature.settings.generated.resources.confirm
@@ -68,9 +71,11 @@ import gainful.feature.settings.generated.resources.import_stat_duplicate
 import gainful.feature.settings.generated.resources.import_stat_total
 import gainful.feature.settings.generated.resources.import_stat_valid
 import gainful.feature.settings.generated.resources.import_upload_hint
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 @Composable
 fun ImportScreen(
@@ -335,10 +340,11 @@ private fun UploadArea(
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "\u2191",
-                fontSize = 36.sp,
-                color = if (hasPreview) GainGreen else TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_upload),
+                contentDescription = null,
+                modifier = Modifier.size(36.dp),
+                tint = if (hasPreview) GainGreen else TextMuted,
             )
             Spacer(modifier = Modifier.height(8.dp))
             if (hasPreview) {
