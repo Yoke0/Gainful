@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:filename")
+
 package com.yoke.gainful
 
 import androidx.compose.ui.window.Window
