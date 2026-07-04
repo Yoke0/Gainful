@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.yoke.gainful.common.extensions.pad2
-import com.yoke.gainful.designsystem.components.NavButton
+import com.yoke.gainful.designsystem.components.NavIconButton
 import com.yoke.gainful.designsystem.components.PrimaryButton
 import com.yoke.gainful.designsystem.components.SecondaryButton
 import com.yoke.gainful.designsystem.theme.Background
@@ -49,6 +51,10 @@ import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import gainful.core.designsystem.generated.resources.ic_calendar
+import gainful.core.designsystem.generated.resources.ic_chevron_down
+import gainful.core.designsystem.generated.resources.ic_chevron_left
+import gainful.core.designsystem.generated.resources.ic_chevron_right
 import gainful.core.ui.generated.resources.Res
 import gainful.core.ui.generated.resources.cancel
 import gainful.core.ui.generated.resources.confirm
@@ -84,9 +90,11 @@ import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Instant
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 @Composable
 fun DatePickerField(
@@ -121,10 +129,11 @@ fun DatePickerField(
                     .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "📅",
-                fontSize = 16.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_calendar),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = TextMuted,
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -134,10 +143,11 @@ fun DatePickerField(
                 fontFamily = FontFamily.Monospace,
                 modifier = Modifier.weight(1f),
             )
-            Text(
-                text = "▾",
-                fontSize = 14.sp,
-                color = TextMuted,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_chevron_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = TextMuted,
             )
         }
     }
@@ -228,8 +238,8 @@ fun CalendarDialog(
                     color = TextPrimary,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    NavButton("‹") { prevMonth() }
-                    NavButton("›") { nextMonth() }
+                    NavIconButton(painterResource(DsRes.drawable.ic_chevron_left)) { prevMonth() }
+                    NavIconButton(painterResource(DsRes.drawable.ic_chevron_right)) { nextMonth() }
                 }
             }
 
@@ -374,7 +384,7 @@ fun DatePickerPreview() {
                     .padding(20.dp),
         ) {
             DatePickerField(
-                label = "交易日期",
+                label = "Trade Date",
                 dateMillis = dateMillis,
                 onClick = { showDialog = true },
             )
@@ -389,7 +399,7 @@ fun DatePickerPreview() {
                     "未选择"
                 }
             Text(
-                text = "已选日期：$dateStr",
+                text = "Selected: $dateStr",
                 fontSize = 15.sp,
                 color = TextSecondary,
             )

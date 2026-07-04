@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
@@ -39,10 +41,19 @@ import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.GoldDim
 import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import gainful.core.designsystem.generated.resources.Res
+import gainful.core.designsystem.generated.resources.ic_chevron_left
+import gainful.core.designsystem.generated.resources.ic_chevron_right
+import gainful.core.designsystem.generated.resources.ic_close
+import gainful.core.designsystem.generated.resources.ic_coin_dollar
+import gainful.core.designsystem.generated.resources.ic_search
+import gainful.core.designsystem.generated.resources.ic_trending_down
+import gainful.core.designsystem.generated.resources.ic_trending_up
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun NavButton(
-    text: String,
+fun NavIconButton(
+    icon: Painter,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
@@ -56,11 +67,11 @@ fun NavButton(
                 .border(1.dp, Border, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = text,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextSecondary,
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = TextSecondary,
         )
     }
 }
@@ -122,7 +133,8 @@ fun SecondaryButton(
 @Composable
 fun SelectChip(
     label: String,
-    icon: String,
+    icon: Painter,
+    iconTint: Color,
     isSelected: Boolean,
     activeColor: Color,
     activeBackground: Color,
@@ -143,7 +155,12 @@ fun SelectChip(
                 .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = icon, fontSize = 18.sp)
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = if (isSelected) activeColor else iconTint,
+        )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
@@ -156,7 +173,8 @@ fun SelectChip(
 
 @Composable
 fun SquareIconButton(
-    icon: String,
+    icon: Painter,
+    iconTint: Color = TextSecondary,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
@@ -171,10 +189,11 @@ fun SquareIconButton(
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = icon,
-            fontSize = 20.sp,
-            color = TextSecondary,
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = iconTint,
         )
     }
 }
@@ -193,10 +212,10 @@ private fun ButtonPreview() {
                     .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(text = "NavButton", fontSize = 13.sp, color = TextSecondary)
+            Text(text = "NavIconButton", fontSize = 13.sp, color = TextSecondary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NavButton("<") {}
-                NavButton(">") {}
+                NavIconButton(painterResource(Res.drawable.ic_chevron_left)) {}
+                NavIconButton(painterResource(Res.drawable.ic_chevron_right)) {}
             }
 
             Text(text = "PrimaryButton / SecondaryButton", fontSize = 13.sp, color = TextSecondary)
@@ -216,7 +235,8 @@ private fun ButtonPreview() {
             ) {
                 SelectChip(
                     label = "Buy",
-                    icon = "\uD83D\uDCC8",
+                    icon = painterResource(Res.drawable.ic_trending_up),
+                    iconTint = TextSecondary,
                     isSelected = selectedType == 0,
                     activeColor = Gold,
                     activeBackground = GoldDim,
@@ -225,7 +245,8 @@ private fun ButtonPreview() {
                 )
                 SelectChip(
                     label = "Sell",
-                    icon = "\uD83D\uDCC9",
+                    icon = painterResource(Res.drawable.ic_trending_down),
+                    iconTint = TextSecondary,
                     isSelected = selectedType == 1,
                     activeColor = GainRed,
                     activeBackground = GainRed.copy(alpha = 0.15f),
@@ -234,7 +255,8 @@ private fun ButtonPreview() {
                 )
                 SelectChip(
                     label = "Dividend",
-                    icon = "\uD83D\uDCB5",
+                    icon = painterResource(Res.drawable.ic_coin_dollar),
+                    iconTint = TextSecondary,
                     isSelected = selectedType == 2,
                     activeColor = Gold,
                     activeBackground = GoldDim,
@@ -245,8 +267,8 @@ private fun ButtonPreview() {
 
             Text(text = "SquareIconButton", fontSize = 13.sp, color = TextSecondary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SquareIconButton(icon = "\uD83D\uDD0D") {}
-                SquareIconButton(icon = "\u2715") {}
+                SquareIconButton(icon = painterResource(Res.drawable.ic_search)) {}
+                SquareIconButton(icon = painterResource(Res.drawable.ic_close)) {}
             }
         }
     }

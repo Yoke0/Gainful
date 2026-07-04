@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,6 +50,7 @@ import com.yoke.gainful.ui.TransactionCard
 import com.yoke.gainful.ui.TransactionDisplayItem
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
+import gainful.core.designsystem.generated.resources.ic_clipboard
 import gainful.feature.transactions.generated.resources.Res
 import gainful.feature.transactions.generated.resources.add_button
 import gainful.feature.transactions.generated.resources.all
@@ -65,10 +68,12 @@ import gainful.feature.transactions.generated.resources.trade_count_unit
 import gainful.feature.transactions.generated.resources.transactions_title
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Instant
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 @Composable
 fun TransactionsScreen(
@@ -318,9 +323,11 @@ private fun EmptyState(modifier: Modifier = Modifier) {
                     .border(1.dp, Border, RoundedCornerShape(24.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = "\uD83D\uDCCB",
-                fontSize = 20.sp,
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_clipboard),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = TextSecondary,
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
