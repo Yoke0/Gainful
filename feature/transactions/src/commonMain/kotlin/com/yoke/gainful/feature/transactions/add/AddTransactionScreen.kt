@@ -174,7 +174,7 @@ private fun AddTransactionScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             TypeSelector(
                 selectedType = uiState.type,
@@ -422,7 +422,7 @@ private fun AssetSearchExpandable(
     onQueryChanged: (String) -> Unit,
     onAssetSelected: (Asset) -> Unit,
 ) {
-    Column {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
         Row(
             modifier =
                 Modifier

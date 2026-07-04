@@ -196,8 +196,7 @@ private fun DashboardScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .navigationBarsPadding(),
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             DailyPnlCard(uiState.holdings)

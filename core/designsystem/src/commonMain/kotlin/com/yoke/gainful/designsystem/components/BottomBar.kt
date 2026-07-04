@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -38,7 +39,11 @@ import com.yoke.gainful.designsystem.theme.Surface
 
 val BottomBarHeight = 80.dp
 
-fun Modifier.bottomBarPadding(): Modifier = this.padding(bottom = BottomBarHeight)
+@Composable
+fun Modifier.bottomBarPadding(): Modifier =
+    this
+        .padding(bottom = BottomBarHeight)
+        .navigationBarsPadding()
 
 @Composable
 fun BottomBar(

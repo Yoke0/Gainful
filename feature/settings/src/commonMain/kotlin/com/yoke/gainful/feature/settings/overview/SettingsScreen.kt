@@ -253,7 +253,6 @@ private fun SettingsScreen(
 
             SettingsGroup(
                 title = stringResource(Res.string.about_group),
-                modifier = Modifier.bottomBarPadding(),
             ) {
                 SettingRow(
                     label = stringResource(Res.string.app_version),
