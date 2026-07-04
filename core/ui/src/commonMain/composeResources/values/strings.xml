@@ -44,4 +44,5 @@
     <string name="delete">删除</string>
     <string name="delete_confirm_text">确定要删除这笔交易吗？</string>
     <string name="delete_confirm_suffix">此操作不可撤销</string>
+    <string name="treemap_other">其它</string>
 </resources>
