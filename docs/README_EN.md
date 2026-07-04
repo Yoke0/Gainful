@@ -32,14 +32,18 @@ Gainful/
 │   ├── common/                # Utilities, extensions, constants
 │   ├── model/                 # Data models (DTOs, Entities)
 │   ├── ui/                    # Common UI components, theme
+│   ├── designsystem/          # Design system tokens, shared styling
 │   ├── data/                  # Repository interfaces
 │   ├── database/              # Local data source (Room + BundledSQLiteDriver)
+│   ├── datastore/             # Preferences DataStore
 │   ├── network/               # Remote data source (Ktor)
 │   ├── domain/                # UseCases (organized by business domain)
-│   │   ├── transaction/       # Transaction-related
+│   │   ├── asset/             # Asset search
+│   │   ├── dashboard/         # Dashboard (PnL calculation)
 │   │   ├── holding/           # Holding-related
-│   │   ├── portfolio/         # Portfolio summary
-│   │   └── asset/             # Asset search
+│   │   └── transaction/       # Transaction-related
+│   ├── sync/                  # Background data sync (price fetching, KLine caching)
+│   ├── file/                  # File I/O utilities
 │   └── navigation/            # Navigation config (Navigation3)
 ├── feature/                   # Feature modules (per business)
 │   ├── dashboard/             # Dashboard
