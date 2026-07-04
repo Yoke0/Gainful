@@ -47,6 +47,10 @@ data class StockPnlDetail(
     val tradePrice: Double? = null,
     val tradeQuantity: Double = 0.0,
     val fee: Double = 0.0,
+    val buyFee: Double = 0.0,
+    val sellFee: Double = 0.0,
+    val dividend: Double = 0.0,
+    val dailyPnl: Double = 0.0,
 ) {
     val pnl: Double get() = positionPnl + tradePnl - fee
     val hasPosition: Boolean get() = positionQuantity > 0

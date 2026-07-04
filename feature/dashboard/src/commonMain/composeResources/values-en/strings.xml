@@ -47,4 +47,14 @@
     <string name="weekday_fri">Fri</string>
     <string name="weekday_sat">Sat</string>
     <string name="no_transactions">No transaction records</string>
+    <string name="pnl_detail_total_pnl">Total P&amp;L</string>
+    <string name="pnl_detail_buy_fee">Buy Fee</string>
+    <string name="pnl_detail_sell_fee">Sell Fee</string>
+    <string name="pnl_detail_dividend">Dividend</string>
+    <string name="pnl_detail_daily_gain">Daily P&amp;L</string>
+    <string name="pnl_detail_no_records">No records for this day</string>
+    <string name="pnl_detail_buy_fee_total">Total Buy Fee</string>
+    <string name="pnl_detail_sell_fee_total">Total Sell Fee</string>
+    <string name="pnl_detail_dividend_total">Total Dividend</string>
+    <string name="pnl_detail_daily_gain_total">Total Daily P&amp;L</string>
 </resources>

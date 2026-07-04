@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +27,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -73,6 +78,7 @@ import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.PnlCell
 import com.yoke.gainful.model.PnlPeriod
 import com.yoke.gainful.model.PnlPeriodType
+import com.yoke.gainful.model.StockPnlDetail
 import com.yoke.gainful.ui.AutoSizeText
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
@@ -92,6 +98,16 @@ import gainful.feature.dashboard.generated.resources.no_transactions
 import gainful.feature.dashboard.generated.resources.no_trend_data
 import gainful.feature.dashboard.generated.resources.pnl_current_period
 import gainful.feature.dashboard.generated.resources.pnl_day_label
+import gainful.feature.dashboard.generated.resources.pnl_detail_buy_fee
+import gainful.feature.dashboard.generated.resources.pnl_detail_buy_fee_total
+import gainful.feature.dashboard.generated.resources.pnl_detail_daily_gain
+import gainful.feature.dashboard.generated.resources.pnl_detail_daily_gain_total
+import gainful.feature.dashboard.generated.resources.pnl_detail_dividend
+import gainful.feature.dashboard.generated.resources.pnl_detail_dividend_total
+import gainful.feature.dashboard.generated.resources.pnl_detail_no_records
+import gainful.feature.dashboard.generated.resources.pnl_detail_sell_fee
+import gainful.feature.dashboard.generated.resources.pnl_detail_sell_fee_total
+import gainful.feature.dashboard.generated.resources.pnl_detail_total_pnl
 import gainful.feature.dashboard.generated.resources.pnl_details
 import gainful.feature.dashboard.generated.resources.pnl_month_label
 import gainful.feature.dashboard.generated.resources.pnl_next_period
@@ -205,7 +221,6 @@ private fun DashboardScreen(
 
     if (uiState.selectedPnlDate != null) {
         StockPnlDetailDialog(
-            date = uiState.selectedPnlDate,
             details = uiState.stockPnlDetails,
             onDismiss = { onIntent(DashboardIntent.DismissPnlDetail) },
         )
@@ -1215,138 +1230,311 @@ private fun allTransactionsEmpty(uiState: DashboardUiState): Boolean {
     return uiState.totalBuys == 0.0 && uiState.totalSells == 0.0 && uiState.totalDividends == 0.0
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StockPnlDetailDialog(
-    date: kotlinx.datetime.LocalDate,
-    details: List<com.yoke.gainful.model.StockPnlDetail>,
+    details: List<StockPnlDetail>,
     onDismiss: () -> Unit,
 ) {
-    androidx.compose.material3.AlertDialog(
+    val sheetState =
+        rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        )
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Card,
-        title = {
-            Text(
-                text = "${date.year}年${date.month.ordinal + 1}月${date.day}日",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-            )
-        },
-        text = {
+        sheetState = sheetState,
+        containerColor = Background,
+        contentColor = TextPrimary,
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 22.dp)
+                    .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             if (details.isEmpty()) {
                 Text(
-                    text = "当日无交易记录",
+                    text = stringResource(Res.string.pnl_detail_no_records),
                     fontSize = 14.sp,
                     color = TextMuted,
                 )
             } else {
-                androidx.compose.foundation.lazy.LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(details.size) { index ->
-                        val detail = details[index]
-                        StockPnlDetailItem(detail)
-                    }
+                details.forEach { detail ->
+                    StockPnlDetailItem(detail)
                 }
+
+                // Summary card
+                StockPnlDetailSummary(details)
             }
-        },
-        confirmButton = {
-            androidx.compose.material3.TextButton(onClick = onDismiss) {
-                Text(
-                    text = "关闭",
-                    color = Gold,
-                )
-            }
-        },
-    )
+        }
+    }
 }
 
 @Composable
-private fun StockPnlDetailItem(detail: com.yoke.gainful.model.StockPnlDetail) {
+private fun StockPnlDetailItem(detail: StockPnlDetail) {
+    val iconColors =
+        listOf(
+            Color(0xFF3B82F6) to Color(0xFF1E3A5F),
+            Color(0xFF8B5CF6) to Color(0xFF3B1F6E),
+            Color(0xFFF59E0B) to Color(0xFF5C3D0A),
+            Color(0xFF14B8A6) to Color(0xFF0D4F47),
+            Color(0xFFEC4899) to Color(0xFF5C1A3D),
+            Color(0xFF6366F1) to Color(0xFF2E2D6E),
+            Color(0xFFF43F5E) to Color(0xFF5C1428),
+        )
+    val colorIndex = (detail.assetId.hashCode() and Int.MAX_VALUE) % iconColors.size
+    val (iconBg, iconFg) = iconColors[colorIndex]
+    val abbreviation = detail.stockName.take(2)
+
     Column(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(Surface)
-                .padding(12.dp),
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .border(1.dp, Border, RoundedCornerShape(14.dp))
+                .padding(18.dp),
     ) {
+        // Stock header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Icon
+            Box(
+                modifier =
+                    Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(iconBg),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = abbreviation,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = iconFg,
+                )
+            }
+
+            // Name + code
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = detail.stockName,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                )
+                Text(
+                    text = detail.assetId,
+                    fontSize = 13.sp,
+                    color = TextMuted,
+                )
+            }
+
+            // Total PnL
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = stringResource(Res.string.pnl_detail_total_pnl),
+                    fontSize = 13.sp,
+                    color = TextMuted,
+                )
+                Text(
+                    text = detail.pnl.formatSigned(),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (detail.pnl >= 0) gainColor else lossColor,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // Detail grid — only show non-zero items
+        val gridItems =
+            listOf(
+                Triple(
+                    stringResource(Res.string.pnl_detail_buy_fee),
+                    if (detail.buyFee > 0) "-¥${detail.buyFee.formatLocalized()}" else null,
+                    if (detail.buyFee > 0) lossColor else null,
+                ),
+                Triple(
+                    stringResource(Res.string.pnl_detail_sell_fee),
+                    if (detail.sellFee > 0) "-¥${detail.sellFee.formatLocalized()}" else null,
+                    if (detail.sellFee > 0) lossColor else null,
+                ),
+                Triple(
+                    stringResource(Res.string.pnl_detail_dividend),
+                    if (detail.dividend > 0) "+¥${detail.dividend.formatLocalized()}" else null,
+                    if (detail.dividend > 0) gainColor else null,
+                ),
+                Triple(
+                    stringResource(Res.string.pnl_detail_daily_gain),
+                    detail.dailyPnl.formatSigned(),
+                    if (detail.dailyPnl > 0) {
+                        gainColor
+                    } else if (detail.dailyPnl < 0) {
+                        lossColor
+                    } else {
+                        null
+                    },
+                ),
+            ).filter { it.third != null }
+
+        if (gridItems.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                gridItems.chunked(2).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        row.forEach { (label, value, color) ->
+                            PnlDetailGridItem(
+                                modifier = Modifier.weight(1f),
+                                label = label,
+                                value = value.orEmpty(),
+                                color = color ?: TextSecondary,
+                            )
+                        }
+                        if (row.size < 2) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PnlDetailGridItem(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    color: Color,
+) {
+    Column(
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(Surface)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = TextMuted,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = value,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
+    }
+}
+
+@Composable
+private fun StockPnlDetailSummary(details: List<StockPnlDetail>) {
+    val totalBuyFee = details.sumOf { it.buyFee }
+    val totalSellFee = details.sumOf { it.sellFee }
+    val totalDividend = details.sumOf { it.dividend }
+    val totalDailyGain = details.sumOf { it.dailyPnl }
+    val totalPnl = details.sumOf { it.pnl }
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .border(1.5.dp, Gold, RoundedCornerShape(14.dp))
+                .background(GoldDim)
+                .padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (totalBuyFee > 0) {
+            SummaryRow(
+                label = stringResource(Res.string.pnl_detail_buy_fee_total),
+                value = "-¥${totalBuyFee.formatLocalized()}",
+                color = lossColor,
+            )
+        }
+        if (totalSellFee > 0) {
+            SummaryRow(
+                label = stringResource(Res.string.pnl_detail_sell_fee_total),
+                value = "-¥${totalSellFee.formatLocalized()}",
+                color = lossColor,
+            )
+        }
+        if (totalDividend > 0) {
+            SummaryRow(
+                label = stringResource(Res.string.pnl_detail_dividend_total),
+                value = "+¥${totalDividend.formatLocalized()}",
+                color = gainColor,
+            )
+        }
+        SummaryRow(
+            label = stringResource(Res.string.pnl_detail_daily_gain_total),
+            value = totalDailyGain.formatSigned(),
+            color = if (totalDailyGain >= 0) gainColor else lossColor,
+        )
+
+        // Divider
+        Spacer(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Gold.copy(alpha = 0.2f)),
+        )
+
+        // Total
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = detail.stockName,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
+                text = stringResource(Res.string.pnl_detail_total_pnl),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
                 color = TextPrimary,
             )
             Text(
-                text = detail.pnl.formatSigned(),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (detail.pnl >= 0) gainColor else lossColor,
+                text = totalPnl.formatSigned(),
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = if (totalPnl >= 0) gainColor else lossColor,
             )
         }
+    }
+}
 
-        // Position info
-        if (detail.hasPosition) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "持仓 ${detail.positionQuantity.toInt()}股",
-                    fontSize = 12.sp,
-                    color = TextMuted,
-                )
-                if (detail.positionPnl != 0.0) {
-                    Text(
-                        text = detail.positionPnl.formatSigned(),
-                        fontSize = 12.sp,
-                        color = if (detail.positionPnl >= 0) gainColor else lossColor,
-                    )
-                }
-            }
-        }
-
-        // Trade info
-        if (detail.hasTrade) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                val typeName =
-                    when (detail.tradeType) {
-                        com.yoke.gainful.model.TransactionType.BUY -> "买入"
-                        com.yoke.gainful.model.TransactionType.SELL -> "卖出"
-                        com.yoke.gainful.model.TransactionType.DIVIDEND -> "分红"
-                        else -> ""
-                    }
-                Text(
-                    text = "$typeName ${detail.tradeQuantity.toInt()}股",
-                    fontSize = 12.sp,
-                    color = TextMuted,
-                )
-                val price = detail.tradePrice
-                if (price != null) {
-                    Text(
-                        text = "¥${price.formatLocalized()}",
-                        fontSize = 12.sp,
-                        color = TextMuted,
-                    )
-                }
-                if (detail.fee > 0) {
-                    Text(
-                        text = "手续费 ¥${detail.fee.formatLocalized()}",
-                        fontSize = 12.sp,
-                        color = TextMuted,
-                    )
-                }
-            }
-        }
+@Composable
+private fun SummaryRow(
+    label: String,
+    value: String,
+    color: Color,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            color = TextSecondary,
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
     }
 }

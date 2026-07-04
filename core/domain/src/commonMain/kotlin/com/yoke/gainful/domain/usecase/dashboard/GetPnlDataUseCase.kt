@@ -75,6 +75,7 @@ class GetPnlDataUseCase(
                     else -> 0.0
                 }
 
+            val txFee = tx?.fee ?: 0.0
             details.add(
                 StockPnlDetail(
                     assetId = assetId,
@@ -85,7 +86,11 @@ class GetPnlDataUseCase(
                     tradeType = tx?.type,
                     tradePrice = tx?.price,
                     tradeQuantity = tx?.quantity ?: 0.0,
-                    fee = tx?.fee ?: 0.0,
+                    fee = txFee,
+                    buyFee = if (tx?.type == TransactionType.BUY) txFee else 0.0,
+                    sellFee = if (tx?.type == TransactionType.SELL) txFee else 0.0,
+                    dividend = if (tx?.type == TransactionType.DIVIDEND) tradePnl else 0.0,
+                    dailyPnl = positionPnl + tradePnl,
                 ),
             )
         }
@@ -115,6 +120,10 @@ class GetPnlDataUseCase(
                     tradePrice = tx.price,
                     tradeQuantity = tx.quantity,
                     fee = tx.fee,
+                    buyFee = if (tx.type == TransactionType.BUY) tx.fee else 0.0,
+                    sellFee = if (tx.type == TransactionType.SELL) tx.fee else 0.0,
+                    dividend = if (tx.type == TransactionType.DIVIDEND) tradePnl else 0.0,
+                    dailyPnl = if (tx.type == TransactionType.DIVIDEND) 0.0 else tradePnl,
                 ),
             )
         }
