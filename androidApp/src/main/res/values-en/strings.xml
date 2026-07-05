@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Gainful</string>
+    <string name="widget_today_pnl_description">Show today\'s portfolio P&amp;L</string>
+    <string name="widget_today_pnl_title">Today\'s P&amp;L</string>
+    <string name="widget_no_data">No data</string>
 </resources>

@@ -9,6 +9,7 @@ import com.yoke.gainful.feature.transactions.di.transactionsViewModelModule
 import com.yoke.gainful.navigation.navigationModule
 import com.yoke.gainful.network.di.networkModule
 import com.yoke.gainful.sync.di.syncModule
+import com.yoke.gainful.widget.di.widgetModule
 import org.koin.core.module.Module
 
 fun allModules(): List<Module> =
@@ -18,6 +19,7 @@ fun allModules(): List<Module> =
             dataModule,
             domainModule,
             syncModule,
+            widgetModule,
             navigationModule,
             dashboardViewModelModule,
             transactionsViewModelModule,
