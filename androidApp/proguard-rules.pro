@@ -1,4 +1,2 @@
--keep class com.yoke.gainful.** { *; }
--keepclassmembers class * extends androidx.lifecycle.ViewModel {
-    <init>(...);
-}
+# Repackage classes into the default package to reduce the size of descriptors.
+-repackageclasses
