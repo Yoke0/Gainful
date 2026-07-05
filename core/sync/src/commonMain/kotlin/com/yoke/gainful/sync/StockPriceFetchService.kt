@@ -3,8 +3,12 @@ package com.yoke.gainful.sync
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.MarketRepository
 import com.yoke.gainful.data.repository.QuoteCacheRepository
+import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
+import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
 import com.yoke.gainful.model.QuoteSnapshot
+import com.yoke.gainful.widget.domain.GetTodayPnlUseCase
+import com.yoke.gainful.widget.syncWidgetData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -28,6 +32,7 @@ class StockPriceFetchService(
     private val marketRepository: MarketRepository,
     private val quoteCacheRepository: QuoteCacheRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val transactionRepository: TransactionRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var fetchJob: Job? = null
@@ -85,6 +90,16 @@ class StockPriceFetchService(
 
         if (snapshots.isNotEmpty()) {
             quoteCacheRepository.upsertAll(snapshots)
+            syncWidgetDataIfNeeded()
+        }
+    }
+
+    private suspend fun syncWidgetDataIfNeeded() {
+        runCatching {
+            val holdingsUseCase = GetHoldingsDisplayUseCase(transactionRepository, assetRepository, marketRepository, quoteCacheRepository)
+            val useCase = GetTodayPnlUseCase(holdingsUseCase)
+            val pnl = useCase.compute(title = "", noDataText = "")
+            syncWidgetData(pnl)
         }
     }
 

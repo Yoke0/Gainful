@@ -50,6 +50,7 @@ include(":core:navigation")
 include(":core:datastore")
 include(":core:sync")
 include(":core:file")
+include(":core:widget")
 
 include(":feature:dashboard")
 include(":feature:holdings")

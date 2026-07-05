@@ -13,11 +13,19 @@ kotlin {
 }
 dependencies {
     implementation(projects.shared)
+    implementation(projects.core.model)
+    implementation(projects.core.domain)
+    implementation(projects.core.widget)
 
     implementation(libs.androidx.activity.compose)
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
+
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+
+    implementation(libs.koin.core)
 }
 
 android {

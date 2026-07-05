@@ -12,6 +12,8 @@ import com.yoke.gainful.model.PnlPeriodType
 import com.yoke.gainful.model.StockPnlDetail
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.widget.domain.GetTodayPnlUseCase
+import com.yoke.gainful.widget.syncWidgetData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +28,7 @@ class DashboardViewModel(
     private val getHoldingsDisplayUseCase: GetHoldingsDisplayUseCase,
     private val getTransactionsUseCase: GetTransactionsUseCase,
     private val getPnlDataUseCase: GetPnlDataUseCase,
+    private val getTodayPnlUseCase: GetTodayPnlUseCase,
     private val assetRepository: AssetRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DashboardUiState.now())
@@ -90,6 +93,7 @@ class DashboardViewModel(
                 )
             }.collect { state ->
                 _uiState.value = state
+                syncWidgetDataIfNeeded()
             }
         }
     }
@@ -193,6 +197,15 @@ class DashboardViewModel(
                 selectedPnlDate = null,
                 stockPnlDetails = emptyList(),
             )
+    }
+
+    private fun syncWidgetDataIfNeeded() {
+        viewModelScope.launch {
+            runCatching {
+                val pnl = getTodayPnlUseCase.compute(title = "", noDataText = "")
+                syncWidgetData(pnl)
+            }
+        }
     }
 }
 

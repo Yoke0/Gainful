@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">盈迹</string>
+    <string name="widget_today_pnl_description">显示当日投资组合盈亏</string>
+    <string name="widget_today_pnl_title">今日盈亏</string>
+    <string name="widget_no_data">暂无数据</string>
 </resources>
