@@ -6,6 +6,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.yoke.gainful.di.initKoin
+import com.yoke.gainful.widget.WidgetContextHolder
+import com.yoke.gainful.widget.WidgetRefreshWorker
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,6 +16,8 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         initKoin(applicationContext)
+        WidgetContextHolder.init(applicationContext)
+        WidgetRefreshWorker.enqueue(applicationContext)
 
         setContent {
             App()

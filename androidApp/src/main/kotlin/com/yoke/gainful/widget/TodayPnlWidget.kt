@@ -46,19 +46,57 @@ class TodayPnlWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         initKoin(context)
+        if (!WidgetContextHolder.isInitialized()) {
+            WidgetContextHolder.init(context)
+        }
 
-        val useCase = GlobalContext.get().get<GetTodayPnlUseCase>()
-        val title = context.getString(R.string.widget_today_pnl_title)
-        val noData = context.getString(R.string.widget_no_data)
         val data =
-            runCatching { useCase.compute(title, noData) }
-                .getOrDefault(PnlWidgetData(title = title, noDataText = noData))
+            readCachedData(context)
+                ?: computeFreshData(context)
+                ?: run {
+                    val title = context.getString(R.string.widget_today_pnl_title)
+                    val noData = context.getString(R.string.widget_no_data)
+                    PnlWidgetData(title = title, noDataText = noData)
+                }
 
         provideContent {
             GlanceTheme {
                 PnlWidgetContent(context, data)
             }
         }
+    }
+
+    private fun readCachedData(context: Context): PnlWidgetData? {
+        if (!WidgetContextHolder.isInitialized()) return null
+        val prefs = WidgetContextHolder.getPrefs()
+        val hasData = prefs.getBoolean(WidgetContextHolder.KEY_HAS_DATA, false)
+        if (!prefs.contains(WidgetContextHolder.KEY_GAIN_TEXT)) return null
+        val gainText = prefs.getString(WidgetContextHolder.KEY_GAIN_TEXT, "") ?: ""
+        val cleaned = gainText.replace(",", "").replace("+", "")
+        val dailyGain =
+            if (gainText.startsWith("-")) {
+                -(cleaned.toDoubleOrNull() ?: 0.0)
+            } else {
+                cleaned.toDoubleOrNull() ?: 0.0
+            }
+        val holdingsCount = if (hasData) 1 else 0
+        return PnlWidgetData(
+            dailyGain = dailyGain,
+            dailyGainText = gainText,
+            dailyGainPercentText = prefs.getString(WidgetContextHolder.KEY_PCT_TEXT, "") ?: "",
+            title = prefs.getString(WidgetContextHolder.KEY_TITLE, "") ?: "",
+            noDataText = prefs.getString(WidgetContextHolder.KEY_NO_DATA, "") ?: "",
+            holdingsCount = holdingsCount,
+        )
+    }
+
+    private suspend fun computeFreshData(context: Context): PnlWidgetData? {
+        return runCatching {
+            val title = context.getString(R.string.widget_today_pnl_title)
+            val noData = context.getString(R.string.widget_no_data)
+            val useCase = GlobalContext.get().get<GetTodayPnlUseCase>()
+            useCase.compute(title, noData)
+        }.getOrNull()
     }
 }
 

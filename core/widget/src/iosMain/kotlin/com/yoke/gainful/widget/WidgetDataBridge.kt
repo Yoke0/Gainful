@@ -1,6 +1,7 @@
 package com.yoke.gainful.widget
 
 import com.yoke.gainful.widget.model.PnlWidgetData
+import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSUserDefaults
 import kotlin.time.Clock
 
@@ -14,6 +15,8 @@ object WidgetDataBridge {
     private const val KEY_NO_DATA = "widget_no_data"
     private const val KEY_LAST_UPDATE = "widget_last_update"
 
+    const val WIDGET_RELOAD_NOTIFICATION = "com.yoke.gainful.widgetReload"
+
     private fun getDefaults(): NSUserDefaults =
         NSUserDefaults(suiteName = APP_GROUP) ?: NSUserDefaults.standardUserDefaults
 
@@ -26,5 +29,7 @@ object WidgetDataBridge {
         d.setObject(data.title, forKey = KEY_TITLE)
         d.setObject(data.noDataText, forKey = KEY_NO_DATA)
         d.setDouble(Clock.System.now().toEpochMilliseconds().toDouble(), forKey = KEY_LAST_UPDATE)
+
+        NSNotificationCenter.defaultCenter.postNotificationName(WIDGET_RELOAD_NOTIFICATION, null)
     }
 }

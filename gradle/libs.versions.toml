@@ -28,6 +28,7 @@ icu4j = "78.3"
 spotless = "8.7.0"
 ktlint = "1.8.0"
 glance = "1.1.1"
+work = "2.10.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -72,6 +73,7 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "multiplatform-nav3-ui" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
