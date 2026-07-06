@@ -2,6 +2,45 @@
 
 本文件记录盈迹 (Gainful) 应用的所有重要变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [1.0.2] - 2026-07-07
+
+### 新增功能
+
+#### Dashboard (仪表盘)
+- PnL 概览卡片
+- 基于 K 线数据的真实 PnL 计算，替代模拟数据
+- 股票详情弹窗，展示持仓和交易信息
+- PnL 详情改用 ModalBottomSheet 展示
+
+#### 持仓
+- 持仓热力图替换为 squarify treemap 布局，提升可读性
+
+#### Widgets (小组件)
+- Android 和 iOS 小组件，展示当日盈亏
+- Android 小组件尺寸优化为 2x2/2x4
+- 小组件支持即时刷新和后台同步
+
+#### UI
+- 所有文本/Emoji 图标替换为矢量 XML drawable
+
+### 修复问题
+
+- 统一各页面底部间距和屏幕内边距一致性
+- 禁用 R8 full mode 修复 release 构建中 Glance 小组件渲染问题
+
+### 重构
+
+- PnL 计算引入缓存机制，分离计算与查询
+
+### 构建与依赖
+
+- GitHub Actions 添加 spotlessCheck 代码格式化检查
+
+### 文档
+
+- 添加股票计算规则文档
+- 更新项目文档
+
 ## [1.0.1] - 2026-06-30
 
 盈迹 v1.0.1 是第一个正式发布版本。这是一款 Kotlin Multiplatform + Compose Multiplatform 投资组合管理应用，支持 Android、iOS 和 Desktop 三端。

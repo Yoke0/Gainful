@@ -2,6 +2,45 @@
 
 All notable changes to the Gainful application are documented in this file. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.2] - 2026-07-07
+
+### Added
+
+#### Dashboard
+- PnL overview card
+- Real PnL calculation based on K-line data, replacing simulated data
+- Stock detail bottom sheet showing holdings and transaction info
+- PnL detail now displayed via ModalBottomSheet
+
+#### Holdings
+- Replaced heatmap layout with squarify treemap for better readability
+
+#### Widgets
+- Android and iOS app widgets displaying today's P&L
+- Optimized Android widget size to 2x2/2x4
+- Widget support for immediate refresh and background sync
+
+#### UI
+- Replaced all text/emoji icons with vector XML drawables
+
+### Fixed
+
+- Unified bottom padding and screen spacing consistency across pages
+- Disabled R8 full mode to fix Glance widget rendering in release builds
+
+### Refactored
+
+- Added PnL cache with compute/query separation
+
+### Build & CI
+
+- Added spotlessCheck to GitHub Actions for code formatting
+
+### Documentation
+
+- Added stock calculation rules documentation
+- Updated project documentation
+
 ## [1.0.1] - 2026-06-30
 
 Gainful v1.0.1 is the first official release. It is a Kotlin Multiplatform + Compose Multiplatform portfolio management application supporting Android, iOS, and Desktop.
