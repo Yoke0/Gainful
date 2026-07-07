@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -227,6 +228,48 @@ private fun DashboardScreen(
 }
 
 @Composable
+private fun SectionCard(
+    title: String,
+    modifier: Modifier = Modifier,
+    trailing: @Composable (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(Card)
+                .padding(20.dp),
+    ) {
+        if (trailing != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                )
+                trailing()
+            }
+        } else {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary,
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        content()
+    }
+}
+
+@Composable
 private fun PnlOverviewCard(
     uiState: DashboardUiState,
     onIntent: (DashboardIntent) -> Unit,
@@ -234,22 +277,7 @@ private fun PnlOverviewCard(
     val pnlData = uiState.pnlData
     val period = pnlData?.period
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .padding(20.dp),
-    ) {
-        Text(
-            text = periodTitle(period, uiState.selectedPnlPeriod),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary,
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-
+    SectionCard(title = periodTitle(period, uiState.selectedPnlPeriod)) {
         PnlPeriodTabs(
             selectedPeriod = uiState.selectedPnlPeriod,
             onPeriodSelected = { period ->
@@ -739,22 +767,7 @@ private fun SummaryCard(state: DashboardUiState) {
     val totalValue = state.totalMarketValue
     val totalCost = state.totalCost
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .padding(20.dp),
-    ) {
-        Text(
-            text = stringResource(Res.string.total_pnl),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextSecondary,
-            letterSpacing = 0.5.sp,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+    SectionCard(title = stringResource(Res.string.total_pnl)) {
         Row(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -801,22 +814,7 @@ private fun DailyPnlCard(holdings: List<HoldingDisplay>) {
     val previousDayValue = totalMarketValue - totalDailyGain
     val totalDailyGainPercent = if (previousDayValue > 0) (totalDailyGain / previousDayValue) * 100 else 0.0
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .padding(20.dp),
-    ) {
-        Text(
-            text = stringResource(Res.string.daily_pnl),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextSecondary,
-            letterSpacing = 0.5.sp,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+    SectionCard(title = stringResource(Res.string.daily_pnl)) {
         Row(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -868,25 +866,9 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                 ?: emptyList()
         }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .padding(20.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(Res.string.holdings_trend),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
-            )
+    SectionCard(
+        title = stringResource(Res.string.holdings_trend),
+        trailing = {
             Box(
                 modifier =
                     Modifier
@@ -900,10 +882,8 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                     color = TextMuted,
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
+        },
+    ) {
         if (chartData.size >= 2) {
             val minVal = chartData.min()
             val maxVal = chartData.max()
@@ -1026,15 +1006,7 @@ private fun MetricsSection(state: DashboardUiState) {
     val totalGain = state.totalGain
     val totalGainPercent = state.totalGainPercent
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = stringResource(Res.string.key_metrics),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary,
-        )
+    SectionCard(title = stringResource(Res.string.key_metrics)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -1081,7 +1053,7 @@ private fun MetricCard(
         modifier =
             modifier
                 .clip(RoundedCornerShape(10.dp))
-                .background(Card)
+                .background(Surface)
                 .padding(16.dp),
     ) {
         Text(
@@ -1109,24 +1081,9 @@ private fun HoldingsOverviewCard(
     val sorted = remember(holdings) { holdings.sortedByDescending { it.totalMarketValue } }
     val totalGain = remember(holdings) { holdings.sumOf { it.totalGain } }
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(Card)
-                .padding(20.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.holdings_overview),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
-            )
+    SectionCard(
+        title = stringResource(Res.string.holdings_overview),
+        trailing = {
             Box(
                 modifier =
                     Modifier
@@ -1141,9 +1098,9 @@ private fun HoldingsOverviewCard(
                     color = Gold,
                 )
             }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-
+        },
+        modifier = modifier,
+    ) {
         sorted.take(5).forEach { holding ->
             HoldingRow(
                 name = "${holding.name} ${holding.pinYin.ifBlank { holding.code }}",
