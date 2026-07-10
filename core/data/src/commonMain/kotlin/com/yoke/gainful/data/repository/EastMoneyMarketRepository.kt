@@ -27,8 +27,8 @@ class EastMoneyMarketRepository(
         return api.getBatchQuotes(secIds).mapNotNull { it.toStockQuote() }
     }
 
-    override suspend fun getTrends(secId: String, ndays: Int): List<StockTrend> {
-        return api.getTrends(secId, ndays).toStockTrendList()
+    override suspend fun getTrends(secId: String): List<StockTrend> {
+        return api.getTrends(secId).toStockTrendList()
     }
 
     override suspend fun getKLines(

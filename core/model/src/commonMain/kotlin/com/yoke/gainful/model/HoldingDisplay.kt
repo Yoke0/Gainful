@@ -9,6 +9,7 @@ data class HoldingDisplay(
     val quantity: Double,
     val averageCost: Double,
     val currentPrice: Double,
+    val preClose: Double,
     val changePercent: Double,
     val changeAmount: Double,
     val totalBuys: Double = 0.0,

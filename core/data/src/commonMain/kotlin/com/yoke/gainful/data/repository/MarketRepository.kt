@@ -14,7 +14,7 @@ interface MarketRepository {
 
     suspend fun getBatchQuotes(secIds: List<String>): List<StockQuote>
 
-    suspend fun getTrends(secId: String, ndays: Int = 1): List<StockTrend>
+    suspend fun getTrends(secId: String): List<StockTrend>
 
     suspend fun getKLines(
         secId: String,

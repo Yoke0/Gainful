@@ -10,7 +10,7 @@ interface EastMoneyApi {
 
     suspend fun getBatchQuotes(secIds: List<String>): List<QuoteData>
 
-    suspend fun getTrends(secId: String, ndays: Int): TrendData
+    suspend fun getTrends(secId: String): TrendData
 
     suspend fun getKLines(
         secId: String,

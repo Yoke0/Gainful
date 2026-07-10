@@ -28,7 +28,12 @@ class EastMoneyApiImplTest {
                     )
                 }
             }
-        return EastMoneyApiImpl(client)
+        val json =
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+        return EastMoneyApiImpl(client, json)
     }
 
     @Test
@@ -143,7 +148,7 @@ class EastMoneyApiImplTest {
                     },
                 )
 
-            val trend = api.getTrends("1.600519", ndays = 1)
+            val trend = api.getTrends("1.600519")
 
             assertNotNull(trend)
             assertEquals(4, trend.data.size)
@@ -167,7 +172,7 @@ class EastMoneyApiImplTest {
                     },
                 )
 
-            val trend = api.getTrends("1.600519", ndays = 1)
+            val trend = api.getTrends("1.600519")
             assertNotNull(trend)
             assertTrue(trend.data.isEmpty())
         }

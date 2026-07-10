@@ -62,7 +62,7 @@ class GetHoldingsDisplayUseCase(
         for (quoteId in missingIds) {
             runCatching {
                 val quote = marketRepository.getQuote(quoteId) ?: return@runCatching
-                val trends = marketRepository.getTrends(quoteId, ndays = 1)
+                val trends = marketRepository.getTrends(quoteId)
                 val snapshot =
                     QuoteSnapshot(
                         quoteId = quoteId,
@@ -90,6 +90,7 @@ class GetHoldingsDisplayUseCase(
             val snapshot = snapshotMap[quoteId] ?: return@map hd
             hd.copy(
                 currentPrice = snapshot.quote.latestPrice,
+                preClose = snapshot.quote.preClose,
                 changePercent = snapshot.quote.changePercent,
                 changeAmount = snapshot.quote.changeAmount,
                 trends = snapshot.trends,
@@ -180,6 +181,7 @@ class GetHoldingsDisplayUseCase(
             quantity = quantity,
             averageCost = if (quantity > 0) totalCost / quantity else 0.0,
             currentPrice = 0.0,
+            preClose = 0.0,
             changePercent = 0.0,
             changeAmount = 0.0,
             totalBuys = totalBuys,
