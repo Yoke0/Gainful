@@ -1,6 +1,5 @@
 package com.yoke.gainful.feature.holdings.overview
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,10 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +38,8 @@ import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ClosedPosition
 import com.yoke.gainful.model.HoldingDisplay
+import com.yoke.gainful.model.StockTrend
+import com.yoke.gainful.ui.LineChart
 import com.yoke.gainful.ui.MarketCapTreemap
 import com.yoke.gainful.ui.TreemapItem
 import com.yoke.gainful.ui.gainColor
@@ -59,8 +56,6 @@ import gainful.feature.holdings.generated.resources.profit_loss
 import gainful.feature.holdings.generated.resources.shares
 import gainful.feature.holdings.generated.resources.total_assets
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.PI
-import kotlin.math.sin
 
 @Composable
 fun HoldingsScreen(
@@ -307,7 +302,6 @@ private fun HoldingCard(
 
         Sparkline(
             trends = holding.trends,
-            changeAmount = holding.changeAmount,
             modifier =
                 Modifier
                     .width(72.dp)
@@ -400,71 +394,28 @@ private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String, 
 
 @Composable
 private fun Sparkline(
-    trends: List<com.yoke.gainful.model.StockTrend>,
-    changeAmount: Double,
+    trends: List<StockTrend>,
     modifier: Modifier = Modifier,
     strokeColor: Color = gainColor,
 ) {
-    val reversedPrices = remember(trends) { trends.map { it.price }.reversed() }
-    val points =
-        remember(reversedPrices, changeAmount) {
-            if (reversedPrices.size >= 2) {
-                val min = reversedPrices.min()
-                val max = reversedPrices.max()
-                val range = max - min
-                reversedPrices.map { price ->
-                    if (range > 0) (price - min) / range else 0.5
+    val data =
+        remember(trends) {
+            val prices = trends.map { it.price }
+            if (prices.size >= 2) {
+                val basePrice = prices.first()
+                prices.mapIndexed { index, price ->
+                    index.toFloat() to ((price - basePrice) / basePrice * 100).toFloat()
                 }
             } else {
-                val direction = if (changeAmount >= 0) "up" else "down"
-                generateSparkline(direction)
+                emptyList()
             }
         }
 
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        val stepX = w / (points.size - 1).coerceAtLeast(1).toFloat()
-
-        val linePath = Path()
-        points.forEachIndexed { index, value ->
-            val x = index * stepX
-            val y = h * value.toFloat()
-            if (index == 0) {
-                linePath.moveTo(x, y)
-            } else {
-                linePath.lineTo(x, y)
-            }
-        }
-
-        drawPath(
-            path = linePath,
-            color = strokeColor,
-            style =
-                Stroke(
-                    width = 2f,
-                    cap = StrokeCap.Round,
-                    join = StrokeJoin.Round,
-                ),
-        )
-    }
-}
-
-private fun generateSparkline(direction: String): List<Double> {
-    val points = mutableListOf<Double>()
-    val seed = direction.hashCode().toLong()
-    var y: Double
-    for (i in 0..20) {
-        val t = i / 20.0
-        val wave = sin(t * PI * 3) * 0.08 + (((seed + i * 7) % 100) / 100.0 - 0.5) * 0.06
-        y =
-            if (direction == "up") {
-                0.8 - t * 0.5 + wave
-            } else {
-                0.2 + t * 0.5 + wave
-            }
-        y = y.coerceIn(0.05, 0.95)
-        points.add(y)
-    }
-    return points
+    LineChart(
+        data = data,
+        modifier = modifier,
+        lineColor = strokeColor,
+        showBaseline = true,
+        baselineY = 0f,
+    )
 }

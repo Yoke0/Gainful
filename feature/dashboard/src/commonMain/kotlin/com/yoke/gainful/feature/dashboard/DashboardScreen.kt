@@ -3,7 +3,6 @@ package com.yoke.gainful.feature.dashboard
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,12 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -69,8 +63,6 @@ import com.yoke.gainful.designsystem.theme.Card
 import com.yoke.gainful.designsystem.theme.GainGreen
 import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.GoldDim
-import com.yoke.gainful.designsystem.theme.GoldLight
-import com.yoke.gainful.designsystem.theme.GridLine
 import com.yoke.gainful.designsystem.theme.Surface
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
@@ -81,6 +73,7 @@ import com.yoke.gainful.model.PnlPeriod
 import com.yoke.gainful.model.PnlPeriodType
 import com.yoke.gainful.model.StockPnlDetail
 import com.yoke.gainful.ui.AutoSizeText
+import com.yoke.gainful.ui.LineChart
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
@@ -885,100 +878,14 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
         },
     ) {
         if (chartData.size >= 2) {
-            val minVal = chartData.min()
-            val maxVal = chartData.max()
-            val range = maxVal - minVal
-
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(342f / 140f)
-                        .clip(RoundedCornerShape(8.dp)),
-            ) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    val w = size.width
-                    val h = size.height
-                    val padTop = 10f
-                    val padBottom = 10f
-                    val chartH = h - padTop - padBottom
-
-                    val lineColor = Gold
-                    val gridColor = GridLine
-
-                    for (i in 0..2) {
-                        val y = padTop + chartH * i / 2f
-                        drawLine(
-                            color = gridColor,
-                            start = Offset(0f, y),
-                            end = Offset(w, y),
-                            strokeWidth = 1f,
-                        )
-                    }
-
-                    val linePath = Path()
-                    val fillPath = Path()
-                    val stepX = w / (chartData.size - 1).toFloat()
-
-                    chartData.forEachIndexed { index, value ->
-                        val x = index * stepX
-                        val normalized = if (range > 0) ((value - minVal) / range).toFloat() else 0.5f
-                        val y = padTop + chartH * (1f - normalized)
-
-                        if (index == 0) {
-                            linePath.moveTo(x, y)
-                            fillPath.moveTo(x, h)
-                            fillPath.lineTo(x, y)
-                        } else {
-                            linePath.lineTo(x, y)
-                            fillPath.lineTo(x, y)
-                        }
-                    }
-
-                    fillPath.lineTo(w, h)
-                    fillPath.close()
-
-                    drawPath(
-                        path = fillPath,
-                        brush =
-                            Brush.verticalGradient(
-                                colors =
-                                    listOf(
-                                        lineColor.copy(alpha = 0.45f),
-                                        lineColor.copy(alpha = 0.12f),
-                                        lineColor.copy(alpha = 0.02f),
-                                    ),
-                                startY = 0f,
-                                endY = h,
-                            ),
-                    )
-
-                    drawPath(
-                        path = linePath,
-                        color = lineColor,
-                        style =
-                            Stroke(
-                                width = 2.5f,
-                                cap = StrokeCap.Round,
-                                join = StrokeJoin.Round,
-                            ),
-                    )
-
-                    val lastX = (chartData.size - 1) * stepX
-                    val lastNormalized = if (range > 0) ((chartData.last() - minVal) / range).toFloat() else 0.5f
-                    val lastY = padTop + chartH * (1f - lastNormalized)
-                    drawCircle(
-                        color = GoldLight,
-                        radius = 3.5f,
-                        center = Offset(lastX, lastY),
-                    )
-                    drawCircle(
-                        color = Background,
-                        radius = 1.5f,
-                        center = Offset(lastX, lastY),
-                    )
-                }
-            }
+            val data = chartData.mapIndexed { index, value -> index.toFloat() to value.toFloat() }
+            LineChart(
+                data = data,
+                modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+                showBaseline = true,
+                showGridLines = true,
+                gradientFill = true,
+            )
         } else {
             Box(
                 modifier =
