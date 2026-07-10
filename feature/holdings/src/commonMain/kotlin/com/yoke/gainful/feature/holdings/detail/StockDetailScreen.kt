@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -68,6 +67,7 @@ import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.LineChart
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
 import gainful.core.designsystem.generated.resources.ic_check
@@ -649,70 +649,14 @@ private fun ChartCard(
 
 @Composable
 private fun ChartArea(data: List<Double>) {
-    val lineColor = gainColor
-    Canvas(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(160.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(Surface),
-    ) {
-        val w = size.width
-        val h = size.height
-        val padTop = 10f
-        val padBottom = 10f
-        val chartH = h - padTop - padBottom
-
-        val minVal = data.min()
-        val maxVal = data.max()
-        val range = maxVal - minVal
-
-        val linePath = Path()
-        val fillPath = Path()
-        val stepX = w / (data.size - 1).coerceAtLeast(1).toFloat()
-
-        data.forEachIndexed { index, value ->
-            val x = index * stepX
-            val normalized = if (range > 0) (value - minVal) / range else 0.5
-            val y = padTop + chartH * (1f - normalized.toFloat())
-            if (index == 0) {
-                linePath.moveTo(x, y)
-                fillPath.moveTo(x, h)
-                fillPath.lineTo(x, y)
-            } else {
-                linePath.lineTo(x, y)
-                fillPath.lineTo(x, y)
-            }
-        }
-        fillPath.lineTo(w, h)
-        fillPath.close()
-
-        drawPath(
-            path = fillPath,
-            brush =
-                Brush.verticalGradient(
-                    colors =
-                        listOf(
-                            lineColor.copy(alpha = 0.3f),
-                            lineColor.copy(alpha = 0.02f),
-                        ),
-                    startY = 0f,
-                    endY = h,
-                ),
-        )
-        drawPath(
-            path = linePath,
-            color = lineColor,
-            style = Stroke(width = 2f, cap = StrokeCap.Round, join = StrokeJoin.Round),
-        )
-
-        val lastX = (data.size - 1) * stepX
-        val lastNormalized = if (range > 0) (data.last() - minVal) / range else 0.5
-        val lastY = padTop + chartH * (1f - lastNormalized.toFloat())
-        drawCircle(color = lineColor, radius = 3.5f, center = Offset(lastX, lastY))
-        drawCircle(color = Surface, radius = 1.5f, center = Offset(lastX, lastY))
-    }
+    val chartData = data.mapIndexed { index, value -> index.toFloat() to value.toFloat() }
+    LineChart(
+        data = chartData,
+        modifier = Modifier.height(160.dp).clip(RoundedCornerShape(6.dp)).background(Surface),
+        lineColor = gainColor,
+        showBaseline = true,
+        gradientFill = true,
+    )
 }
 
 @Composable
