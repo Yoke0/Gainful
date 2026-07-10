@@ -106,10 +106,8 @@ class StockPriceFetchService(
     private suspend fun fetchSingleQuote(quoteId: String): QuoteSnapshot? =
         runCatching {
             coroutineScope {
-                val quoteDeferred = async { marketRepository.getQuote(quoteId) }
-                val trendsDeferred = async { marketRepository.getTrends(quoteId, ndays = 1) }
-                val quote = quoteDeferred.await() ?: return@coroutineScope null
-                val trends = trendsDeferred.await()
+                val quote = marketRepository.getQuote(quoteId) ?: return@coroutineScope null
+                val trends = marketRepository.getTrends(quoteId)
                 QuoteSnapshot(
                     quoteId = quoteId,
                     code = quote.code,

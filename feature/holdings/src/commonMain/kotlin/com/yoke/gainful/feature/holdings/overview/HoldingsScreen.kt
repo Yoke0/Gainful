@@ -302,6 +302,7 @@ private fun HoldingCard(
 
         Sparkline(
             trends = holding.trends,
+            preClose = holding.preClose,
             modifier =
                 Modifier
                     .width(72.dp)
@@ -395,16 +396,16 @@ private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String, 
 @Composable
 private fun Sparkline(
     trends: List<StockTrend>,
+    preClose: Double,
     modifier: Modifier = Modifier,
     strokeColor: Color = gainColor,
 ) {
     val data =
-        remember(trends) {
+        remember(trends, preClose) {
             val prices = trends.map { it.price }
-            if (prices.size >= 2) {
-                val basePrice = prices.first()
+            if (prices.size >= 2 && preClose > 0) {
                 prices.mapIndexed { index, price ->
-                    index.toFloat() to ((price - basePrice) / basePrice * 100).toFloat()
+                    index.toFloat() to ((price - preClose) / preClose * 100).toFloat()
                 }
             } else {
                 emptyList()

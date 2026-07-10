@@ -23,6 +23,6 @@ fun QuoteData.toStockQuote(): StockQuote? {
         preClose = resolvedPreClose,
         totalMarketCap = resolvedTotalMarketCap,
         circulatingMarketCap = resolvedCirculatingMarketCap,
-        industry = industry ?: "",
+        industry = resolvedIndustry,
     )
 }

@@ -11,16 +11,16 @@ import org.koin.dsl.module
 val networkModule =
     module {
         single {
+            Json {
+                ignoreUnknownKeys = true
+            }
+        }
+        single {
             createPlatformHttpClient().config {
                 install(ContentNegotiation) {
-                    json(
-                        Json {
-                            ignoreUnknownKeys = true
-                            isLenient = true
-                        },
-                    )
+                    json(get<Json>())
                 }
             }
         }
-        single<EastMoneyApi> { EastMoneyApiImpl(get()) }
+        single<EastMoneyApi> { EastMoneyApiImpl(get(), get()) }
     }

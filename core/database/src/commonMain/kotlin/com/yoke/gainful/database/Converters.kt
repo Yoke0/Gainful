@@ -9,8 +9,6 @@ import kotlinx.serialization.json.Json
 private data class StockTrendDto(
     val time: String,
     val price: Double,
-    val volume: Int,
-    val averagePrice: Double,
 )
 
 class Converters {
@@ -23,8 +21,6 @@ class Converters {
                 StockTrendDto(
                     time = it.time,
                     price = it.price,
-                    volume = it.volume,
-                    averagePrice = it.averagePrice,
                 )
             }
         return json.encodeToString(dtos)
@@ -38,8 +34,6 @@ class Converters {
                 StockTrend(
                     time = dto.time,
                     price = dto.price,
-                    volume = dto.volume,
-                    averagePrice = dto.averagePrice,
                 )
             }
         }.getOrDefault(emptyList())

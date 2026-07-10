@@ -41,14 +41,16 @@ data class QuoteData(
     @SerialName("f100") val industry: String? = null,
     @SerialName("f116") val totalMarketCapSingle: Double? = null,
     @SerialName("f117") val circulatingMarketCapSingle: Double? = null,
+    @SerialName("f127") val industrySingle: String? = null,
     @SerialName("f162") val peStatic: Double? = null,
     @SerialName("f167") val pbSingle: Double? = null,
     @SerialName("f168") val turnoverRateSingle: Double? = null,
     @SerialName("f169") val changeAmountSingle: Double? = null,
     @SerialName("f170") val changePercentSingle: Double? = null,
     @SerialName("f171") val amplitudeSingle: Double? = null,
+    @SerialName("f80") val tradingHours: String? = null,
 ) {
-    val resolvedLatestPrice: Double get() = latestPriceSingle ?: latestPrice ?: 0.0
+    val resolvedLatestPrice: Double get() = latestPriceSingle?.takeIf { it != 0.0 } ?: preCloseSingle ?: latestPrice ?: 0.0
     val resolvedChangePercent: Double get() = changePercentSingle ?: changePercent ?: 0.0
     val resolvedChangeAmount: Double get() = changeAmountSingle ?: changeAmount ?: 0.0
     val resolvedVolume: Long get() = volumeSingle ?: volume ?: 0L
@@ -66,6 +68,7 @@ data class QuoteData(
     val resolvedTotalMarketCap: Double get() = totalMarketCapSingle ?: totalMarketCap ?: 0.0
     val resolvedCirculatingMarketCap: Double get() = circulatingMarketCapSingle ?: circulatingMarketCap ?: 0.0
     val resolvedPb: Double get() = pbSingle ?: pb ?: 0.0
+    val resolvedIndustry: String get() = industrySingle ?: industry ?: ""
 }
 
 @Serializable
