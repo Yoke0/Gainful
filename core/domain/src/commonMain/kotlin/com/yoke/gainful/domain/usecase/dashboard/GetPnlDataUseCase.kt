@@ -190,16 +190,23 @@ class GetPnlDataUseCase(
         val today = today()
         val firstDayOfMonth = LocalDate(year, month, 1)
         val lastDayOfMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY)
-        val weeksInMonth = mutableListOf<List<LocalDate>>()
 
+        // Find the first Monday on or before the first day of the month
         var currentWeekStart = firstDayOfMonth
+        while (currentWeekStart.dayOfWeek != kotlinx.datetime.DayOfWeek.MONDAY) {
+            currentWeekStart = currentWeekStart.minus(1, DateTimeUnit.DAY)
+        }
+
+        val weeksInMonth = mutableListOf<List<LocalDate>>()
         while (currentWeekStart <= lastDayOfMonth) {
             val week =
                 (0..6).mapNotNull { offset ->
                     val date = currentWeekStart.plus(offset.toLong(), DateTimeUnit.DAY)
-                    if (date <= lastDayOfMonth) date else null
+                    if (date >= firstDayOfMonth && date <= lastDayOfMonth) date else null
                 }
-            weeksInMonth.add(week)
+            if (week.isNotEmpty()) {
+                weeksInMonth.add(week)
+            }
             currentWeekStart = currentWeekStart.plus(7, DateTimeUnit.DAY)
         }
 
@@ -207,8 +214,10 @@ class GetPnlDataUseCase(
         var weekNumber = getWeekNumber(firstDayOfMonth)
 
         for (week in weeksInMonth) {
-            val weekPnl = week.sumOf { dailyPnl[it] ?: 0.0 }
+            // Calculate PnL only for days up to today
+            val weekPnl = week.filter { it <= today }.sumOf { dailyPnl[it] ?: 0.0 }
             val hasFuture = week.any { it > today }
+            val hasPastDays = week.any { it <= today }
 
             cells.add(
                 PnlCell(
@@ -217,9 +226,9 @@ class GetPnlDataUseCase(
                     week = weekNumber,
                     weekStartDay = week.first().day,
                     weekEndDay = week.last().day,
-                    value = if (hasFuture) null else weekPnl,
+                    value = if (hasPastDays) weekPnl else null,
                     isCurrent = week.any { it == today },
-                    isEmpty = hasFuture || weekPnl == 0.0,
+                    isEmpty = !hasPastDays || weekPnl == 0.0,
                 ),
             )
             weekNumber++

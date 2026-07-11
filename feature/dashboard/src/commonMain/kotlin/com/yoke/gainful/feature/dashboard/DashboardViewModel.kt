@@ -60,6 +60,19 @@ class DashboardViewModel(
             ) { holdings, transactions ->
                 allTransactions = transactions
 
+                // Calculate first transaction year and month
+                val firstTransaction = transactions.minByOrNull { it.tradeDate }
+                val firstTransactionYear =
+                    firstTransaction?.let { tx ->
+                        kotlinx.datetime.Instant.fromEpochMilliseconds(tx.tradeDate)
+                            .toLocalDateTime(TimeZone.currentSystemDefault()).date.year
+                    } ?: 2023
+                val firstTransactionMonth =
+                    firstTransaction?.let { tx ->
+                        kotlinx.datetime.Instant.fromEpochMilliseconds(tx.tradeDate)
+                            .toLocalDateTime(TimeZone.currentSystemDefault()).date.month.ordinal + 1
+                    } ?: 8
+
                 var totalBuys = 0.0
                 var totalSells = 0.0
                 var totalDividends = 0.0
@@ -90,6 +103,8 @@ class DashboardViewModel(
                     pnlYear = currentState.pnlYear,
                     pnlMonth = currentState.pnlMonth,
                     pnlData = pnlData,
+                    firstTransactionYear = firstTransactionYear,
+                    firstTransactionMonth = firstTransactionMonth,
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -222,6 +237,8 @@ data class DashboardUiState(
     val error: String? = null,
     val selectedPnlDate: LocalDate? = null,
     val stockPnlDetails: List<StockPnlDetail> = emptyList(),
+    val firstTransactionYear: Int = 2023,
+    val firstTransactionMonth: Int = 8,
 ) {
     val totalMarketValue: Double get() = holdings.sumOf { it.totalMarketValue }
     val totalCost: Double get() = holdings.sumOf { it.totalCost }

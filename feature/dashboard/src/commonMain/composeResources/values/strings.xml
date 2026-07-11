@@ -2,6 +2,7 @@
     <string name="dashboard_title">仪表盘</string>
     <string name="live_badge">实时</string>
     <string name="total_pnl">总盈亏</string>
+    <string name="pnl_overview">盈亏概览</string>
     <string name="total_market_value_label">总市值: </string>
     <string name="total_cost_label">总成本: </string>
     <string name="holdings_trend">持仓走势</string>
@@ -32,13 +33,13 @@
     <string name="pnl_year_month_label">%1$d年%2$d月</string>
     <string name="pnl_year_label">%1$d年</string>
     <string name="pnl_week_range_label">W%1$d · %2$d-%3$d日</string>
-    <string name="pnl_week_cell_label">W%1$d\n%2$d-%3$d日</string>
+    <string name="pnl_week_cell_label">W%1$d(%2$d-%3$d)</string>
     <string name="pnl_month_label">%1$d月</string>
     <string name="pnl_day_label">%1$d</string>
     <string name="pnl_year_cell_label">%1$d</string>
     <string name="pnl_year_cell_first_label">%1$d\n%2$d月起</string>
     <string name="pnl_total_label">全部</string>
-    <string name="pnl_total_period_label">%1$d.%2$d 至今</string>
+    <string name="pnl_total_period_label">%1$d.%2$d至今</string>
     <string name="weekday_sun">日</string>
     <string name="weekday_mon">一</string>
     <string name="weekday_tue">二</string>
