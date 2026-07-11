@@ -59,11 +59,12 @@ abstract class GenerateBuildConfigTask : DefaultTask() {
     }
 }
 
-val generateBuildConfig by tasks.registering(GenerateBuildConfigTask::class) {
-    description = "Generates BuildConfig.kt with app version"
-    versionName.set(project.property("VERSION_NAME").toString())
-    outputDir.set(layout.buildDirectory.dir("generated/buildconfig"))
-}
+val generateBuildConfig =
+    tasks.register<GenerateBuildConfigTask>("generateBuildConfig") {
+        description = "Generates BuildConfig.kt with app version"
+        versionName.set(project.property("VERSION_NAME").toString())
+        outputDir.set(layout.buildDirectory.dir("generated/buildconfig"))
+    }
 
 tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
     dependsOn(generateBuildConfig)
