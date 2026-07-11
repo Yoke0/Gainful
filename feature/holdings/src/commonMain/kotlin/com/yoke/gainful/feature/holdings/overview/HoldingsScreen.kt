@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -280,21 +281,17 @@ private fun HoldingCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatLocalized())
-                MetaText(stringResource(Res.string.cost), holding.averageCost.formatLocalized())
-                MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}")
-            }
-            Spacer(modifier = Modifier.height(2.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatLocalized(), Modifier.weight(1f))
+                MetaText(stringResource(Res.string.cost), holding.averageCost.formatLocalized(), Modifier.weight(1f))
+                MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}", Modifier.weight(1f))
                 MetaText(
                     stringResource(Res.string.profit_loss),
                     holding.totalGain.formatLocalized(),
+                    Modifier.weight(1f),
                     valueColor = if (holding.totalGain > 0) gainColor else lossColor,
                 )
             }
@@ -319,6 +316,7 @@ private fun MetaText(label: String, value: String, modifier: Modifier = Modifier
             text = "$label ",
             fontSize = 10.sp,
             color = TextMuted,
+            maxLines = 1,
         )
         Text(
             text = value,
@@ -326,6 +324,7 @@ private fun MetaText(label: String, value: String, modifier: Modifier = Modifier
             fontWeight = FontWeight.SemiBold,
             fontFamily = FontFamily.Monospace,
             color = valueColor,
+            maxLines = 1,
         )
     }
 }
