@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -40,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -78,6 +81,8 @@ import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
 import com.yoke.gainful.ui.lossDimColor
+import gainful.core.designsystem.generated.resources.ic_chevron_left
+import gainful.core.designsystem.generated.resources.ic_chevron_right
 import gainful.feature.dashboard.generated.resources.Res
 import gainful.feature.dashboard.generated.resources.daily_pnl
 import gainful.feature.dashboard.generated.resources.dashboard_title
@@ -90,7 +95,6 @@ import gainful.feature.dashboard.generated.resources.key_metrics
 import gainful.feature.dashboard.generated.resources.live_badge
 import gainful.feature.dashboard.generated.resources.no_transactions
 import gainful.feature.dashboard.generated.resources.no_trend_data
-import gainful.feature.dashboard.generated.resources.pnl_current_period
 import gainful.feature.dashboard.generated.resources.pnl_day_label
 import gainful.feature.dashboard.generated.resources.pnl_detail_buy_fee
 import gainful.feature.dashboard.generated.resources.pnl_detail_buy_fee_total
@@ -102,15 +106,12 @@ import gainful.feature.dashboard.generated.resources.pnl_detail_no_records
 import gainful.feature.dashboard.generated.resources.pnl_detail_sell_fee
 import gainful.feature.dashboard.generated.resources.pnl_detail_sell_fee_total
 import gainful.feature.dashboard.generated.resources.pnl_detail_total_pnl
-import gainful.feature.dashboard.generated.resources.pnl_details
 import gainful.feature.dashboard.generated.resources.pnl_month_label
-import gainful.feature.dashboard.generated.resources.pnl_next_period
+import gainful.feature.dashboard.generated.resources.pnl_overview
 import gainful.feature.dashboard.generated.resources.pnl_period_day
 import gainful.feature.dashboard.generated.resources.pnl_period_month
 import gainful.feature.dashboard.generated.resources.pnl_period_week
 import gainful.feature.dashboard.generated.resources.pnl_period_year
-import gainful.feature.dashboard.generated.resources.pnl_previous_period
-import gainful.feature.dashboard.generated.resources.pnl_total_label
 import gainful.feature.dashboard.generated.resources.pnl_total_period_label
 import gainful.feature.dashboard.generated.resources.pnl_week_cell_label
 import gainful.feature.dashboard.generated.resources.pnl_week_range_label
@@ -136,7 +137,9 @@ import gainful.feature.dashboard.generated.resources.weekday_tue
 import gainful.feature.dashboard.generated.resources.weekday_wed
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import gainful.core.designsystem.generated.resources.Res as DesignRes
 
 @Composable
 fun DashboardScreen(
@@ -270,7 +273,7 @@ private fun PnlOverviewCard(
     val pnlData = uiState.pnlData
     val period = pnlData?.period
 
-    SectionCard(title = periodTitle(period, uiState.selectedPnlPeriod)) {
+    SectionCard(title = stringResource(Res.string.pnl_overview)) {
         PnlPeriodTabs(
             selectedPeriod = uiState.selectedPnlPeriod,
             onPeriodSelected = { period ->
@@ -278,8 +281,14 @@ private fun PnlOverviewCard(
             },
         )
 
-        if (uiState.selectedPnlPeriod != PnlPeriodType.YEAR) {
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        if (uiState.selectedPnlPeriod == PnlPeriodType.YEAR) {
+            PnlPeriodNavigation(
+                periodLabel = "${uiState.firstTransactionYear}.${uiState.firstTransactionMonth.toString().padStart(2, '0')}至今",
+                showNavigation = false,
+                onNavigate = { },
+            )
+        } else {
             val today = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
             val isCurrentPeriod =
                 when (uiState.selectedPnlPeriod) {
@@ -293,6 +302,7 @@ private fun PnlOverviewCard(
                 }
             PnlPeriodNavigation(
                 periodLabel = periodNavLabel(period, uiState.selectedPnlPeriod),
+                showNavigation = true,
                 showNext = !isCurrentPeriod,
                 onNavigate = { direction ->
                     onIntent(DashboardIntent.NavigatePnlPeriod(direction))
@@ -301,36 +311,6 @@ private fun PnlOverviewCard(
         }
 
         Spacer(modifier = Modifier.height(12.dp))
-
-        val totalPnl = pnlData?.totalPnl ?: 0.0
-        val periodInfoLabel = periodInfoLabel(period, uiState.selectedPnlPeriod)
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            Text(
-                text = stringResource(Res.string.pnl_current_period),
-                fontSize = 12.sp,
-                color = TextMuted,
-            )
-            Text(
-                text = periodInfoLabel,
-                fontSize = 12.sp,
-                color = TextMuted,
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = totalPnl.formatSigned(),
-            fontSize = 32.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = if (totalPnl >= 0) Gold else lossColor,
-            letterSpacing = (-0.5).sp,
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
 
         if (uiState.holdings.isEmpty() && allTransactionsEmpty(uiState)) {
             Box(
@@ -350,19 +330,10 @@ private fun PnlOverviewCard(
             val columns =
                 when (uiState.selectedPnlPeriod) {
                     PnlPeriodType.DAY -> 7
-                    PnlPeriodType.WEEK -> 4
-                    PnlPeriodType.MONTH -> 4
+                    PnlPeriodType.WEEK -> 3
+                    PnlPeriodType.MONTH -> 3
                     PnlPeriodType.YEAR -> 3
                 }
-
-            Text(
-                text = stringResource(Res.string.pnl_details),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextMuted,
-                letterSpacing = 0.5.sp,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
 
             if (uiState.selectedPnlPeriod == PnlPeriodType.DAY) {
                 WeekdayHeader()
@@ -373,6 +344,8 @@ private fun PnlOverviewCard(
                 cells = pnlData.cells,
                 columns = columns,
                 periodType = uiState.selectedPnlPeriod,
+                firstYear = uiState.firstTransactionYear,
+                firstMonth = uiState.firstTransactionMonth,
                 onCellClick = { year, month, day ->
                     onIntent(DashboardIntent.SelectPnlCell(year, month, day))
                 },
@@ -382,29 +355,11 @@ private fun PnlOverviewCard(
 }
 
 @Composable
-private fun periodTitle(period: PnlPeriod?, type: PnlPeriodType): String {
-    if (period == null) return stringResource(Res.string.total_pnl)
-    return when (type) {
-        PnlPeriodType.DAY, PnlPeriodType.WEEK -> {
-            stringResource(Res.string.pnl_year_month_label, period.year, period.month)
-        }
-
-        PnlPeriodType.MONTH -> {
-            stringResource(Res.string.pnl_year_label, period.year)
-        }
-
-        PnlPeriodType.YEAR -> {
-            stringResource(Res.string.pnl_total_label)
-        }
-    }
-}
-
-@Composable
 private fun periodNavLabel(period: PnlPeriod?, type: PnlPeriodType): String {
     if (period == null) return ""
     return when (type) {
         PnlPeriodType.WEEK -> {
-            stringResource(Res.string.pnl_week_range_label, getWeekNumber(period), period.startDay, period.endDay)
+            stringResource(Res.string.pnl_year_month_label, period.year, period.month)
         }
 
         PnlPeriodType.DAY -> {
@@ -425,6 +380,8 @@ private fun periodNavLabel(period: PnlPeriod?, type: PnlPeriodType): String {
 private fun periodInfoLabel(
     period: PnlPeriod?,
     type: PnlPeriodType,
+    firstYear: Int = 2023,
+    firstMonth: Int = 8,
 ): String {
     if (period == null) return ""
     return when (type) {
@@ -441,7 +398,7 @@ private fun periodInfoLabel(
         }
 
         PnlPeriodType.YEAR -> {
-            stringResource(Res.string.pnl_total_period_label, period.year, 8)
+            stringResource(Res.string.pnl_total_period_label, firstYear, firstMonth)
         }
     }
 }
@@ -524,23 +481,24 @@ private fun PnlPeriodTabs(
 @Composable
 private fun PnlPeriodNavigation(
     periodLabel: String,
-    showNext: Boolean,
+    showNavigation: Boolean = true,
+    showNext: Boolean = true,
     onNavigate: (Int) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = stringResource(Res.string.pnl_previous_period),
-            fontSize = 14.sp,
-            color = TextMuted,
+        Icon(
+            painter = painterResource(DesignRes.drawable.ic_chevron_left),
+            contentDescription = null,
             modifier =
                 Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { onNavigate(-1) }
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                    .size(20.dp)
+                    .then(if (showNavigation) Modifier.clickable { onNavigate(-1) } else Modifier)
+                    .then(if (!showNavigation) Modifier.alpha(0f) else Modifier),
+            tint = TextMuted,
         )
         Text(
             text = periodLabel,
@@ -548,20 +506,16 @@ private fun PnlPeriodNavigation(
             fontWeight = FontWeight.SemiBold,
             color = TextPrimary,
         )
-        if (showNext) {
-            Text(
-                text = stringResource(Res.string.pnl_next_period),
-                fontSize = 14.sp,
-                color = TextMuted,
-                modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onNavigate(1) }
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-            )
-        } else {
-            Spacer(modifier = Modifier.width(60.dp))
-        }
+        Icon(
+            painter = painterResource(DesignRes.drawable.ic_chevron_right),
+            contentDescription = null,
+            modifier =
+                Modifier
+                    .size(20.dp)
+                    .then(if (showNavigation && showNext) Modifier.clickable { onNavigate(1) } else Modifier)
+                    .then(if (!showNavigation || !showNext) Modifier.alpha(0f) else Modifier),
+            tint = TextMuted,
+        )
     }
 }
 
@@ -599,6 +553,8 @@ private fun PnlGrid(
     cells: List<PnlCell>,
     columns: Int,
     periodType: PnlPeriodType,
+    firstYear: Int = 2023,
+    firstMonth: Int = 8,
     onCellClick: (year: Int, month: Int, day: Int) -> Unit = { _, _, _ -> },
 ) {
     val rows = cells.chunked(columns)
@@ -618,6 +574,8 @@ private fun PnlGrid(
                         PnlCellItem(
                             cell = cell,
                             periodType = periodType,
+                            firstYear = firstYear,
+                            firstMonth = firstMonth,
                             modifier = Modifier.weight(1f),
                             onClick = {
                                 if (!cell.isFuture && !cell.isPadding && cell.day > 0) {
@@ -639,15 +597,18 @@ private fun PnlGrid(
 private fun PnlCellItem(
     cell: PnlCell,
     periodType: PnlPeriodType,
+    firstYear: Int = 2023,
+    firstMonth: Int = 8,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    val label = cellLabel(cell, periodType)
+    val label = cellLabel(cell, periodType, firstYear, firstMonth)
 
     if (cell.isFuture) {
         Column(
             modifier = modifier.padding(horizontal = 4.dp, vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy((-2).dp, Alignment.CenterVertically),
         ) {
             AutoSizeText(
                 text = label,
@@ -702,6 +663,7 @@ private fun PnlCellItem(
                 .clickable { onClick() }
                 .padding(horizontal = 4.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy((-2).dp, Alignment.CenterVertically),
     ) {
         AutoSizeText(
             text = label,
@@ -728,7 +690,7 @@ private fun PnlCellItem(
 }
 
 @Composable
-private fun cellLabel(cell: PnlCell, periodType: PnlPeriodType): String {
+private fun cellLabel(cell: PnlCell, periodType: PnlPeriodType, firstYear: Int = 2023, firstMonth: Int = 8): String {
     return when (periodType) {
         PnlPeriodType.DAY -> {
             stringResource(Res.string.pnl_day_label, cell.day)
@@ -743,8 +705,7 @@ private fun cellLabel(cell: PnlCell, periodType: PnlPeriodType): String {
         }
 
         PnlPeriodType.YEAR -> {
-            val firstMonth = 8
-            if (cell.year == 2023) {
+            if (cell.year == firstYear) {
                 stringResource(Res.string.pnl_year_cell_first_label, cell.year, firstMonth)
             } else {
                 stringResource(Res.string.pnl_year_cell_label, cell.year)
@@ -914,9 +875,10 @@ private fun MetricsSection(state: DashboardUiState) {
     val totalGainPercent = state.totalGainPercent
 
     SectionCard(title = stringResource(Res.string.key_metrics)) {
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             MetricCard(
                 modifier = Modifier.weight(1f),
@@ -928,11 +890,6 @@ private fun MetricsSection(state: DashboardUiState) {
                 label = stringResource(Res.string.total_cost),
                 value = totalCost.formatLocalized(),
             )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
             MetricCard(
                 modifier = Modifier.weight(1f),
                 label = stringResource(Res.string.total_profit),
