@@ -777,11 +777,28 @@ private fun DetailText(label: String, value: String, modifier: Modifier = Modifi
 private fun ChartCard(holdings: List<HoldingDisplay>) {
     val chartData =
         remember(holdings) {
-            holdings
-                .filter { it.trends.isNotEmpty() }
-                .flatMap { it.trends.map { trend -> trend.price } }
-                .takeIf { it.isNotEmpty() }
-                ?: emptyList()
+            val activeHoldings = holdings.filter { it.trends.isNotEmpty() }
+            if (activeHoldings.isEmpty()) return@remember emptyList()
+
+            // Collect all unique time points across all stocks
+            val allTimes =
+                activeHoldings
+                    .flatMap { holding -> holding.trends.map { it.time } }
+                    .toSet()
+                    .sorted()
+
+            if (allTimes.isEmpty()) return@remember emptyList()
+
+            // For each time point, compute aggregated PnL:
+            // sum of (price_at_time - preClose) * quantity across all stocks
+            allTimes.map { time ->
+                activeHoldings.sumOf { holding ->
+                    val priceAtTime =
+                        holding.trends.find { it.time == time }?.price
+                            ?: return@sumOf 0.0
+                    (priceAtTime - holding.preClose) * holding.quantity
+                }
+            }
         }
 
     SectionCard(
@@ -804,9 +821,11 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
     ) {
         if (chartData.size >= 2) {
             val data = chartData.mapIndexed { index, value -> index.toFloat() to value.toFloat() }
+            val chartColor = if (chartData.last() >= 0) gainColor else lossColor
             LineChart(
                 data = data,
                 modifier = Modifier.fillMaxWidth().aspectRatio(2.4f).clip(RoundedCornerShape(8.dp)),
+                lineColor = chartColor,
                 showBaseline = true,
                 showGridLines = true,
                 gradientFill = true,
