@@ -112,9 +112,7 @@ import gainful.feature.dashboard.generated.resources.pnl_period_day
 import gainful.feature.dashboard.generated.resources.pnl_period_month
 import gainful.feature.dashboard.generated.resources.pnl_period_week
 import gainful.feature.dashboard.generated.resources.pnl_period_year
-import gainful.feature.dashboard.generated.resources.pnl_total_period_label
 import gainful.feature.dashboard.generated.resources.pnl_week_cell_label
-import gainful.feature.dashboard.generated.resources.pnl_week_range_label
 import gainful.feature.dashboard.generated.resources.pnl_year_cell_first_label
 import gainful.feature.dashboard.generated.resources.pnl_year_cell_label
 import gainful.feature.dashboard.generated.resources.pnl_year_label
@@ -374,40 +372,6 @@ private fun periodNavLabel(period: PnlPeriod?, type: PnlPeriodType): String {
             ""
         }
     }
-}
-
-@Composable
-private fun periodInfoLabel(
-    period: PnlPeriod?,
-    type: PnlPeriodType,
-    firstYear: Int = 2023,
-    firstMonth: Int = 8,
-): String {
-    if (period == null) return ""
-    return when (type) {
-        PnlPeriodType.DAY -> {
-            stringResource(Res.string.pnl_year_month_label, period.year, period.month)
-        }
-
-        PnlPeriodType.WEEK -> {
-            stringResource(Res.string.pnl_week_range_label, getWeekNumber(period), period.startDay, period.endDay)
-        }
-
-        PnlPeriodType.MONTH -> {
-            stringResource(Res.string.pnl_year_month_label, period.year, period.month)
-        }
-
-        PnlPeriodType.YEAR -> {
-            stringResource(Res.string.pnl_total_period_label, firstYear, firstMonth)
-        }
-    }
-}
-
-private fun getWeekNumber(period: PnlPeriod): Int {
-    val firstDayOfYear = kotlinx.datetime.LocalDate(period.year, 1, 1)
-    val firstDayOfMonth = kotlinx.datetime.LocalDate(period.year, period.month, 1)
-    val daysSinceFirstDay = firstDayOfMonth.dayOfYear - firstDayOfYear.dayOfYear
-    return (daysSinceFirstDay / 7) + 1
 }
 
 @Composable
@@ -842,7 +806,7 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
             val data = chartData.mapIndexed { index, value -> index.toFloat() to value.toFloat() }
             LineChart(
                 data = data,
-                modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+                modifier = Modifier.fillMaxWidth().aspectRatio(2.4f).clip(RoundedCornerShape(8.dp)),
                 showBaseline = true,
                 showGridLines = true,
                 gradientFill = true,

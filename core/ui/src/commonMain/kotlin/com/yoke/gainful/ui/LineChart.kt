@@ -42,10 +42,7 @@ fun LineChart(
     val range = maxVal - minVal
 
     Canvas(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .aspectRatio(342f / 140f),
+        modifier = modifier.fillMaxWidth(),
     ) {
         val w = size.width
         val h = size.height
@@ -70,12 +67,13 @@ fun LineChart(
                 if (range > 0) (baselineY - minVal) / range else 0.5f
             val baselineScreenY = padTop + chartH * (1f - normalizedBaseline)
             val resolvedBaselineColor = if (baselineColor != Color.Unspecified) baselineColor else lineColor
+            val dashLen = (w / 40f).coerceIn(4f, 12f)
             drawLine(
                 color = resolvedBaselineColor,
                 start = Offset(0f, baselineScreenY),
                 end = Offset(w, baselineScreenY),
                 strokeWidth = 1f,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f)),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashLen, dashLen * 0.8f)),
             )
         }
 
@@ -123,7 +121,7 @@ fun LineChart(
             color = lineColor,
             style =
                 Stroke(
-                    width = 2.5f,
+                    width = 2f,
                     cap = StrokeCap.Round,
                     join = StrokeJoin.Round,
                 ),
@@ -138,7 +136,10 @@ private fun LineChartBasicPreview() {
     Column(
         modifier = Modifier.padding(16.dp).background(Background),
     ) {
-        LineChart(data = data)
+        LineChart(
+            data = data,
+            modifier = Modifier.fillMaxWidth().aspectRatio(2.4f),
+        )
     }
 }
 
@@ -151,6 +152,7 @@ private fun LineChartBaselinePreview() {
     ) {
         LineChart(
             data = data,
+            modifier = Modifier.fillMaxWidth().aspectRatio(2.4f),
             showBaseline = true,
             baselineY = 0f,
         )
@@ -166,6 +168,7 @@ private fun LineChartGridAndGradientPreview() {
     ) {
         LineChart(
             data = data,
+            modifier = Modifier.fillMaxWidth().aspectRatio(2.4f),
             showGridLines = true,
             gradientFill = true,
         )
@@ -181,6 +184,7 @@ private fun LineChartRedBaselinePreview() {
     ) {
         LineChart(
             data = data,
+            modifier = Modifier.fillMaxWidth().aspectRatio(2.4f),
             lineColor = GainRed,
             showBaseline = true,
             baselineY = 0f,

@@ -7,8 +7,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -652,7 +654,7 @@ private fun ChartArea(data: List<Double>) {
     val chartData = data.mapIndexed { index, value -> index.toFloat() to value.toFloat() }
     LineChart(
         data = chartData,
-        modifier = Modifier.height(160.dp).clip(RoundedCornerShape(6.dp)).background(Surface),
+        modifier = Modifier.fillMaxWidth().aspectRatio(2f).clip(RoundedCornerShape(6.dp)).background(Surface),
         lineColor = gainColor,
         showBaseline = true,
         gradientFill = true,
@@ -661,33 +663,30 @@ private fun ChartArea(data: List<Double>) {
 
 @Composable
 private fun MetricsGrid(uiState: StockDetailUiState.Success) {
-    Column(
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricItem(stringResource(Res.string.market_value), uiState.totalMarketCap.formatCompact(), Modifier.weight(1f))
-            MetricItem(stringResource(Res.string.turnover_rate), "${uiState.turnoverRate.formatLocalized()}%", Modifier.weight(1f))
-            MetricItem(stringResource(Res.string.amplitude), "${uiState.amplitude.formatLocalized()}%", Modifier.weight(1f))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricItem(
-                stringResource(Res.string.holding_badge),
-                stringResource(Res.string.holding_quantity, uiState.quantity.toInt()),
-                Modifier.weight(1f),
-            )
-            MetricItem(
-                stringResource(Res.string.cost),
-                uiState.averageCost.formatLocalized(),
-                Modifier.weight(1f),
-                valueColor = if (uiState.averageCost > uiState.price) lossColor else gainColor,
-            )
-            MetricItem(
-                stringResource(Res.string.profit_loss),
-                uiState.totalGain.formatSigned(),
-                Modifier.weight(1f),
-                valueColor = if (uiState.totalGain >= 0) gainColor else lossColor,
-            )
-        }
+        MetricItem(stringResource(Res.string.market_value), uiState.totalMarketCap.formatCompact(), Modifier.weight(1f))
+        MetricItem(stringResource(Res.string.turnover_rate), "${uiState.turnoverRate.formatLocalized()}%", Modifier.weight(1f))
+        MetricItem(stringResource(Res.string.amplitude), "${uiState.amplitude.formatLocalized()}%", Modifier.weight(1f))
+        MetricItem(
+            stringResource(Res.string.holding_badge),
+            stringResource(Res.string.holding_quantity, uiState.quantity.toInt()),
+            Modifier.weight(1f),
+        )
+        MetricItem(
+            stringResource(Res.string.cost),
+            uiState.averageCost.formatLocalized(),
+            Modifier.weight(1f),
+            valueColor = if (uiState.averageCost > uiState.price) lossColor else gainColor,
+        )
+        MetricItem(
+            stringResource(Res.string.profit_loss),
+            uiState.totalGain.formatSigned(),
+            Modifier.weight(1f),
+            valueColor = if (uiState.totalGain >= 0) gainColor else lossColor,
+        )
     }
 }
 
@@ -701,6 +700,7 @@ private fun MetricItem(
     Column(
         modifier =
             modifier
+                .widthIn(min = 100.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(Card)
                 .padding(12.dp),
@@ -710,6 +710,7 @@ private fun MetricItem(
             text = label,
             fontSize = 11.sp,
             color = TextMuted,
+            maxLines = 1,
             modifier = Modifier.padding(bottom = 4.dp),
         )
         Text(
@@ -718,6 +719,7 @@ private fun MetricItem(
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace,
             color = valueColor,
+            maxLines = 1,
         )
     }
 }
