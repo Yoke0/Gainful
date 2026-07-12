@@ -52,8 +52,6 @@ import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Blue
-import com.yoke.gainful.designsystem.theme.GainGreen
-import com.yoke.gainful.designsystem.theme.GainRed
 import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.Purple
 import com.yoke.gainful.designsystem.theme.Surface
@@ -112,6 +110,9 @@ fun KLineChart(
 
     val totalCandleCount = kLines.size
     val bodyWidth = (candleWidth * 0.58f).coerceAtLeast(3f)
+
+    val currentGainColor = gainColor
+    val currentLossColor = lossColor
 
     val maDataList =
         maConfigs.map { config ->
@@ -256,7 +257,7 @@ fun KLineChart(
                 kLines.forEachIndexed { i, d ->
                     val cx = xMid(i)
                     if (cx > -candleWidth && cx < w + candleWidth) {
-                        drawCandle(cx, d, bodyWidth, toY)
+                        drawCandle(cx, d, bodyWidth, toY, currentGainColor, currentLossColor)
                     }
                 }
 
@@ -293,7 +294,7 @@ fun KLineChart(
                     if (xc > -candleWidth && xc < w + candleWidth) {
                         val isGain = d.close >= d.open
                         val barH = (d.volume.toFloat() / maxVolume) * volH
-                        val fillColor = if (isGain) GainGreen.copy(alpha = 0.4f) else GainRed.copy(alpha = 0.4f)
+                        val fillColor = if (isGain) currentGainColor.copy(alpha = 0.4f) else currentLossColor.copy(alpha = 0.4f)
                         drawRect(
                             color = fillColor,
                             topLeft = Offset(xc - vBarW / 2f, dateAreaBot + volH - barH),
@@ -307,7 +308,7 @@ fun KLineChart(
                     val d = kLines[idx]
                     val cx = xMid(idx)
 
-                    drawCandle(cx, d, bodyWidth, toY, strokeWidth = 1.6f)
+                    drawCandle(cx, d, bodyWidth, toY, currentGainColor, currentLossColor, strokeWidth = 1.6f)
 
                     val volBottom = dateAreaBot + volH
                     drawLine(
@@ -361,10 +362,12 @@ private fun DrawScope.drawCandle(
     candle: KLine,
     bodyWidth: Float,
     toY: (Double) -> Float,
+    gainColor: Color,
+    lossColor: Color,
     strokeWidth: Float = 1.2f,
 ) {
     val isGain = candle.close >= candle.open
-    val color = if (isGain) GainGreen else GainRed
+    val color = if (isGain) gainColor else lossColor
 
     drawLine(
         color = color,
@@ -504,7 +507,7 @@ private fun KLineTooltip(
     viewportWidth: Float,
 ) {
     val isGain = candle.close >= candle.open
-    val chgColor = if (isGain) GainGreen else GainRed
+    val chgColor = if (isGain) gainColor else lossColor
     val gap = with(LocalDensity.current) { 12.dp.toPx() }
     var tooltipSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -544,7 +547,7 @@ private fun KLineTooltip(
                     text = candle.date,
                     style = TextStyle(fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold),
                 )
-                val badgeBg = if (isGain) GainGreen.copy(alpha = 0.08f) else GainRed.copy(alpha = 0.08f)
+                val badgeBg = if (isGain) gainColor.copy(alpha = 0.08f) else lossColor.copy(alpha = 0.08f)
                 Box(
                     modifier =
                         Modifier
@@ -564,8 +567,8 @@ private fun KLineTooltip(
                 TooltipCellItem(Modifier.weight(1f), stringResource(Res.string.kline_close), candle.close.formatLocalized(2), chgColor)
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                TooltipCellItem(Modifier.weight(1f), stringResource(Res.string.kline_high), candle.high.formatLocalized(2), GainGreen)
-                TooltipCellItem(Modifier.weight(1f), stringResource(Res.string.kline_low), candle.low.formatLocalized(2), GainRed)
+                TooltipCellItem(Modifier.weight(1f), stringResource(Res.string.kline_high), candle.high.formatLocalized(2), gainColor)
+                TooltipCellItem(Modifier.weight(1f), stringResource(Res.string.kline_low), candle.low.formatLocalized(2), lossColor)
             }
             TooltipSeparator()
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
