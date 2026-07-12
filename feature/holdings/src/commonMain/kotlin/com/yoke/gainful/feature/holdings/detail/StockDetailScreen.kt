@@ -68,7 +68,9 @@ import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ChartPeriod
+import com.yoke.gainful.model.KLine
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.KLineChart
 import com.yoke.gainful.ui.LineChart
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
@@ -185,7 +187,7 @@ private fun StockDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     PriceHeroCard(uiState)
-                    ChartCard(uiState.selectedPeriod, uiState.kLines.map { it.close }, onPeriodSelected)
+                    ChartCard(uiState.selectedPeriod, uiState.kLines, onPeriodSelected)
                     MetricsGrid(uiState)
                     TradesCard(uiState)
 
@@ -476,7 +478,7 @@ private fun ExtraItem(label: String, value: String) {
 @Composable
 private fun ChartCard(
     selectedPeriod: ChartPeriod,
-    chartData: List<Double>,
+    kLines: List<KLine>,
     onPeriodSelected: (ChartPeriod) -> Unit,
 ) {
     var minutesExpanded by remember { mutableStateOf(false) }
@@ -627,38 +629,35 @@ private fun ChartCard(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (chartData.isNotEmpty()) {
-            ChartArea(chartData)
-        } else {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Surface),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(Res.string.no_data),
-                    fontSize = 14.sp,
-                    color = TextMuted,
-                )
-            }
-        }
+        ChartArea(
+            period = selectedPeriod,
+            kLines = kLines,
+            modifier = Modifier.fillMaxWidth().aspectRatio(4 / 3f).clip(RoundedCornerShape(6.dp)).background(Surface),
+        )
     }
 }
 
 @Composable
-private fun ChartArea(data: List<Double>) {
-    val chartData = data.mapIndexed { index, value -> index.toFloat() to value.toFloat() }
-    LineChart(
-        data = chartData,
-        modifier = Modifier.fillMaxWidth().aspectRatio(2f).clip(RoundedCornerShape(6.dp)).background(Surface),
-        lineColor = gainColor,
-        showBaseline = true,
-        gradientFill = true,
-    )
+private fun ChartArea(period: ChartPeriod, kLines: List<KLine>, modifier: Modifier) {
+    if (kLines.isEmpty()) {
+        Box(modifier = modifier, contentAlignment = Alignment.Center) {
+            Text(text = stringResource(Res.string.no_data), fontSize = 14.sp, color = TextMuted)
+        }
+        return
+    }
+
+    if (period.isTrends) {
+        val chartData = kLines.mapIndexed { index, kLine -> index.toFloat() to kLine.close.toFloat() }
+        LineChart(
+            data = chartData,
+            modifier = modifier,
+            lineColor = gainColor,
+            showBaseline = true,
+            gradientFill = true,
+        )
+    } else {
+        KLineChart(kLines = kLines, modifier = modifier)
+    }
 }
 
 @Composable

@@ -45,4 +45,13 @@
     <string name="delete_confirm_text">确定要删除这笔交易吗？</string>
     <string name="delete_confirm_suffix">此操作不可撤销</string>
     <string name="treemap_other">其它</string>
+    <string name="kline_open">开盘</string>
+    <string name="kline_close">收盘</string>
+    <string name="kline_high">最高</string>
+    <string name="kline_low">最低</string>
+    <string name="kline_change_amount">涨跌额</string>
+    <string name="kline_volume">成交量</string>
+    <string name="kline_volume_format">%1$s手</string>
+    <string name="kline_turnover">成交额</string>
+    <string name="kline_turnover_rate">换手率</string>
 </resources>

@@ -73,7 +73,20 @@ class StockDetailViewModel(
                         totalDividends = data.totalDividends,
                         transactions = data.transactions,
                         kLines = data.kLines,
+                        selectedPeriod = ChartPeriod.DAILY,
                     )
+                val qid = data.quoteId
+                if (qid != null) {
+                    viewModelScope.launch {
+                        val kLines =
+                            runCatching { getStockDetailUseCase.fetchKLines(qid, ChartPeriod.DAILY) }
+                                .getOrNull() ?: return@launch
+                        _uiState.value =
+                            _uiState.value.let { state ->
+                                if (state is StockDetailUiState.Success) state.copy(kLines = kLines) else state
+                            }
+                    }
+                }
             }.onFailure { e ->
                 _uiState.value =
                     StockDetailUiState.Error(
