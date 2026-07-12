@@ -59,7 +59,7 @@ Run tests after making changes. CI runs `./gradlew allTests`.
 ## Key Versions
 
 - Kotlin 2.4.0
-- Gradle 9.4.1
+- Gradle 9.6.1
 - AGP 9.2.1
 - Compose Multiplatform 1.11.1
 - Material3 1.12.0-alpha02
@@ -101,7 +101,7 @@ Key calculation formulas are documented in [`docs/stock-calculation-rules.md`](d
 
 - `docs/stock-calculation-rules.md` — Stock calculation rules and formulas (PnL, holdings, fees, aggregation)
 - `docs/CHANGELOG.md` / `docs/CHANGELOG_EN.md` — Release changelogs
-- `docs/README_EN.md` — English version of the README
+- `README.en.md` — English version of the README
 - `docs/private/` — Internal design specs (HTML mockups, API field references)
 
 ## Git Commit Convention
@@ -191,6 +191,8 @@ Reusable composables in `core/ui/src/commonMain/kotlin/com/yoke/gainful/ui/`:
 - **components/DateTimePicker.kt** — `DateTimePickerField`, `DateTimePickerDialog`
 - **components/Loading.kt** — `LoadingIndicator`
 - **TransactionCard.kt** — `TransactionCard`
+- **LineChart.kt** — `LineChart` (reusable line chart with trend lines, baseline, touch interaction)
+- **KLineChart.kt** — `KLineChart` (candlestick chart with MA lines, volume bars, crosshair, tooltip)
 - **components/NavIcons.kt** — `BackNavigationIcon`, nav icons
 
 Button naming follows Material3 conventions: `PrimaryButton` (filled), `SecondaryButton` (outlined), `NavButton` (circular icon), `SelectChip` (toggleable chip), `SquareIconButton` (square icon).
