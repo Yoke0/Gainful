@@ -45,4 +45,13 @@
     <string name="delete_confirm_text">Are you sure you want to delete this transaction?</string>
     <string name="delete_confirm_suffix">This action cannot be undone</string>
     <string name="treemap_other">Other</string>
+    <string name="kline_open">Open</string>
+    <string name="kline_close">Close</string>
+    <string name="kline_high">High</string>
+    <string name="kline_low">Low</string>
+    <string name="kline_change_amount">Change</string>
+    <string name="kline_volume">Volume</string>
+    <string name="kline_volume_format">%1$s lots</string>
+    <string name="kline_turnover">Turnover</string>
+    <string name="kline_turnover_rate">Rate</string>
 </resources>
