@@ -74,7 +74,7 @@ Gainful/
 | Kotlin | 2.4.0 |
 | Compose Multiplatform | 1.11.1 |
 | Material3 | 1.12.0-alpha02 |
-| Gradle | 9.4.1 |
+| Gradle | 9.6.1 |
 | AGP | 9.2.1 |
 | Ktor | 3.5.0 |
 | Room | 2.8.4 |
@@ -143,6 +143,8 @@ Gainful/
 | `DateTimePickerField` / `DateTimePickerDialog` | `DateTimePicker.kt` | Date-time picker |
 | `LoadingIndicator` | `Loading.kt` | Loading state indicator |
 | `TransactionCard` | `TransactionCard.kt` | Transaction card |
+| `LineChart` | `LineChart.kt` | Reusable line chart (trend lines, baseline, touch interaction) |
+| `KLineChart` | `KLineChart.kt` | K-line candlestick chart (MA lines, volume bars, crosshair, tooltip) |
 | `BackNavigationIcon` / `NavIcons` | `NavIcons.kt` | Navigation icons |
 
 ### Testing

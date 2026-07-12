@@ -2,7 +2,7 @@
 
 > 让每一次增长，都有迹可循。
 
-[English](docs/README_EN.md)
+[English](README.en.md)
 
 Gainful 是一款面向个人用户的收益追踪与财务分析工具，基于 Kotlin Multiplatform + Compose Multiplatform 构建，支持 Android、iOS 和 Desktop (JVM) 三端。
 
@@ -74,7 +74,7 @@ Gainful/
 | Kotlin | 2.4.0 |
 | Compose Multiplatform | 1.11.1 |
 | Material3 | 1.12.0-alpha02 |
-| Gradle | 9.4.1 |
+| Gradle | 9.6.1 |
 | AGP | 9.2.1 |
 | Ktor | 3.5.0 |
 | Room | 2.8.4 |
@@ -144,6 +144,8 @@ Gainful/
 | `DateTimePickerField` / `DateTimePickerDialog` | `DateTimePicker.kt` | 日期时间选择器 |
 | `LoadingIndicator` | `Loading.kt` | 加载状态指示器 |
 | `TransactionCard` | `TransactionCard.kt` | 交易卡片 |
+| `LineChart` | `LineChart.kt` | 可复用折线图组件（支持趋势线、基准线、触摸交互） |
+| `KLineChart` | `KLineChart.kt` | K 线图组件（蜡烛图、MA 均线、成交量柱、十字光标、工具提示） |
 | `BackNavigationIcon` / `NavIcons` | `NavIcons.kt` | 导航图标 |
 
 ### 测试

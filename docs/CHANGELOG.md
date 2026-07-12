@@ -2,6 +2,30 @@
 
 本文件记录盈迹 (Gainful) 应用的所有重要变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [1.1.0] - 2026-07-12
+
+### 新增功能
+
+#### UI
+- 新增 KLineChart K 线图组件，支持蜡烛图、MA 均线、成交量柱、十字光标和工具提示
+- 新增可复用 LineChart 折线图组件，替换所有内联图表实现
+- PnL 概览区域改版，新增关键指标网格展示
+
+#### Dashboard (仪表盘)
+- 使用聚合日内 PnL 数据优化图表展示
+
+### 修复问题
+
+- 修复 formatMinimumFractionDigits 精度问题
+
+### 重构
+
+- 优化 LineChart 和 HoldingCard 在桌面端的展示效果
+
+### 构建与依赖
+
+- 升级 Gradle 至 9.6.1 并修复废弃警告
+
 ## [1.0.2] - 2026-07-07
 
 ### 新增功能

@@ -2,6 +2,30 @@
 
 All notable changes to the Gainful application are documented in this file. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-07-12
+
+### Added
+
+#### UI
+- Added KLineChart composable for candlestick visualization with MA lines, volume bars, crosshair, and tooltip
+- Added reusable LineChart component, replacing all inline chart implementations
+- Overhauled PnL overview section with key metrics grid layout
+
+#### Dashboard
+- Optimized chart display using aggregated intraday PnL data
+
+### Fixed
+
+- Fixed formatMinimumFractionDigits precision issue
+
+### Refactored
+
+- Optimized LineChart and HoldingCard for desktop display
+
+### Build & Dependencies
+
+- Upgraded Gradle to 9.6.1 and fixed deprecation warnings
+
 ## [1.0.2] - 2026-07-07
 
 ### Added
