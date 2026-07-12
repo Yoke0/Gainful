@@ -2,6 +2,7 @@ package com.yoke.gainful.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -52,9 +54,11 @@ import com.yoke.gainful.common.extensions.formatLocalized
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Blue
+import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.Purple
 import com.yoke.gainful.designsystem.theme.Surface
+import com.yoke.gainful.designsystem.theme.Surface2
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.KLine
@@ -175,6 +179,29 @@ fun KLineChart(
                                 selectedIndex = null
                             },
                         )
+                    }
+                    .pointerInput(kLines) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                when (event.type) {
+                                    PointerEventType.Move -> {
+                                        val change = event.changes.first()
+                                        val chartX = change.position.x + scrollOffset - yAxisWidth
+                                        val idx = (chartX / candleWidth).toInt()
+                                        if (idx in 0 until totalCandleCount) {
+                                            selectedIndex = idx
+                                            touchX = change.position.x
+                                            touchY = change.position.y
+                                        }
+                                    }
+
+                                    PointerEventType.Exit -> {
+                                        selectedIndex = null
+                                    }
+                                }
+                            }
+                        }
                     },
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
@@ -534,7 +561,8 @@ private fun KLineTooltip(
                 }
                 .wrapContentWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Surface.copy(alpha = 0.96f))
+                .background(Surface2)
+                .border(1.dp, Border, RoundedCornerShape(12.dp))
                 .padding(12.dp),
     ) {
         Column(modifier = Modifier.width(240.dp)) {
