@@ -54,6 +54,7 @@
     <string name="pnl_detail_dividend">股息</string>
     <string name="pnl_detail_daily_gain">当日盈收</string>
     <string name="pnl_detail_no_records">当日无交易记录</string>
+    <string name="pnl_detail_non_trading_day">当天非交易日</string>
     <string name="pnl_detail_buy_fee_total">买入手续费合计</string>
     <string name="pnl_detail_sell_fee_total">卖出手续费合计</string>
     <string name="pnl_detail_dividend_total">股息合计</string>

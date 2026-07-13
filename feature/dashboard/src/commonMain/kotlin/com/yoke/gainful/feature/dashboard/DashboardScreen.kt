@@ -103,6 +103,7 @@ import gainful.feature.dashboard.generated.resources.pnl_detail_daily_gain_total
 import gainful.feature.dashboard.generated.resources.pnl_detail_dividend
 import gainful.feature.dashboard.generated.resources.pnl_detail_dividend_total
 import gainful.feature.dashboard.generated.resources.pnl_detail_no_records
+import gainful.feature.dashboard.generated.resources.pnl_detail_non_trading_day
 import gainful.feature.dashboard.generated.resources.pnl_detail_sell_fee
 import gainful.feature.dashboard.generated.resources.pnl_detail_sell_fee_total
 import gainful.feature.dashboard.generated.resources.pnl_detail_total_pnl
@@ -216,6 +217,7 @@ private fun DashboardScreen(
     if (uiState.selectedPnlDate != null) {
         StockPnlDetailDialog(
             details = uiState.stockPnlDetails,
+            isNonTradingDay = uiState.isNonTradingDay,
             onDismiss = { onIntent(DashboardIntent.DismissPnlDetail) },
         )
     }
@@ -298,9 +300,20 @@ private fun PnlOverviewCard(
                         uiState.pnlYear == today.year
                     }
                 }
+            val isFirstPeriod =
+                when (uiState.selectedPnlPeriod) {
+                    PnlPeriodType.DAY, PnlPeriodType.WEEK -> {
+                        uiState.pnlYear == uiState.firstTransactionYear && uiState.pnlMonth == uiState.firstTransactionMonth
+                    }
+
+                    PnlPeriodType.MONTH -> {
+                        uiState.pnlYear == uiState.firstTransactionYear
+                    }
+                }
             PnlPeriodNavigation(
                 periodLabel = periodNavLabel(period, uiState.selectedPnlPeriod),
                 showNavigation = true,
+                showPrevious = !isFirstPeriod,
                 showNext = !isCurrentPeriod,
                 onNavigate = { direction ->
                     onIntent(DashboardIntent.NavigatePnlPeriod(direction))
@@ -344,8 +357,8 @@ private fun PnlOverviewCard(
                 periodType = uiState.selectedPnlPeriod,
                 firstYear = uiState.firstTransactionYear,
                 firstMonth = uiState.firstTransactionMonth,
-                onCellClick = { year, month, day ->
-                    onIntent(DashboardIntent.SelectPnlCell(year, month, day))
+                onCellClick = { year, month, day, weekStartDay, weekEndDay ->
+                    onIntent(DashboardIntent.SelectPnlCell(year, month, day, uiState.selectedPnlPeriod, weekStartDay, weekEndDay))
                 },
             )
         }
@@ -446,6 +459,7 @@ private fun PnlPeriodTabs(
 private fun PnlPeriodNavigation(
     periodLabel: String,
     showNavigation: Boolean = true,
+    showPrevious: Boolean = true,
     showNext: Boolean = true,
     onNavigate: (Int) -> Unit,
 ) {
@@ -460,8 +474,8 @@ private fun PnlPeriodNavigation(
             modifier =
                 Modifier
                     .size(20.dp)
-                    .then(if (showNavigation) Modifier.clickable { onNavigate(-1) } else Modifier)
-                    .then(if (!showNavigation) Modifier.alpha(0f) else Modifier),
+                    .then(if (showNavigation && showPrevious) Modifier.clickable { onNavigate(-1) } else Modifier)
+                    .then(if (!showNavigation || !showPrevious) Modifier.alpha(0f) else Modifier),
             tint = TextMuted,
         )
         Text(
@@ -519,7 +533,7 @@ private fun PnlGrid(
     periodType: PnlPeriodType,
     firstYear: Int = 2023,
     firstMonth: Int = 8,
-    onCellClick: (year: Int, month: Int, day: Int) -> Unit = { _, _, _ -> },
+    onCellClick: (year: Int, month: Int, day: Int, weekStartDay: Int, weekEndDay: Int) -> Unit = { _, _, _, _, _ -> },
 ) {
     val rows = cells.chunked(columns)
 
@@ -542,8 +556,8 @@ private fun PnlGrid(
                             firstMonth = firstMonth,
                             modifier = Modifier.weight(1f),
                             onClick = {
-                                if (!cell.isFuture && !cell.isPadding && cell.day > 0) {
-                                    onCellClick(cell.year, cell.month, cell.day)
+                                if (!cell.isFuture && !cell.isPadding) {
+                                    onCellClick(cell.year, cell.month, cell.day, cell.weekStartDay, cell.weekEndDay)
                                 }
                             },
                         )
@@ -1037,6 +1051,7 @@ private fun allTransactionsEmpty(uiState: DashboardUiState): Boolean {
 @Composable
 private fun StockPnlDetailDialog(
     details: List<StockPnlDetail>,
+    isNonTradingDay: Boolean = false,
     onDismiss: () -> Unit,
 ) {
     val sheetState =
@@ -1061,11 +1076,24 @@ private fun StockPnlDetailDialog(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (details.isEmpty()) {
-                Text(
-                    text = stringResource(Res.string.pnl_detail_no_records),
-                    fontSize = 14.sp,
-                    color = TextMuted,
-                )
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text =
+                            if (isNonTradingDay) {
+                                stringResource(Res.string.pnl_detail_non_trading_day)
+                            } else {
+                                stringResource(Res.string.pnl_detail_no_records)
+                            },
+                        fontSize = 14.sp,
+                        color = TextMuted,
+                    )
+                }
             } else {
                 details.forEach { detail ->
                     StockPnlDetailItem(detail)
@@ -1164,17 +1192,17 @@ private fun StockPnlDetailItem(detail: StockPnlDetail) {
             listOf(
                 Triple(
                     stringResource(Res.string.pnl_detail_buy_fee),
-                    if (detail.buyFee > 0) "-¥${detail.buyFee.formatLocalized()}" else null,
+                    if (detail.buyFee > 0) "-${detail.buyFee.formatLocalized()}" else null,
                     if (detail.buyFee > 0) lossColor else null,
                 ),
                 Triple(
                     stringResource(Res.string.pnl_detail_sell_fee),
-                    if (detail.sellFee > 0) "-¥${detail.sellFee.formatLocalized()}" else null,
+                    if (detail.sellFee > 0) "-${detail.sellFee.formatLocalized()}" else null,
                     if (detail.sellFee > 0) lossColor else null,
                 ),
                 Triple(
                     stringResource(Res.string.pnl_detail_dividend),
-                    if (detail.dividend > 0) "+¥${detail.dividend.formatLocalized()}" else null,
+                    if (detail.dividend > 0) "+${detail.dividend.formatLocalized()}" else null,
                     if (detail.dividend > 0) gainColor else null,
                 ),
                 Triple(
@@ -1263,21 +1291,21 @@ private fun StockPnlDetailSummary(details: List<StockPnlDetail>) {
         if (totalBuyFee > 0) {
             SummaryRow(
                 label = stringResource(Res.string.pnl_detail_buy_fee_total),
-                value = "-¥${totalBuyFee.formatLocalized()}",
+                value = "-${totalBuyFee.formatLocalized()}",
                 color = lossColor,
             )
         }
         if (totalSellFee > 0) {
             SummaryRow(
                 label = stringResource(Res.string.pnl_detail_sell_fee_total),
-                value = "-¥${totalSellFee.formatLocalized()}",
+                value = "-${totalSellFee.formatLocalized()}",
                 color = lossColor,
             )
         }
         if (totalDividend > 0) {
             SummaryRow(
                 label = stringResource(Res.string.pnl_detail_dividend_total),
-                value = "+¥${totalDividend.formatLocalized()}",
+                value = "+${totalDividend.formatLocalized()}",
                 color = gainColor,
             )
         }

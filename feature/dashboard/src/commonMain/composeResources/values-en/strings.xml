@@ -54,6 +54,7 @@
     <string name="pnl_detail_dividend">Dividend</string>
     <string name="pnl_detail_daily_gain">Daily P&amp;L</string>
     <string name="pnl_detail_no_records">No records for this day</string>
+    <string name="pnl_detail_non_trading_day">Non-trading day</string>
     <string name="pnl_detail_buy_fee_total">Total Buy Fee</string>
     <string name="pnl_detail_sell_fee_total">Total Sell Fee</string>
     <string name="pnl_detail_dividend_total">Total Dividend</string>

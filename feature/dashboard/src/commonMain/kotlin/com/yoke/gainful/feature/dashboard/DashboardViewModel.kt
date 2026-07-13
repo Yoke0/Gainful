@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 class DashboardViewModel(
     private val getHoldingsDisplayUseCase: GetHoldingsDisplayUseCase,
@@ -43,12 +44,36 @@ class DashboardViewModel(
 
     fun onIntent(intent: DashboardIntent) {
         when (intent) {
-            is DashboardIntent.LoadPortfolioSummary -> loadData()
-            is DashboardIntent.Refresh -> loadData()
-            is DashboardIntent.SelectPnlPeriod -> selectPnlPeriod(intent.periodType)
-            is DashboardIntent.NavigatePnlPeriod -> navigatePnlPeriod(intent.direction)
-            is DashboardIntent.SelectPnlCell -> selectPnlCell(intent.year, intent.month, intent.day)
-            is DashboardIntent.DismissPnlDetail -> dismissPnlDetail()
+            is DashboardIntent.LoadPortfolioSummary -> {
+                loadData()
+            }
+
+            is DashboardIntent.Refresh -> {
+                loadData()
+            }
+
+            is DashboardIntent.SelectPnlPeriod -> {
+                selectPnlPeriod(intent.periodType)
+            }
+
+            is DashboardIntent.NavigatePnlPeriod -> {
+                navigatePnlPeriod(intent.direction)
+            }
+
+            is DashboardIntent.SelectPnlCell -> {
+                selectPnlCell(
+                    intent.year,
+                    intent.month,
+                    intent.day,
+                    intent.periodType,
+                    intent.weekStartDay,
+                    intent.weekEndDay,
+                )
+            }
+
+            is DashboardIntent.DismissPnlDetail -> {
+                dismissPnlDetail()
+            }
         }
     }
 
@@ -64,14 +89,19 @@ class DashboardViewModel(
                 val firstTransaction = transactions.minByOrNull { it.tradeDate }
                 val firstTransactionYear =
                     firstTransaction?.let { tx ->
-                        kotlinx.datetime.Instant.fromEpochMilliseconds(tx.tradeDate)
+                        Instant.fromEpochMilliseconds(tx.tradeDate)
                             .toLocalDateTime(TimeZone.currentSystemDefault()).date.year
                     } ?: 2023
                 val firstTransactionMonth =
                     firstTransaction?.let { tx ->
-                        kotlinx.datetime.Instant.fromEpochMilliseconds(tx.tradeDate)
+                        Instant.fromEpochMilliseconds(tx.tradeDate)
                             .toLocalDateTime(TimeZone.currentSystemDefault()).date.month.ordinal + 1
                     } ?: 8
+                val firstTransactionDate =
+                    firstTransaction?.let { tx ->
+                        Instant.fromEpochMilliseconds(tx.tradeDate)
+                            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    }
 
                 var totalBuys = 0.0
                 var totalSells = 0.0
@@ -105,6 +135,7 @@ class DashboardViewModel(
                     pnlData = pnlData,
                     firstTransactionYear = firstTransactionYear,
                     firstTransactionMonth = firstTransactionMonth,
+                    firstTransactionDate = firstTransactionDate,
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -153,10 +184,18 @@ class DashboardViewModel(
                 if (newYear > today.year || (newYear == today.year && newMonth > today.month.ordinal + 1)) {
                     return
                 }
+                if (newYear < currentState.firstTransactionYear ||
+                    (newYear == currentState.firstTransactionYear && newMonth < currentState.firstTransactionMonth)
+                ) {
+                    return
+                }
             }
 
             PnlPeriodType.MONTH -> {
                 newYear += direction
+                if (newYear < currentState.firstTransactionYear) {
+                    return
+                }
             }
 
             PnlPeriodType.YEAR -> {
@@ -181,9 +220,40 @@ class DashboardViewModel(
         }
     }
 
-    private fun selectPnlCell(year: Int, month: Int, day: Int) {
+    private fun selectPnlCell(year: Int, month: Int, day: Int, periodType: PnlPeriodType, weekStartDay: Int, weekEndDay: Int) {
         val currentState = _uiState.value
-        val date = LocalDate(year, month, day)
+
+        val startDate: LocalDate
+        val endDate: LocalDate
+
+        when (periodType) {
+            PnlPeriodType.DAY -> {
+                startDate = LocalDate(year, month, day)
+                endDate = startDate
+            }
+
+            PnlPeriodType.WEEK -> {
+                startDate = LocalDate(year, month, weekStartDay)
+                endDate = LocalDate(year, month, weekEndDay)
+            }
+
+            PnlPeriodType.MONTH -> {
+                startDate = LocalDate(year, month, 1)
+                val daysInMonth =
+                    when (month) {
+                        1, 3, 5, 7, 8, 10, 12 -> 31
+                        4, 6, 9, 11 -> 30
+                        2 -> if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) 29 else 28
+                        else -> 30
+                    }
+                endDate = LocalDate(year, month, daysInMonth)
+            }
+
+            PnlPeriodType.YEAR -> {
+                startDate = LocalDate(year, 1, 1)
+                endDate = LocalDate(year, 12, 31)
+            }
+        }
 
         viewModelScope.launch {
             // Get stock names from both holdings and asset repository
@@ -195,13 +265,20 @@ class DashboardViewModel(
             val details =
                 getPnlDataUseCase.getStockPnlDetails(
                     transactions = allTransactions,
-                    date = date,
+                    date = startDate,
+                    endDate = endDate,
                     stockNames = stockNames,
                 )
+
+            // Check if the date has KLine data (no KLine = non-trading day)
+            val hasKLineData = getPnlDataUseCase.hasKLineDataForDate(startDate, allTransactions)
+            val isNonTradingDay = !hasKLineData && periodType == PnlPeriodType.DAY
+
             _uiState.value =
                 currentState.copy(
-                    selectedPnlDate = date,
+                    selectedPnlDate = startDate,
                     stockPnlDetails = details,
+                    isNonTradingDay = isNonTradingDay,
                 )
         }
     }
@@ -211,6 +288,7 @@ class DashboardViewModel(
             _uiState.value.copy(
                 selectedPnlDate = null,
                 stockPnlDetails = emptyList(),
+                isNonTradingDay = false,
             )
     }
 
@@ -239,6 +317,8 @@ data class DashboardUiState(
     val stockPnlDetails: List<StockPnlDetail> = emptyList(),
     val firstTransactionYear: Int = 2023,
     val firstTransactionMonth: Int = 8,
+    val firstTransactionDate: LocalDate? = null,
+    val isNonTradingDay: Boolean = false,
 ) {
     val totalMarketValue: Double get() = holdings.sumOf { it.totalMarketValue }
     val totalCost: Double get() = holdings.sumOf { it.totalCost }
