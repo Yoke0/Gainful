@@ -1,5 +1,6 @@
 package com.yoke.gainful.feature.dashboard
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -346,21 +347,23 @@ private fun PnlOverviewCard(
                     PnlPeriodType.YEAR -> 3
                 }
 
-            if (uiState.selectedPnlPeriod == PnlPeriodType.DAY) {
-                WeekdayHeader()
-                Spacer(modifier = Modifier.height(6.dp))
-            }
+            Column(modifier = Modifier.animateContentSize()) {
+                if (uiState.selectedPnlPeriod == PnlPeriodType.DAY) {
+                    WeekdayHeader()
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
 
-            PnlGrid(
-                cells = pnlData.cells,
-                columns = columns,
-                periodType = uiState.selectedPnlPeriod,
-                firstYear = uiState.firstTransactionYear,
-                firstMonth = uiState.firstTransactionMonth,
-                onCellClick = { year, month, day, weekStartDay, weekEndDay ->
-                    onIntent(DashboardIntent.SelectPnlCell(year, month, day, uiState.selectedPnlPeriod, weekStartDay, weekEndDay))
-                },
-            )
+                PnlGrid(
+                    cells = pnlData.cells,
+                    columns = columns,
+                    periodType = uiState.selectedPnlPeriod,
+                    firstYear = uiState.firstTransactionYear,
+                    firstMonth = uiState.firstTransactionMonth,
+                    onCellClick = { year, month, day, weekStartDay, weekEndDay ->
+                        onIntent(DashboardIntent.SelectPnlCell(year, month, day, uiState.selectedPnlPeriod, weekStartDay, weekEndDay))
+                    },
+                )
+            }
         }
     }
 }
@@ -556,7 +559,7 @@ private fun PnlGrid(
                             firstMonth = firstMonth,
                             modifier = Modifier.weight(1f),
                             onClick = {
-                                if (!cell.isFuture && !cell.isPadding) {
+                                if (!cell.isFuture && !cell.isBeforeTransaction && !cell.isPadding) {
                                     onCellClick(cell.year, cell.month, cell.day, cell.weekStartDay, cell.weekEndDay)
                                 }
                             },
@@ -582,7 +585,7 @@ private fun PnlCellItem(
 ) {
     val label = cellLabel(cell, periodType, firstYear, firstMonth)
 
-    if (cell.isFuture) {
+    if (cell.isFuture || cell.isBeforeTransaction) {
         Column(
             modifier = modifier.padding(horizontal = 4.dp, vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
