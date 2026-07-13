@@ -42,93 +42,127 @@ class GetPnlDataUseCase(
     suspend fun getStockPnlDetails(
         transactions: List<Transaction>,
         date: LocalDate,
+        endDate: LocalDate = date,
         stockNames: Map<String, String> = emptyMap(),
     ): List<StockPnlDetail> {
         val dailyPositions = computeDailyPositions(transactions)
         val klineData = fetchKlineData(transactions)
-        val positions = dailyPositions[date] ?: emptyMap()
-        val dayTransactions = transactions.filter { it.tradeDate.toLocalDate() == date }
 
-        val details = mutableListOf<StockPnlDetail>()
+        // Aggregate details across date range
+        val aggregated = mutableMapOf<String, StockPnlDetail>()
 
-        // Position-based PnL
-        for ((assetId, quantity) in positions) {
-            if (quantity <= 0) continue
+        var currentDate = date
+        while (currentDate <= endDate) {
+            val positions = dailyPositions[currentDate] ?: emptyMap()
+            val dayTransactions = transactions.filter { it.tradeDate.toLocalDate() == currentDate }
 
-            val kline = klineData[assetId]?.find { it.date == date.toString() }
-            val sellTx = dayTransactions.firstOrNull { it.assetId == assetId && it.type == TransactionType.SELL }
-            val buyTx = dayTransactions.firstOrNull { it.assetId == assetId && it.type == TransactionType.BUY }
-            val sellQty = sellTx?.quantity ?: 0.0
+            // Position-based PnL
+            for ((assetId, quantity) in positions) {
+                if (quantity <= 0) continue
 
-            val heldQuantity = quantity - sellQty
-            val positionPnl = if (kline != null && heldQuantity > 0) kline.changeAmount * heldQuantity else 0.0
+                val kline = klineData[assetId]?.find { it.date == currentDate.toString() }
+                val sellTx = dayTransactions.firstOrNull { it.assetId == assetId && it.type == TransactionType.SELL }
+                val buyTx = dayTransactions.firstOrNull { it.assetId == assetId && it.type == TransactionType.BUY }
+                val sellQty = sellTx?.quantity ?: 0.0
 
-            val dateStr = date.toString()
-            val klines = klineData[assetId]
-            val yesterdayClose = klines?.findLast { it.date < dateStr }?.close
+                val heldQuantity = quantity - sellQty
+                val positionPnl = if (kline != null && heldQuantity > 0) kline.changeAmount * heldQuantity else 0.0
 
-            val tx = buyTx ?: sellTx
-            val tradePnl =
-                when {
-                    buyTx != null -> if (kline != null) (kline.close - buyTx.price) * buyTx.quantity else 0.0
-                    sellTx != null -> if (yesterdayClose != null) (sellTx.price - yesterdayClose) * sellTx.quantity else 0.0
-                    else -> 0.0
+                val dateStr = currentDate.toString()
+                val klines = klineData[assetId]
+                val yesterdayClose = klines?.findLast { it.date < dateStr }?.close
+
+                val tx = buyTx ?: sellTx
+                val tradePnl =
+                    when {
+                        buyTx != null -> if (kline != null) (kline.close - buyTx.price) * buyTx.quantity else 0.0
+                        sellTx != null -> if (yesterdayClose != null) (sellTx.price - yesterdayClose) * sellTx.quantity else 0.0
+                        else -> 0.0
+                    }
+
+                val txFee = tx?.fee ?: 0.0
+                val existing = aggregated[assetId]
+                if (existing != null) {
+                    aggregated[assetId] =
+                        existing.copy(
+                            positionPnl = existing.positionPnl + positionPnl,
+                            positionQuantity = existing.positionQuantity + heldQuantity,
+                            tradePnl = existing.tradePnl + tradePnl,
+                            fee = existing.fee + txFee,
+                            buyFee = existing.buyFee + if (tx?.type == TransactionType.BUY) txFee else 0.0,
+                            sellFee = existing.sellFee + if (tx?.type == TransactionType.SELL) txFee else 0.0,
+                            dividend = existing.dividend + if (tx?.type == TransactionType.DIVIDEND) tradePnl else 0.0,
+                            dailyPnl = existing.dailyPnl + positionPnl + tradePnl,
+                        )
+                } else {
+                    aggregated[assetId] =
+                        StockPnlDetail(
+                            assetId = assetId,
+                            stockName = stockNames[assetId] ?: assetId,
+                            positionPnl = positionPnl,
+                            positionQuantity = heldQuantity,
+                            tradePnl = tradePnl,
+                            tradeType = tx?.type,
+                            tradePrice = tx?.price,
+                            tradeQuantity = tx?.quantity ?: 0.0,
+                            fee = txFee,
+                            buyFee = if (tx?.type == TransactionType.BUY) txFee else 0.0,
+                            sellFee = if (tx?.type == TransactionType.SELL) txFee else 0.0,
+                            dividend = if (tx?.type == TransactionType.DIVIDEND) tradePnl else 0.0,
+                            dailyPnl = positionPnl + tradePnl,
+                        )
                 }
+            }
 
-            val txFee = tx?.fee ?: 0.0
-            details.add(
-                StockPnlDetail(
-                    assetId = assetId,
-                    stockName = stockNames[assetId] ?: assetId,
-                    positionPnl = positionPnl,
-                    positionQuantity = heldQuantity,
-                    tradePnl = tradePnl,
-                    tradeType = tx?.type,
-                    tradePrice = tx?.price,
-                    tradeQuantity = tx?.quantity ?: 0.0,
-                    fee = txFee,
-                    buyFee = if (tx?.type == TransactionType.BUY) txFee else 0.0,
-                    sellFee = if (tx?.type == TransactionType.SELL) txFee else 0.0,
-                    dividend = if (tx?.type == TransactionType.DIVIDEND) tradePnl else 0.0,
-                    dailyPnl = positionPnl + tradePnl,
-                ),
-            )
+            // Trade-only PnL (stocks not in position)
+            for (tx in dayTransactions) {
+                if (aggregated.containsKey(tx.assetId)) continue
+
+                val dateStr = currentDate.toString()
+                val klines = klineData[tx.assetId]
+                val yesterdayClose = klines?.findLast { it.date < dateStr }?.close
+                val kline = klines?.find { it.date == dateStr }
+
+                val tradePnl =
+                    when (tx.type) {
+                        TransactionType.BUY -> if (kline != null) (kline.close - tx.price) * tx.quantity else 0.0
+                        TransactionType.SELL -> if (yesterdayClose != null) (tx.price - yesterdayClose) * tx.quantity else 0.0
+                        TransactionType.DIVIDEND -> tx.amount
+                    }
+
+                val existing = aggregated[tx.assetId]
+                if (existing != null) {
+                    aggregated[tx.assetId] =
+                        existing.copy(
+                            tradePnl = existing.tradePnl + tradePnl,
+                            fee = existing.fee + tx.fee,
+                            buyFee = existing.buyFee + if (tx.type == TransactionType.BUY) tx.fee else 0.0,
+                            sellFee = existing.sellFee + if (tx.type == TransactionType.SELL) tx.fee else 0.0,
+                            dividend = existing.dividend + if (tx.type == TransactionType.DIVIDEND) tradePnl else 0.0,
+                            dailyPnl = existing.dailyPnl + if (tx.type == TransactionType.DIVIDEND) 0.0 else tradePnl,
+                        )
+                } else {
+                    aggregated[tx.assetId] =
+                        StockPnlDetail(
+                            assetId = tx.assetId,
+                            stockName = stockNames[tx.assetId] ?: tx.assetId,
+                            tradePnl = tradePnl,
+                            tradeType = tx.type,
+                            tradePrice = tx.price,
+                            tradeQuantity = tx.quantity,
+                            fee = tx.fee,
+                            buyFee = if (tx.type == TransactionType.BUY) tx.fee else 0.0,
+                            sellFee = if (tx.type == TransactionType.SELL) tx.fee else 0.0,
+                            dividend = if (tx.type == TransactionType.DIVIDEND) tradePnl else 0.0,
+                            dailyPnl = if (tx.type == TransactionType.DIVIDEND) 0.0 else tradePnl,
+                        )
+                }
+            }
+
+            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
         }
 
-        // Trade-only PnL (stocks not in position)
-        for (tx in dayTransactions) {
-            if (details.any { it.assetId == tx.assetId }) continue
-
-            val dateStr = date.toString()
-            val klines = klineData[tx.assetId]
-            val yesterdayClose = klines?.findLast { it.date < dateStr }?.close
-            val kline = klines?.find { it.date == dateStr }
-
-            val tradePnl =
-                when (tx.type) {
-                    TransactionType.BUY -> if (kline != null) (kline.close - tx.price) * tx.quantity else 0.0
-                    TransactionType.SELL -> if (yesterdayClose != null) (tx.price - yesterdayClose) * tx.quantity else 0.0
-                    TransactionType.DIVIDEND -> tx.amount
-                }
-
-            details.add(
-                StockPnlDetail(
-                    assetId = tx.assetId,
-                    stockName = stockNames[tx.assetId] ?: tx.assetId,
-                    tradePnl = tradePnl,
-                    tradeType = tx.type,
-                    tradePrice = tx.price,
-                    tradeQuantity = tx.quantity,
-                    fee = tx.fee,
-                    buyFee = if (tx.type == TransactionType.BUY) tx.fee else 0.0,
-                    sellFee = if (tx.type == TransactionType.SELL) tx.fee else 0.0,
-                    dividend = if (tx.type == TransactionType.DIVIDEND) tradePnl else 0.0,
-                    dailyPnl = if (tx.type == TransactionType.DIVIDEND) 0.0 else tradePnl,
-                ),
-            )
-        }
-
-        return details.sortedByDescending { it.pnl }
+        return aggregated.values.sortedByDescending { it.pnl }
     }
 
     // region Cache reading
@@ -202,7 +236,7 @@ class GetPnlDataUseCase(
             val week =
                 (0..6).mapNotNull { offset ->
                     val date = currentWeekStart.plus(offset.toLong(), DateTimeUnit.DAY)
-                    if (date >= firstDayOfMonth && date <= lastDayOfMonth) date else null
+                    if (date in firstDayOfMonth..lastDayOfMonth) date else null
                 }
             if (week.isNotEmpty()) {
                 weeksInMonth.add(week)
@@ -216,7 +250,6 @@ class GetPnlDataUseCase(
         for (week in weeksInMonth) {
             // Calculate PnL only for days up to today
             val weekPnl = week.filter { it <= today }.sumOf { dailyPnl[it] ?: 0.0 }
-            val hasFuture = week.any { it > today }
             val hasPastDays = week.any { it <= today }
 
             cells.add(
@@ -315,6 +348,12 @@ class GetPnlDataUseCase(
     private suspend fun fetchKlineData(transactions: List<Transaction>): Map<String, List<KLine>> {
         val assetIds = transactions.map { it.assetId }.distinct()
         return assetIds.associateWith { kLineCacheRepository.getByAssetId(it) }
+    }
+
+    suspend fun hasKLineDataForDate(date: LocalDate, transactions: List<Transaction>): Boolean {
+        val klineData = fetchKlineData(transactions)
+        val dateStr = date.toString()
+        return klineData.values.any { klines -> klines.any { it.date == dateStr } }
     }
 
     private fun computeDailyPositions(transactions: List<Transaction>): Map<LocalDate, Map<String, Double>> {
