@@ -30,9 +30,10 @@ class GetPnlDataUseCase(
         month: Int,
     ): PnlData {
         val dailyPnl = getDailyPnlFromCache(transactions)
+        val firstTxDate = getFirstTransactionDate(transactions)
 
         return when (periodType) {
-            PnlPeriodType.DAY -> getDayPnl(dailyPnl, year, month)
+            PnlPeriodType.DAY -> getDayPnl(dailyPnl, year, month, firstTxDate)
             PnlPeriodType.WEEK -> getWeekPnl(dailyPnl, year, month)
             PnlPeriodType.MONTH -> getMonthPnl(dailyPnl, year)
             PnlPeriodType.YEAR -> getYearPnl(dailyPnl)
@@ -182,7 +183,7 @@ class GetPnlDataUseCase(
 
     // region Period rendering
 
-    private fun getDayPnl(dailyPnl: Map<LocalDate, Double>, year: Int, month: Int): PnlData {
+    private fun getDayPnl(dailyPnl: Map<LocalDate, Double>, year: Int, month: Int, firstTxDate: LocalDate? = null): PnlData {
         val today = today()
         val daysInMonth = daysInMonth(year, month)
         val cells = mutableListOf<PnlCell>()
@@ -197,6 +198,7 @@ class GetPnlDataUseCase(
         for (day in 1..daysInMonth) {
             val date = LocalDate(year, month, day)
             val isFuture = date > today
+            val isBeforeTransaction = firstTxDate != null && date < firstTxDate
             val dayPnl = if (isFuture) null else dailyPnl[date]
 
             cells.add(
@@ -209,6 +211,7 @@ class GetPnlDataUseCase(
                     isCurrent = date == today,
                     isEmpty = dayPnl == null || dayPnl == 0.0,
                     isFuture = isFuture,
+                    isBeforeTransaction = isBeforeTransaction,
                 ),
             )
         }

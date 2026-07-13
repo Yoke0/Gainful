@@ -29,6 +29,7 @@ data class PnlCell(
     val isEmpty: Boolean = true,
     val isPadding: Boolean = false,
     val isFuture: Boolean = false,
+    val isBeforeTransaction: Boolean = false,
 )
 
 data class PnlData(
