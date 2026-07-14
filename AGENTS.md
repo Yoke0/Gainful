@@ -33,6 +33,7 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
 - `androidApp/` — Android entry point (`MainActivity`)
 - `desktopApp/` — Desktop entry point (`main.kt`, main class `com.yoke.gainful.MainKt`)
 - `iosApp/` — iOS project (Xcode, Swift). Uses `MainViewController.kt` from `shared/iosMain`
+- `server/` — Ktor backend server (see [Server](#server) below)
 
 ## Build & Run
 
@@ -46,6 +47,9 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
 
 # iOS — open in Xcode (requires TEAM_ID in iosApp/Configuration/Config.xcconfig)
 open iosApp/iosApp.xcodeproj
+
+# Server
+./gradlew :server:run
 ```
 
 ## Tests
@@ -65,9 +69,11 @@ Run tests after making changes. CI runs `./gradlew allTests`.
 - Material3 1.12.0-alpha02
 - JVM target: 11
 - compileSdk/targetSdk: 37, minSdk: 24
-- Ktor 3.5.0
+- Ktor 3.5.1
 - Room 2.8.4
 - Koin 4.2.2
+- Exposed 1.3.1
+- kotlinx-datetime 0.8.0
 
 ## Conventions
 
@@ -262,3 +268,59 @@ GainfulScaffold(
 - Room schemas stored in `core/database/schemas/` — checked in for migration tracking
 - Ktor HTTP client uses `expect`/`actual` — platform engines: OkHttp (Android), Darwin (iOS), Java (JVM)
 - `initKoin()` is called in both `App.kt` (Compose) and `MainActivity.kt` (Android) — don't double-init
+
+## Server
+
+Ktor backend server for API, authentication, and data management.
+
+### Tech Stack
+- Kotlin + Ktor (Netty engine) + Exposed 1.3.1 (DSL) + PostgreSQL
+- Koin (DI), JWT (auth), `kotlin.uuid.Uuid` (IDs)
+- H2 for testing, PostgreSQL for production
+- Swagger UI at `/swagger`
+
+### Security Architecture
+- `TokenConfig` — JWT configuration (issuer, audience, secret, expiry)
+- `TokenService` / `JwtTokenService` — JWT generation and validation
+- `UserPrincipal` — Authenticated user context (userId, sessionId, username)
+- `SessionService` — Server-side session management with expiry check
+- `Security.kt` — Ktor JWT authentication with audience validation + session validity check
+
+### API Endpoints
+- `POST /api/auth/register` — Register
+- `POST /api/auth/login` — Login (returns JWT)
+- `GET /api/users/me` — Get profile
+- `PUT /api/users/me` — Update profile
+- `POST /api/users/avatar` — Upload avatar (multipart)
+- `GET /api/users/sessions` — List sessions
+- `DELETE /api/users/sessions` — Revoke other sessions
+- `GET /api/transactions` — List transactions
+- `POST /api/transactions` — Create transaction
+- `DELETE /api/transactions/{id}` — Delete transaction
+- `GET /avatars/{filename}` — Static file serving for avatars
+
+### Project Structure
+```
+server/
+├── src/main/kotlin/com/yoke/gainful/server/
+│   ├── Application.kt          # Entry point (module())
+│   ├── config/                 # AppConfig, DatabaseFactory, KoinModule
+│   ├── db/                     # Exposed table definitions (Users, Transactions, UserSessions)
+│   ├── model/dto/              # Request/Response DTOs
+│   ├── plugins/                # Ktor plugins (Security, Routing, Serialization, StatusPages)
+│   ├── routes/                 # Route handlers (AuthRoutes, UserRoutes, TransactionRoutes)
+│   ├── security/token/         # TokenConfig, TokenClaim, TokenService, JwtTokenService
+│   ├── service/                # Business logic (Auth, User, Session, Transaction, Avatar)
+│   └── util/                   # PasswordUtils
+├── src/main/resources/
+│   ├── application.conf        # HOCON config (database, jwt, upload)
+│   └── openapi/documentation.yaml
+└── src/test/                   # Unit tests (service + route tests with H2)
+```
+
+### Exposed 1.x Migration Notes
+- Package: `org.jetbrains.exposed.v1.core` / `org.jetbrains.exposed.v1.jdbc`
+- DateTime: `exposed-kotlin-datetime` (kotlinx.datetime.LocalDateTime)
+- UUID columns: `kotlin.uuid.Uuid` (not `java.util.UUID`)
+- `eq`/`and`/`or`/`neq` are member functions of `SqlExpressionBuilder` — import from `org.jetbrains.exposed.v1.core.eq` etc.
+- `Clock.System` is in `kotlin.time.Clock` (not `kotlinx.datetime.Clock` in 0.8.0)

@@ -52,7 +52,8 @@ Gainful/
 │   └── settings/              # Settings
 ├── androidApp/                # Android application entry
 ├── desktopApp/                # Desktop application entry
-└── iosApp/                    # iOS application (Xcode project)
+├── iosApp/                    # iOS application (Xcode project)
+└── server/                    # Ktor backend server
 ```
 
 ### Tech Stack
@@ -66,6 +67,7 @@ Gainful/
 | DateTime | kotlinx-datetime | Cross-platform date/time handling |
 | UI | Compose Multiplatform | Declarative cross-platform UI |
 | i18n | Compose Resources | Multi-module string localization (Chinese/English) |
+| Backend | Ktor + Exposed | RESTful API, JWT auth, database operations |
 
 ### Key Versions
 
@@ -76,9 +78,11 @@ Gainful/
 | Material3 | 1.12.0-alpha02 |
 | Gradle | 9.6.1 |
 | AGP | 9.2.1 |
-| Ktor | 3.5.0 |
+| Ktor | 3.5.1 |
 | Room | 2.8.4 |
 | Koin | 4.2.2 |
+| Exposed | 1.3.1 |
+| kotlinx-datetime | 0.8.0 |
 
 ### Platform Support
 
