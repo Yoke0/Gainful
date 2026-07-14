@@ -1,0 +1,422 @@
+openapi: "3.0.3"
+info:
+  title: "Gainful Server API"
+  description: "Ktor backend for Gainful stock tracking app"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:8080"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+
+  schemas:
+    RegisterRequest:
+      type: "object"
+      required: ["username", "email", "password"]
+      properties:
+        username:
+          type: "string"
+          example: "testuser"
+        email:
+          type: "string"
+          example: "test@test.com"
+        password:
+          type: "string"
+          example: "123456"
+
+    LoginRequest:
+      type: "object"
+      required: ["username", "password"]
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+
+    AuthResponse:
+      type: "object"
+      properties:
+        token:
+          type: "string"
+        userId:
+          type: "string"
+        username:
+          type: "string"
+
+    UserResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        username:
+          type: "string"
+        email:
+          type: "string"
+        nickname:
+          type: "string"
+        avatarUrl:
+          type: "string"
+        createdAt:
+          type: "string"
+
+    UpdateProfileRequest:
+      type: "object"
+      properties:
+        nickname:
+          type: "string"
+        email:
+          type: "string"
+
+    SessionResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        deviceInfo:
+          type: "string"
+        ipAddress:
+          type: "string"
+        createdAt:
+          type: "string"
+        expiresAt:
+          type: "string"
+        isRevoked:
+          type: "boolean"
+
+    CreateTransactionRequest:
+      type: "object"
+      required: ["assetCode", "type", "quantity", "price", "amount", "tradeDate"]
+      properties:
+        assetCode:
+          type: "string"
+          example: "600519"
+        assetName:
+          type: "string"
+          example: "贵州茅台"
+        type:
+          type: "integer"
+          description: "0=BUY, 1=SELL, 2=DIVIDEND"
+          example: 0
+        quantity:
+          type: "number"
+          example: 100
+        price:
+          type: "number"
+          example: 1800.0
+        amount:
+          type: "number"
+          example: 180000.0
+        tradeDate:
+          type: "string"
+          format: "date"
+          example: "2025-01-15"
+
+    UpdateTransactionRequest:
+      type: "object"
+      properties:
+        assetCode:
+          type: "string"
+        assetName:
+          type: "string"
+        type:
+          type: "integer"
+        quantity:
+          type: "number"
+        price:
+          type: "number"
+        amount:
+          type: "number"
+        tradeDate:
+          type: "string"
+          format: "date"
+
+    TransactionResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        assetCode:
+          type: "string"
+        assetName:
+          type: "string"
+        type:
+          type: "integer"
+        quantity:
+          type: "number"
+        price:
+          type: "number"
+        amount:
+          type: "number"
+        tradeDate:
+          type: "string"
+        createdAt:
+          type: "string"
+
+    ErrorResponse:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+        message:
+          type: "string"
+
+paths:
+  /api/auth/register:
+    post:
+      tags: ["Auth"]
+      summary: "Register a new user"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: "User registered"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  userId:
+                    type: "string"
+        "409":
+          description: "Username or email already exists"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/login:
+    post:
+      tags: ["Auth"]
+      summary: "Login and get JWT token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: "Login successful"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: "Invalid credentials"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/users/me:
+    get:
+      tags: ["Users"]
+      summary: "Get current user profile"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "User profile"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: "Unauthorized"
+    put:
+      tags: ["Users"]
+      summary: "Update current user profile"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: "Updated user profile"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /api/users/avatar:
+    post:
+      tags: ["Users"]
+      summary: "Upload avatar image"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: "object"
+              properties:
+                avatar:
+                  type: "string"
+                  format: "binary"
+                  description: "JPEG/PNG/WEBP image, max 2MB"
+      responses:
+        "200":
+          description: "Avatar uploaded"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  avatarUrl:
+                    type: "string"
+
+  /api/users/sessions:
+    get:
+      tags: ["Users"]
+      summary: "List active sessions"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Session list"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/SessionResponse"
+    delete:
+      tags: ["Users"]
+      summary: "Revoke all other sessions"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Sessions revoked"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+
+  /api/users/sessions/{sessionId}:
+    delete:
+      tags: ["Users"]
+      summary: "Revoke a specific session"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "sessionId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Session revoked"
+        "403":
+          description: "Cannot revoke another user's session"
+
+  /api/transactions:
+    get:
+      tags: ["Transactions"]
+      summary: "List all transactions"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Transaction list"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/TransactionResponse"
+    post:
+      tags: ["Transactions"]
+      summary: "Create a transaction"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionRequest"
+      responses:
+        "201":
+          description: "Transaction created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+
+  /api/transactions/{id}:
+    get:
+      tags: ["Transactions"]
+      summary: "Get transaction by ID"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Transaction detail"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+        "404":
+          description: "Not found"
+    put:
+      tags: ["Transactions"]
+      summary: "Update a transaction"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTransactionRequest"
+      responses:
+        "200":
+          description: "Transaction updated"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+    delete:
+      tags: ["Transactions"]
+      summary: "Delete a transaction"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Transaction deleted"

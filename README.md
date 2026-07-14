@@ -52,7 +52,8 @@ Gainful/
 │   └── settings/              # 设置
 ├── androidApp/                # Android 应用入口
 ├── desktopApp/                # Desktop 应用入口
-└── iosApp/                    # iOS 应用（Xcode 项目）
+├── iosApp/                    # iOS 应用（Xcode 项目）
+└── server/                    # Ktor 后端服务
 ```
 
 ### 技术栈
@@ -66,6 +67,7 @@ Gainful/
 | 日期时间 | kotlinx-datetime | 跨平台日期时间处理 |
 | UI 框架 | Compose Multiplatform | 跨平台声明式 UI |
 | 国际化 | Compose Resources | 多模块字符串本地化（中文/英文） |
+| 后端服务 | Ktor + Exposed | RESTful API、JWT 认证、数据库操作 |
 
 ### 关键版本
 
@@ -76,9 +78,11 @@ Gainful/
 | Material3 | 1.12.0-alpha02 |
 | Gradle | 9.6.1 |
 | AGP | 9.2.1 |
-| Ktor | 3.5.0 |
+| Ktor | 3.5.1 |
 | Room | 2.8.4 |
 | Koin | 4.2.2 |
+| Exposed | 1.3.1 |
+| kotlinx-datetime | 0.8.0 |
 
 ### 平台支持
 
