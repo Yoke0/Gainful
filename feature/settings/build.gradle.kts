@@ -52,6 +52,8 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
             implementation(libs.compose.components.resources)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.datetime)
             api(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.serialization.json)

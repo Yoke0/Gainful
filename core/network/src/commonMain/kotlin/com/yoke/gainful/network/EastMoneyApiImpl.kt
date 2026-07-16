@@ -28,14 +28,10 @@ internal class EastMoneyApiImpl(
                 parameter("fields", QUOTE_FIELDS)
             }.execute { it.bodyAsText() }
 
-        return try {
+        return runCatching {
             val resp = json.decodeFromString<ApiResponse<QuoteData>>(rawBody)
-            println("[EastMoneyApi] getQuote f80=${resp.data?.tradingHours}")
             resp.data
-        } catch (e: Exception) {
-            println("[EastMoneyApi] getQuote deserialization failed: ${e.message}")
-            null
-        }
+        }.getOrNull()
     }
 
     override suspend fun getBatchQuotes(secIds: List<String>): List<QuoteData> {

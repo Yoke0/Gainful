@@ -1,0 +1,76 @@
+<resources>
+    <!-- Login -->
+    <string name="login_title">登录</string>
+    <string name="login_hero_title">欢迎回来</string>
+    <string name="login_hero_subtitle">登录以同步你的交易数据</string>
+    <string name="login_username_label">用户名 / 邮箱</string>
+    <string name="login_username_hint">请输入用户名或邮箱</string>
+    <string name="login_password_label">密码</string>
+    <string name="login_password_hint">请输入密码</string>
+    <string name="login_submit">登 录</string>
+    <string name="login_loading">登录中...</string>
+    <string name="login_no_account">还没有账号？</string>
+    <string name="login_register_link">立即注册</string>
+    <string name="login_error_empty">请输入用户名和密码</string>
+    <string name="login_error_invalid">用户名或密码错误</string>
+
+    <!-- Register -->
+    <string name="register_title">注册</string>
+    <string name="register_hero_title">创建账号</string>
+    <string name="register_hero_subtitle">注册后开始记录你的每一笔交易</string>
+    <string name="register_nickname_label">昵称</string>
+    <string name="register_nickname_hint">给自己取个名字</string>
+    <string name="register_nickname_length">2-20 个字符</string>
+    <string name="register_email_label">邮箱</string>
+    <string name="register_email_hint">your@email.com</string>
+    <string name="register_password_label">密码</string>
+    <string name="register_password_hint">至少 8 位，含字母和数字</string>
+    <string name="register_confirm_password_label">确认密码</string>
+    <string name="register_confirm_password_hint">再次输入密码</string>
+    <string name="register_submit">注 册</string>
+    <string name="register_loading">注册中...</string>
+    <string name="register_has_account">已有账号？</string>
+    <string name="register_login_link">去登录</string>
+    <string name="register_password_mismatch">两次密码不一致</string>
+    <string name="register_error_empty">请填写所有必填项</string>
+    <string name="register_error_weak_password">密码强度不足</string>
+
+    <!-- Password Strength -->
+    <string name="strength_label">密码强度：</string>
+    <string name="strength_weak">弱</string>
+    <string name="strength_fair">较弱</string>
+    <string name="strength_medium">中等</string>
+    <string name="strength_strong">强</string>
+
+    <!-- Avatar -->
+    <string name="avatar_title">更换头像</string>
+    <string name="avatar_current_label">当前头像</string>
+    <string name="avatar_preset_label">选择头像</string>
+    <string name="avatar_upload_label">上传自定义头像</string>
+    <string name="avatar_upload_hint">点击上传图片</string>
+    <string name="avatar_upload_format">支持 JPG、PNG，建议 200x200px</string>
+    <string name="avatar_confirm">确认更换</string>
+
+    <!-- User Card -->
+    <string name="user_card_login">点击登录</string>
+    <string name="user_card_login_subtitle">登录后同步你的交易数据</string>
+    <string name="user_card_logout">登出</string>
+    <string name="user_id_format">ID: GF-%1$s</string>
+
+    <!-- Agreement -->
+    <string name="register_agreement_prefix">我已阅读并同意 </string>
+    <string name="register_terms_of_service">《用户服务协议》</string>
+    <string name="register_agreement_and"> 和 </string>
+    <string name="register_privacy_policy">《隐私政策》</string>
+
+    <!-- Validation -->
+    <string name="error_nickname_length">昵称需要2-20个字符</string>
+    <string name="error_password_mismatch">两次密码输入不一致</string>
+    <string name="error_password_too_short">密码至少需要6个字符</string>
+    <string name="error_agreement_required">请同意用户服务协议和隐私政策</string>
+
+    <!-- Avatar Errors -->
+    <string name="avatar_error_image_process">图片处理失败</string>
+    <string name="avatar_error_save">保存失败</string>
+    <string name="avatar_error_upload">上传失败</string>
+</resources>

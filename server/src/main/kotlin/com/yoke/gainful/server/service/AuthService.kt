@@ -21,7 +21,7 @@ class AuthService(
     private val sessionService: SessionService,
     private val tokenService: TokenService,
 ) {
-    fun register(username: String, email: String, password: String): String {
+    fun register(username: String, email: String, password: String, deviceInfo: String? = null, ipAddress: String? = null): AuthResponse {
         if (password.length < 6) throw ValidationException("Password must be at least 6 characters")
 
         val existing =
@@ -42,7 +42,16 @@ class AuthService(
             }
         }
 
-        return userId.toString()
+        val session = sessionService.createSession(userId = userId, deviceInfo = deviceInfo, ipAddress = ipAddress)
+        val token =
+            tokenService.generate(
+                config = tokenConfig,
+                TokenClaim("sub", userId.toString()),
+                TokenClaim("sessionId", session.id.toString()),
+                TokenClaim("username", username),
+            )
+
+        return AuthResponse(token = token, userId = userId.toString(), username = username)
     }
 
     fun login(username: String, password: String, deviceInfo: String?, ipAddress: String?): AuthResponse {

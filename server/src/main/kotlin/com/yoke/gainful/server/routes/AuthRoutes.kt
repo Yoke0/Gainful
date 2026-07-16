@@ -23,8 +23,10 @@ fun Route.authRoutes() {
             if (request.email.isBlank()) throw ValidationException("Email is required")
             if (request.password.isBlank()) throw ValidationException("Password is required")
 
-            val userId = authService.register(request.username, request.email, request.password)
-            call.respond(mapOf("userId" to userId))
+            val deviceInfo = call.request.userAgent()
+            val ipAddress = call.request.local.remoteAddress
+            val response = authService.register(request.username, request.email, request.password, deviceInfo, ipAddress)
+            call.respond(response)
         }
 
         post("/login") {

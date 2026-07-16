@@ -19,6 +19,9 @@ import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.GainfulTheme
 import com.yoke.gainful.di.initKoin
+import com.yoke.gainful.feature.account.navigation.AvatarNavKey
+import com.yoke.gainful.feature.account.navigation.LoginNavKey
+import com.yoke.gainful.feature.account.navigation.accountEntry
 import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
 import com.yoke.gainful.feature.dashboard.navigation.dashboardEntry
 import com.yoke.gainful.feature.holdings.navigation.holdingsEntry
@@ -92,7 +95,12 @@ fun App() {
                                 dashboardEntry()
                                 transactionsEntry(navigator)
                                 holdingsEntry(navigator)
-                                settingsEntry(navigator)
+                                settingsEntry(
+                                    navigator,
+                                    onNavigateToLogin = { navigator.navigate(LoginNavKey) },
+                                    onNavigateToAvatar = { navigator.navigate(AvatarNavKey) },
+                                )
+                                accountEntry(navigator)
                             }
 
                         GainfulNavGraph(

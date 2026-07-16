@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="image_picker_title">Select Image</string>
+    <string name="image_picker_filter">Image files</string>
+    <string name="csv_save_title">Save Transaction Records</string>
+    <string name="csv_save_filter">CSV files</string>
+    <string name="csv_pick_title">Select Transaction Record File</string>
+    <string name="csv_pick_filter">CSV files</string>
+</resources>

@@ -58,6 +58,7 @@ kotlin {
             implementation(projects.feature.holdings)
             implementation(projects.feature.transactions)
             implementation(projects.feature.settings)
+            implementation(projects.feature.account)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

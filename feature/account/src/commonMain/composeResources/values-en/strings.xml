@@ -1,0 +1,76 @@
+<resources>
+    <!-- Login -->
+    <string name="login_title">Login</string>
+    <string name="login_hero_title">Welcome Back</string>
+    <string name="login_hero_subtitle">Login to sync your transaction data</string>
+    <string name="login_username_label">Username / Email</string>
+    <string name="login_username_hint">Enter username or email</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_hint">Enter password</string>
+    <string name="login_submit">Login</string>
+    <string name="login_loading">Logging in...</string>
+    <string name="login_no_account">Don\'t have an account? </string>
+    <string name="login_register_link">Sign up</string>
+    <string name="login_error_empty">Please enter username and password</string>
+    <string name="login_error_invalid">Invalid username or password</string>
+
+    <!-- Register -->
+    <string name="register_title">Register</string>
+    <string name="register_hero_title">Create Account</string>
+    <string name="register_hero_subtitle">Start recording every transaction after registration</string>
+    <string name="register_nickname_label">Nickname</string>
+    <string name="register_nickname_hint">Give yourself a name</string>
+    <string name="register_nickname_length">2-20 characters</string>
+    <string name="register_email_label">Email</string>
+    <string name="register_email_hint">your@email.com</string>
+    <string name="register_password_label">Password</string>
+    <string name="register_password_hint">At least 8 characters, with letters and numbers</string>
+    <string name="register_confirm_password_label">Confirm Password</string>
+    <string name="register_confirm_password_hint">Enter password again</string>
+    <string name="register_submit">Register</string>
+    <string name="register_loading">Registering...</string>
+    <string name="register_has_account">Already have an account? </string>
+    <string name="register_login_link">Login</string>
+    <string name="register_password_mismatch">Passwords do not match</string>
+    <string name="register_error_empty">Please fill in all required fields</string>
+    <string name="register_error_weak_password">Password strength is too weak</string>
+
+    <!-- Password Strength -->
+    <string name="strength_label">Password strength: </string>
+    <string name="strength_weak">Weak</string>
+    <string name="strength_fair">Fair</string>
+    <string name="strength_medium">Medium</string>
+    <string name="strength_strong">Strong</string>
+
+    <!-- Avatar -->
+    <string name="avatar_title">Change Avatar</string>
+    <string name="avatar_current_label">Current Avatar</string>
+    <string name="avatar_preset_label">Choose Avatar</string>
+    <string name="avatar_upload_label">Upload Custom Avatar</string>
+    <string name="avatar_upload_hint">Click to upload image</string>
+    <string name="avatar_upload_format">Supports JPG, PNG, recommended 200x200px</string>
+    <string name="avatar_confirm">Confirm Change</string>
+
+    <!-- User Card -->
+    <string name="user_card_login">Click to login</string>
+    <string name="user_card_login_subtitle">Login to sync your transaction data</string>
+    <string name="user_card_logout">Logout</string>
+    <string name="user_id_format">ID: GF-%1$s</string>
+
+    <!-- Agreement -->
+    <string name="register_agreement_prefix">I have read and agree to the </string>
+    <string name="register_terms_of_service">User Service Agreement</string>
+    <string name="register_agreement_and"> and </string>
+    <string name="register_privacy_policy">Privacy Policy</string>
+
+    <!-- Validation -->
+    <string name="error_nickname_length">Nickname needs 2-20 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_password_too_short">Password needs at least 6 characters</string>
+    <string name="error_agreement_required">Please agree to the User Service Agreement and Privacy Policy</string>
+
+    <!-- Avatar Errors -->
+    <string name="avatar_error_image_process">Image processing failed</string>
+    <string name="avatar_error_save">Save failed</string>
+    <string name="avatar_error_upload">Upload failed</string>
+</resources>

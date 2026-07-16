@@ -29,10 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.yoke.gainful.common.BuildConfig
 import com.yoke.gainful.designsystem.components.GainfulDialog
 import com.yoke.gainful.designsystem.components.GainfulScaffold
@@ -55,6 +57,9 @@ import com.yoke.gainful.model.GainLossColorScheme
 import com.yoke.gainful.ui.TimePickerDialog
 import gainful.core.designsystem.generated.resources.ic_check
 import gainful.core.designsystem.generated.resources.ic_chevron_down
+import gainful.core.designsystem.generated.resources.ic_chevron_right
+import gainful.core.designsystem.generated.resources.ic_logout
+import gainful.core.designsystem.generated.resources.ic_user
 import gainful.feature.settings.generated.resources.Res
 import gainful.feature.settings.generated.resources.about_group
 import gainful.feature.settings.generated.resources.app_version
@@ -88,6 +93,11 @@ import gainful.feature.settings.generated.resources.refresh_frequency_title
 import gainful.feature.settings.generated.resources.settings_data_group
 import gainful.feature.settings.generated.resources.settings_title
 import gainful.feature.settings.generated.resources.trading_hours_group
+import gainful.feature.settings.generated.resources.user_card_default_name
+import gainful.feature.settings.generated.resources.user_card_login_prompt
+import gainful.feature.settings.generated.resources.user_card_login_subtitle
+import gainful.feature.settings.generated.resources.user_card_logout
+import gainful.feature.settings.generated.resources.user_id_format
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -103,6 +113,8 @@ import gainful.core.designsystem.generated.resources.Res as DsRes
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateToImport: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToAvatar: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val fileUtil = rememberCsvFileUtil()
@@ -128,6 +140,8 @@ fun SettingsScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
         onNavigateToImport = onNavigateToImport,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToAvatar = onNavigateToAvatar,
     )
 
     if (uiState.showTimePicker) {
@@ -193,6 +207,8 @@ private fun SettingsScreen(
     uiState: SettingsUiState,
     onIntent: (SettingsIntent) -> Unit,
     onNavigateToImport: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToAvatar: () -> Unit,
 ) {
     GainfulScaffold(
         appTopBar = {
@@ -208,6 +224,18 @@ private fun SettingsScreen(
                     .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+            // User Card
+            UserCard(
+                isLoggedIn = uiState.isLoggedIn,
+                nickname = uiState.userNickname,
+                userId = uiState.userId,
+                avatarEmoji = uiState.avatarEmoji,
+                avatarUrl = uiState.avatarUrl,
+                onClickLogin = onNavigateToLogin,
+                onClickAvatar = onNavigateToAvatar,
+                onClickLogout = { onIntent(SettingsIntent.Logout) },
+            )
+
             SettingsGroup(title = stringResource(Res.string.settings_data_group)) {
                 SettingRow(
                     label = stringResource(Res.string.refresh_frequency),
@@ -294,6 +322,158 @@ private fun SettingsGroup(
                     .border(1.dp, Border, RoundedCornerShape(10.dp)),
         ) {
             content()
+        }
+    }
+}
+
+@Composable
+private fun UserCard(
+    isLoggedIn: Boolean,
+    nickname: String?,
+    userId: String?,
+    avatarEmoji: String?,
+    avatarUrl: String?,
+    onClickLogin: () -> Unit,
+    onClickAvatar: () -> Unit,
+    onClickLogout: () -> Unit,
+) {
+    if (isLoggedIn) {
+        // Logged in state
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Avatar
+            Box(
+                modifier =
+                    Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Gold, CircleShape)
+                        .background(Surface)
+                        .clickable { onClickAvatar() },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (avatarUrl != null) {
+                    AsyncImage(
+                        model = "http://192.168.31.47:8080$avatarUrl",
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Text(
+                        text = avatarEmoji ?: "\uD83D\uDE0E",
+                        fontSize = 28.sp,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.padding(start = 12.dp))
+
+            // User info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = nickname ?: stringResource(Res.string.user_card_default_name),
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                    maxLines = 1,
+                )
+                if (userId != null) {
+                    Text(
+                        text = stringResource(Res.string.user_id_format, userId),
+                        fontSize = 13.sp,
+                        color = TextMuted,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                }
+            }
+
+            // Logout button
+            Row(
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(50))
+                        .border(1.dp, Border, RoundedCornerShape(50))
+                        .clickable { onClickLogout() }
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Icon(
+                    painter = painterResource(DsRes.drawable.ic_logout),
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = TextSecondary,
+                )
+                Text(
+                    text = stringResource(Res.string.user_card_logout),
+                    fontSize = 13.sp,
+                    color = TextSecondary,
+                )
+            }
+        }
+    } else {
+        // Logged out state
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Surface)
+                    .border(1.dp, Border, RoundedCornerShape(10.dp))
+                    .clickable { onClickLogin() }
+                    .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Avatar placeholder
+            Box(
+                modifier =
+                    Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, Border, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(DsRes.drawable.ic_user),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = TextMuted,
+                )
+            }
+
+            Spacer(modifier = Modifier.padding(start = 12.dp))
+
+            // Login prompt
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(Res.string.user_card_login_prompt),
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                )
+                Text(
+                    text = stringResource(Res.string.user_card_login_subtitle),
+                    fontSize = 13.sp,
+                    color = TextSecondary,
+                )
+            }
+
+            // Arrow
+            Icon(
+                painter = painterResource(DsRes.drawable.ic_chevron_right),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = TextMuted,
+            )
         }
     }
 }

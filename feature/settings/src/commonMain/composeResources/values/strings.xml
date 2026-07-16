@@ -69,4 +69,11 @@
         <item>卖出</item>
         <item>股息</item>
     </string-array>
+
+    <!-- User Card -->
+    <string name="user_card_default_name">用户</string>
+    <string name="user_card_login_prompt">点击登录</string>
+    <string name="user_card_login_subtitle">登录后同步你的交易数据</string>
+    <string name="user_card_logout">登出</string>
+    <string name="user_id_format">ID: GF-%1$s</string>
 </resources>
