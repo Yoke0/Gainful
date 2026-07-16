@@ -4,6 +4,8 @@ import com.yoke.gainful.network.EastMoneyApi
 import com.yoke.gainful.network.EastMoneyApiImpl
 import com.yoke.gainful.network.GainfulApi
 import com.yoke.gainful.network.GainfulApiImpl
+import com.yoke.gainful.network.TransactionApi
+import com.yoke.gainful.network.TransactionApiImpl
 import com.yoke.gainful.network.createPlatformHttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
@@ -35,4 +37,5 @@ val networkModule =
             }
         }
         single<GainfulApi> { GainfulApiImpl(get(named("serverHttpClient"))) }
+        single<TransactionApi> { TransactionApiImpl(get(named("serverHttpClient"))) }
     }

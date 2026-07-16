@@ -28,6 +28,6 @@ val domainModule =
         factory { GetTransactionsWithAssetsOnceUseCase(get(), get()) }
         factory { SearchAssetsUseCase(get()) }
         factory { InsertAssetUseCase(get()) }
-        factory { AddTransactionUseCase(get(), get()) }
-        factory { DeleteTransactionUseCase(get(), get()) }
+        factory { AddTransactionUseCase(get(), get(), get(), get(), get()) }
+        factory { DeleteTransactionUseCase(get(), get(), get(), get(), get()) }
     }

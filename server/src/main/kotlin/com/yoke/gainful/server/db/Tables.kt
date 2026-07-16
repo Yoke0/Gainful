@@ -31,6 +31,7 @@ object Transactions : Table("transactions") {
     val tradeDate = date("trade_date")
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
+    val deletedAt = datetime("deleted_at").nullable()
 
     override val primaryKey = PrimaryKey(id)
 

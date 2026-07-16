@@ -14,6 +14,7 @@ fun TransactionEntity.toDomain(): Transaction =
         amount = amount,
         tradeDate = tradeDate,
         timestamp = timestamp,
+        updatedAt = updatedAt,
     )
 
 fun Transaction.toEntity(): TransactionEntity =
@@ -26,4 +27,5 @@ fun Transaction.toEntity(): TransactionEntity =
         amount = amount,
         tradeDate = tradeDate,
         timestamp = timestamp,
+        updatedAt = updatedAt,
     )

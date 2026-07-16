@@ -6,30 +6,50 @@ package com.yoke.gainful.feature.settings.`import`
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.data.repository.AssetRepository
+import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
+import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnceUseCase
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.feature.settings.model.toDisplayItems
 import com.yoke.gainful.feature.settings.util.CsvUtil
+import com.yoke.gainful.model.Transaction
+import com.yoke.gainful.network.TransactionApi
+import com.yoke.gainful.network.model.CreateTransactionRequestDto
 import com.yoke.gainful.ui.TransactionDisplayItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class ImportViewModel(
     private val transactionRepository: TransactionRepository,
+    private val syncQueueRepository: SyncQueueRepository,
+    private val transactionApi: TransactionApi,
+    private val authDataSource: AuthDataSource,
     private val getTransactionsWithAssetsOnceUseCase: GetTransactionsWithAssetsOnceUseCase,
     private val assetRepository: AssetRepository,
     private val searchAssetsUseCase: SearchAssetsUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ImportUiState())
     val uiState: StateFlow<ImportUiState> = _uiState.asStateFlow()
+
+    companion object {
+        // Application-level scope for uploads — not tied to any ViewModel
+        private val uploadScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    }
 
     fun onIntent(intent: ImportIntent) {
         when (intent) {
@@ -147,6 +167,7 @@ class ImportViewModel(
                     config = csvConfig,
                     deletedIndices = preview.deletedIndices,
                 )
+            // Save locally first (fast)
             if (transactions.isNotEmpty()) {
                 transactionRepository.insertTransactions(transactions)
             }
@@ -158,6 +179,29 @@ class ImportViewModel(
                     importedCount = transactions.size,
                 )
             }
+            // Upload to server in independent scope (survives navigation)
+            if (transactions.isNotEmpty()) {
+                uploadToServer(transactions)
+            }
+        }
+    }
+
+    private fun uploadToServer(transactions: List<Transaction>) {
+        uploadScope.launch {
+            val state = authDataSource.authState.first()
+            val token = state.token
+            transactions.map { tx ->
+                async {
+                    if (token != null) {
+                        val result =
+                            runCatching {
+                                transactionApi.createTransaction(token, tx.toCreateRequest())
+                            }
+                        if (result.isSuccess) return@async
+                    }
+                    syncQueueRepository.enqueue("transaction", tx.id, "CREATE")
+                }
+            }.awaitAll()
         }
     }
 
@@ -184,6 +228,23 @@ class ImportViewModel(
     private fun dismissDuplicateConfirm() {
         _uiState.update { it.copy(showDuplicateConfirm = false) }
     }
+}
+
+private fun Transaction.toCreateRequest() =
+    CreateTransactionRequestDto(
+        assetCode = assetId,
+        type = type.value,
+        quantity = quantity,
+        price = price,
+        amount = amount,
+        tradeDate = formatDate(tradeDate),
+    )
+
+private fun formatDate(millis: Long): String {
+    val ldt =
+        Instant.fromEpochMilliseconds(millis)
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+    return ldt.date.toString()
 }
 
 data class DeleteDialogState(

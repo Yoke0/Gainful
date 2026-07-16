@@ -9,6 +9,7 @@ data class Transaction(
     val amount: Double = 0.0,
     val tradeDate: Long,
     val timestamp: Long,
+    val updatedAt: Long = timestamp,
 ) {
     val fee: Double get() =
         when (type) {
