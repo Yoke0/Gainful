@@ -2,56 +2,59 @@ package com.yoke.gainful.file
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import gainful.core.file.generated.resources.Res
+import gainful.core.file.generated.resources.csv_pick_title
+import gainful.core.file.generated.resources.csv_save_title
+import org.jetbrains.compose.resources.stringResource
+import java.awt.FileDialog
+import java.awt.Frame
 import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
 
 @Composable
 actual fun rememberCsvFileUtil(): CsvFileUtil {
-    return remember { DesktopFileUtil() }
+    val saveTitle = stringResource(Res.string.csv_save_title)
+    val pickTitle = stringResource(Res.string.csv_pick_title)
+    return remember(saveTitle, pickTitle) {
+        DesktopFileUtil(saveTitle, pickTitle)
+    }
 }
 
-private class DesktopFileUtil : CsvFileUtil {
+private class DesktopFileUtil(
+    private val saveTitle: String,
+    private val pickTitle: String,
+) : CsvFileUtil {
     override fun saveFile(fileName: String, content: String, onResult: (Boolean) -> Unit) {
-        val success =
-            runCatching {
-                val chooser =
-                    JFileChooser().apply {
-                        dialogTitle = "保存交易记录"
-                        selectedFile = File(fileName)
-                        fileFilter = FileNameExtensionFilter("CSV 文件", "csv")
-                    }
-                val result = chooser.showSaveDialog(null)
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    var file = chooser.selectedFile
+        val dialog = FileDialog(null as Frame?, saveTitle, FileDialog.SAVE)
+        dialog.file = fileName
+        dialog.isVisible = true
+        val selectedFile = dialog.file
+        if (selectedFile != null) {
+            val success =
+                runCatching {
+                    var file = File(dialog.directory, selectedFile)
                     if (!file.name.endsWith(".csv")) {
                         file = File(file.absolutePath + ".csv")
                     }
                     file.writeText(content)
-                    true
-                } else {
-                    false
-                }
-            }.getOrDefault(false)
-        onResult(success)
+                }.isSuccess
+            onResult(success)
+        } else {
+            onResult(false)
+        }
     }
 
     override fun pickFile(onResult: (String?, String?) -> Unit) {
-        val result =
+        val dialog = FileDialog(null as Frame?, pickTitle, FileDialog.LOAD)
+        dialog.file = "*.csv"
+        dialog.isVisible = true
+        val selectedFile = dialog.file
+        if (selectedFile != null) {
+            val file = File(dialog.directory, selectedFile)
             runCatching {
-                val chooser =
-                    JFileChooser().apply {
-                        dialogTitle = "选择交易记录文件"
-                        fileFilter = FileNameExtensionFilter("CSV 文件", "csv")
-                    }
-                val result = chooser.showOpenDialog(null)
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    val file = chooser.selectedFile
-                    file.readText() to file.name
-                } else {
-                    null
-                }
-            }.getOrNull()
-        onResult(result?.first, result?.second)
+                onResult(file.readText(), file.name)
+            }.getOrNull() ?: onResult(null, null)
+        } else {
+            onResult(null, null)
+        }
     }
 }

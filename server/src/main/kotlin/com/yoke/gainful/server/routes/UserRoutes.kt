@@ -42,8 +42,9 @@ fun Route.userRoutes() {
             post("/avatar") {
                 val principal = call.principal<UserPrincipal>()!!
                 val multipart = call.receiveMultipart()
-                val avatarUrl = avatarService.uploadAvatar(principal.userId, multipart)
-                call.respond(mapOf("avatarUrl" to avatarUrl))
+                avatarService.uploadAvatar(principal.userId, multipart)
+                val user = userService.getProfile(principal.userId)
+                call.respond(user)
             }
 
             get("/sessions") {

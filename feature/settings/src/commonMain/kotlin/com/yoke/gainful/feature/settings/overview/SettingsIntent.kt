@@ -25,6 +25,8 @@ sealed interface SettingsIntent {
     data class ConfirmExport(val csvConfig: CsvConfig) : SettingsIntent
 
     data object DismissExportResult : SettingsIntent
+
+    data object Logout : SettingsIntent
 }
 
 enum class TimePickerTarget { OPEN, CLOSE }

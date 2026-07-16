@@ -3,6 +3,7 @@ package com.yoke.gainful.feature.settings.overview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.common.extensions.pad2
+import com.yoke.gainful.data.repository.AuthRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnceUseCase
 import com.yoke.gainful.feature.settings.model.CsvConfig
@@ -11,6 +12,7 @@ import com.yoke.gainful.model.GainLossColorScheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -21,6 +23,7 @@ import kotlin.time.Clock
 class SettingsViewModel(
     private val repository: UserPreferencesRepository,
     private val getTransactionsWithAssetsOnceUseCase: GetTransactionsWithAssetsOnceUseCase,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -37,6 +40,38 @@ class SettingsViewModel(
                         closeMinute = prefs.closeMinute,
                         gainLossColorScheme = prefs.gainLossColorScheme,
                     )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            authRepository.authState.collect { authState ->
+                _uiState.update {
+                    it.copy(
+                        isLoggedIn = authState.isLoggedIn,
+                        userId = authState.userId,
+                        userNickname = authState.username,
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            authRepository.avatarEmoji.collect { emoji ->
+                _uiState.update { it.copy(avatarEmoji = emoji) }
+            }
+        }
+
+        viewModelScope.launch {
+            authRepository.userProfile.collect { profile ->
+                _uiState.update { it.copy(avatarUrl = profile?.avatarUrl) }
+            }
+        }
+
+        viewModelScope.launch {
+            authRepository.authState.first().let { authState ->
+                if (authState.isLoggedIn) {
+                    authRepository.refreshProfile()
                 }
             }
         }
@@ -103,6 +138,12 @@ class SettingsViewModel(
             is SettingsIntent.DismissExportResult -> {
                 _uiState.update {
                     it.copy(showExportResult = false, exportResult = null)
+                }
+            }
+
+            is SettingsIntent.Logout -> {
+                viewModelScope.launch {
+                    authRepository.logout()
                 }
             }
         }
@@ -182,6 +223,11 @@ data class SettingsUiState(
     val exportCsvContent: String? = null,
     val showExportResult: Boolean = false,
     val exportResult: ExportResult? = null,
+    val isLoggedIn: Boolean = false,
+    val userId: String? = null,
+    val userNickname: String? = null,
+    val avatarEmoji: String? = null,
+    val avatarUrl: String? = null,
 ) {
     val openTimeDisplay: String get() = "${openHour.pad2()}:${openMinute.pad2()}"
     val closeTimeDisplay: String get() = "${closeHour.pad2()}:${closeMinute.pad2()}"

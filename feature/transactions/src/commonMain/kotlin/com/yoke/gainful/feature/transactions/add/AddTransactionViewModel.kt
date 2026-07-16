@@ -157,12 +157,9 @@ class AddTransactionViewModel(
                         _uiState.update { it.copy(suggestions = emptyList()) }
                         return@collect
                     }
-                    try {
-                        val results = searchAssetsUseCase(query)
-                        _uiState.update { it.copy(suggestions = results) }
-                    } catch (_: Exception) {
-                        _uiState.update { it.copy(suggestions = emptyList()) }
-                    }
+                    runCatching { searchAssetsUseCase(query) }
+                        .onSuccess { results -> _uiState.update { it.copy(suggestions = results) } }
+                        .onFailure { _uiState.update { it.copy(suggestions = emptyList()) } }
                 }
         }
     }

@@ -2,6 +2,7 @@ package com.yoke.gainful.di
 
 import com.yoke.gainful.data.di.dataModule
 import com.yoke.gainful.domain.di.domainModule
+import com.yoke.gainful.feature.account.di.accountViewModelModule
 import com.yoke.gainful.feature.dashboard.di.dashboardViewModelModule
 import com.yoke.gainful.feature.holdings.di.holdingsViewModelModule
 import com.yoke.gainful.feature.settings.di.settingsViewModelModule
@@ -25,4 +26,5 @@ fun allModules(): List<Module> =
             transactionsViewModelModule,
             holdingsViewModelModule,
             settingsViewModelModule,
+            accountViewModelModule,
         )

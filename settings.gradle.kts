@@ -56,5 +56,6 @@ include(":feature:dashboard")
 include(":feature:holdings")
 include(":feature:transactions")
 include(":feature:settings")
+include(":feature:account")
 
 include(":server")

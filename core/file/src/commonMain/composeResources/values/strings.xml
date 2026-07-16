@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="image_picker_title">选择图片</string>
+    <string name="image_picker_filter">图片文件</string>
+    <string name="csv_save_title">保存交易记录</string>
+    <string name="csv_save_filter">CSV 文件</string>
+    <string name="csv_pick_title">选择交易记录文件</string>
+    <string name="csv_pick_filter">CSV 文件</string>
+</resources>

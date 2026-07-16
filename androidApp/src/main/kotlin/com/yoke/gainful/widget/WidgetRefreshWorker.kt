@@ -17,7 +17,7 @@ class WidgetRefreshWorker(
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
-        return try {
+        return runCatching {
             if (!WidgetContextHolder.isInitialized()) {
                 WidgetContextHolder.init(applicationContext)
             }
@@ -32,9 +32,7 @@ class WidgetRefreshWorker(
             TodayPnlWidget().updateAll(applicationContext)
 
             Result.success()
-        } catch (e: Exception) {
-            Result.retry()
-        }
+        }.getOrElse { Result.retry() }
     }
 
     companion object {

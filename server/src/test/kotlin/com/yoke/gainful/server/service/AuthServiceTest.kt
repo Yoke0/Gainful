@@ -8,9 +8,10 @@ import com.yoke.gainful.server.plugins.UnauthorizedException
 import com.yoke.gainful.server.plugins.ValidationException
 import com.yoke.gainful.server.security.token.JwtTokenService
 import com.yoke.gainful.server.security.token.TokenConfig
+import io.mockk.every
+import io.mockk.mockk
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -24,6 +25,7 @@ import kotlin.uuid.Uuid
 class AuthServiceTest {
     private lateinit var database: Database
     private lateinit var authService: AuthService
+    private lateinit var sessionService: SessionService
 
     @BeforeTest
     fun setup() {
@@ -34,7 +36,12 @@ class AuthServiceTest {
 
         val tokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000)
         val tokenService = JwtTokenService()
-        val sessionService = SessionService()
+        sessionService = mockk(relaxed = true)
+        every { sessionService.createSession(any(), any(), any()) } returns
+            SessionService.SessionInfo(
+                id = Uuid.random(),
+                userId = Uuid.random(),
+            )
         authService = AuthService(tokenConfig, sessionService, tokenService)
     }
 
@@ -47,9 +54,10 @@ class AuthServiceTest {
 
     @Test
     fun `register creates user successfully`() {
-        val userId = authService.register("testuser", "test@test.com", "123456")
-        assertNotNull(userId)
-        assertTrue(Uuid.parse(userId) is Uuid)
+        val response = authService.register("testuser", "test@test.com", "123456")
+        assertNotNull(response.token)
+        assertTrue(response.token.isNotEmpty())
+        assertEquals("testuser", response.username)
     }
 
     @Test
@@ -99,14 +107,10 @@ class AuthServiceTest {
     }
 
     @Test
-    fun `login creates session record`() {
+    fun `login calls session service`() {
         authService.register("testuser", "test@test.com", "123456")
         authService.login("testuser", "123456", null, null)
 
-        val sessions =
-            transaction(database) {
-                UserSessions.selectAll().toList()
-            }
-        assertEquals(1, sessions.size)
+        io.mockk.verify(exactly = 2) { sessionService.createSession(any(), any(), any()) }
     }
 }

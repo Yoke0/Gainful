@@ -8,12 +8,18 @@ import com.yoke.gainful.feature.settings.overview.SettingsViewModel
 import com.yoke.gainful.navigation.Navigator
 import org.koin.compose.viewmodel.koinViewModel
 
-fun EntryProviderScope<NavKey>.settingsEntry(navigator: Navigator) {
+fun EntryProviderScope<NavKey>.settingsEntry(
+    navigator: Navigator,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToAvatar: () -> Unit = {},
+) {
     entry<SettingsNavKey> {
         val viewModel = koinViewModel<SettingsViewModel>()
         SettingsScreen(
             viewModel = viewModel,
             onNavigateToImport = { navigator.navigate(ImportTransactionsNavKey) },
+            onNavigateToLogin = onNavigateToLogin,
+            onNavigateToAvatar = onNavigateToAvatar,
         )
     }
     entry<ImportTransactionsNavKey> {

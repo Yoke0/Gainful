@@ -1,6 +1,8 @@
 package com.yoke.gainful.data.di
 
 import com.yoke.gainful.data.repository.AssetRepository
+import com.yoke.gainful.data.repository.AuthRepository
+import com.yoke.gainful.data.repository.AuthRepositoryImpl
 import com.yoke.gainful.data.repository.EastMoneyMarketRepository
 import com.yoke.gainful.data.repository.KLineCacheRepository
 import com.yoke.gainful.data.repository.MarketRepository
@@ -14,6 +16,7 @@ import com.yoke.gainful.data.repository.PnlCacheRepository
 import com.yoke.gainful.data.repository.QuoteCacheRepository
 import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
+import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.datastore.UserPreferencesDataSource
 import org.koin.dsl.module
 
@@ -26,4 +29,5 @@ val dataModule =
         single<QuoteCacheRepository> { OfflineQuoteCacheRepository(get()) }
         single<KLineCacheRepository> { OfflineKLineCacheRepository(get()) }
         single<PnlCacheRepository> { OfflinePnlCacheRepository(get()) }
+        single<AuthRepository> { AuthRepositoryImpl(get(), get<AuthDataSource>()) }
     }
