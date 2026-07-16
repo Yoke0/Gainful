@@ -1,5 +1,7 @@
 package com.yoke.gainful.server.routes
 
+import com.yoke.gainful.api.AUTH_LOGIN
+import com.yoke.gainful.api.AUTH_REGISTER
 import com.yoke.gainful.server.config.UploadConfig
 import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.db.UserSessions
@@ -86,7 +88,7 @@ class AuthRoutesTest {
             application { testModule() }
 
             val response =
-                client.post("/api/auth/register") {
+                client.post(AUTH_REGISTER) {
                     contentType(ContentType.Application.Json)
                     setBody("""{"username":"testuser","email":"test@test.com","password":"123456"}""")
                 }
@@ -101,13 +103,13 @@ class AuthRoutesTest {
         testApplication {
             application { testModule() }
 
-            client.post("/api/auth/register") {
+            client.post(AUTH_REGISTER) {
                 contentType(ContentType.Application.Json)
                 setBody("""{"username":"testuser","email":"test@test.com","password":"123456"}""")
             }
 
             val response =
-                client.post("/api/auth/register") {
+                client.post(AUTH_REGISTER) {
                     contentType(ContentType.Application.Json)
                     setBody("""{"username":"testuser","email":"other@test.com","password":"123456"}""")
                 }
@@ -120,13 +122,13 @@ class AuthRoutesTest {
         testApplication {
             application { testModule() }
 
-            client.post("/api/auth/register") {
+            client.post(AUTH_REGISTER) {
                 contentType(ContentType.Application.Json)
                 setBody("""{"username":"testuser","email":"test@test.com","password":"123456"}""")
             }
 
             val response =
-                client.post("/api/auth/login") {
+                client.post(AUTH_LOGIN) {
                     contentType(ContentType.Application.Json)
                     setBody("""{"username":"testuser","password":"123456"}""")
                 }
@@ -141,13 +143,13 @@ class AuthRoutesTest {
         testApplication {
             application { testModule() }
 
-            client.post("/api/auth/register") {
+            client.post(AUTH_REGISTER) {
                 contentType(ContentType.Application.Json)
                 setBody("""{"username":"testuser","email":"test@test.com","password":"123456"}""")
             }
 
             val response =
-                client.post("/api/auth/login") {
+                client.post(AUTH_LOGIN) {
                     contentType(ContentType.Application.Json)
                     setBody("""{"username":"testuser","password":"wrong"}""")
                 }

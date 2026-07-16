@@ -15,8 +15,10 @@ import com.yoke.gainful.data.repository.OfflineTransactionRepository
 import com.yoke.gainful.data.repository.OfflineUserPreferencesRepository
 import com.yoke.gainful.data.repository.PnlCacheRepository
 import com.yoke.gainful.data.repository.QuoteCacheRepository
+import com.yoke.gainful.data.repository.ServerTransactionRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
+import com.yoke.gainful.data.repository.TransactionSyncRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.datastore.UserPreferencesDataSource
@@ -32,5 +34,6 @@ val dataModule =
         single<QuoteCacheRepository> { OfflineQuoteCacheRepository(get()) }
         single<KLineCacheRepository> { OfflineKLineCacheRepository(get()) }
         single<PnlCacheRepository> { OfflinePnlCacheRepository(get()) }
+        single<TransactionSyncRepository> { ServerTransactionRepository(get()) }
         single<AuthRepository> { AuthRepositoryImpl(get(), get<AuthDataSource>(), get(), get()) }
     }

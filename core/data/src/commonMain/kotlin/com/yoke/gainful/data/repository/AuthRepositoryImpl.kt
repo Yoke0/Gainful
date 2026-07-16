@@ -1,13 +1,13 @@
 package com.yoke.gainful.data.repository
 
+import com.yoke.gainful.api.LoginRequest
+import com.yoke.gainful.api.RegisterRequest
 import com.yoke.gainful.database.dao.SyncQueueDao
 import com.yoke.gainful.database.dao.TransactionDao
 import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.model.AuthState
 import com.yoke.gainful.model.UserProfile
-import com.yoke.gainful.network.GainfulApi
-import com.yoke.gainful.network.model.LoginRequest
-import com.yoke.gainful.network.model.RegisterRequest
+import com.yoke.gainful.network.server.GainfulApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

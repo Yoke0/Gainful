@@ -3,15 +3,15 @@ package com.yoke.gainful.domain.usecase.transaction
 import com.yoke.gainful.data.repository.PnlCacheRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
+import com.yoke.gainful.data.repository.TransactionSyncRepository
 import com.yoke.gainful.datastore.AuthDataSource
-import com.yoke.gainful.network.TransactionApi
 import kotlinx.coroutines.flow.first
 
 class DeleteTransactionUseCase(
     private val transactionRepository: TransactionRepository,
     private val pnlCacheRepository: PnlCacheRepository,
     private val syncQueueRepository: SyncQueueRepository,
-    private val transactionApi: TransactionApi,
+    private val transactionSyncRepository: TransactionSyncRepository,
     private val authDataSource: AuthDataSource,
 ) {
     suspend operator fun invoke(id: String) {
@@ -23,7 +23,7 @@ class DeleteTransactionUseCase(
         if (token != null) {
             val result =
                 runCatching {
-                    transactionApi.deleteTransaction(token, id)
+                    transactionSyncRepository.deleteTransaction(token, id)
                 }
             if (result.isSuccess) return
         }

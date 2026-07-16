@@ -1,5 +1,6 @@
 package com.yoke.gainful.server.routes
 
+import com.yoke.gainful.api.TRANSACTIONS
 import com.yoke.gainful.server.config.UploadConfig
 import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.db.UserSessions
@@ -142,7 +143,7 @@ class TransactionRoutesTest {
             application { testModule() }
 
             val response =
-                client.post("/api/transactions") {
+                client.post(TRANSACTIONS) {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                     contentType(ContentType.Application.Json)
                     setBody(
@@ -160,14 +161,14 @@ class TransactionRoutesTest {
         testApplication {
             application { testModule() }
 
-            client.post("/api/transactions") {
+            client.post(TRANSACTIONS) {
                 header(HttpHeaders.Authorization, "Bearer $testToken")
                 contentType(ContentType.Application.Json)
                 setBody("""{"assetCode":"600519","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":"2025-01-15"}""")
             }
 
             val response =
-                client.get("/api/transactions") {
+                client.get(TRANSACTIONS) {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                 }
 
@@ -181,7 +182,7 @@ class TransactionRoutesTest {
         testApplication {
             application { testModule() }
 
-            val response = client.get("/api/transactions")
+            val response = client.get(TRANSACTIONS)
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
 
@@ -191,7 +192,7 @@ class TransactionRoutesTest {
             application { testModule() }
 
             val createResponse =
-                client.post("/api/transactions") {
+                client.post(TRANSACTIONS) {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                     contentType(ContentType.Application.Json)
                     setBody("""{"assetCode":"600519","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":"2025-01-15"}""")

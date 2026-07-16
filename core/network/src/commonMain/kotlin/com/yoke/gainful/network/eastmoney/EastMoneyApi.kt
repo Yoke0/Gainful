@@ -1,9 +1,4 @@
-package com.yoke.gainful.network
-
-import com.yoke.gainful.network.model.KLineData
-import com.yoke.gainful.network.model.QuoteData
-import com.yoke.gainful.network.model.SearchItemDto
-import com.yoke.gainful.network.model.TrendData
+package com.yoke.gainful.network.eastmoney
 
 interface EastMoneyApi {
     suspend fun getQuote(secId: String): QuoteData?

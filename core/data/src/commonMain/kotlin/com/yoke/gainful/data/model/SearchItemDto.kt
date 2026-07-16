@@ -1,7 +1,7 @@
 package com.yoke.gainful.data.model
 
 import com.yoke.gainful.model.Asset
-import com.yoke.gainful.network.model.SearchItemDto
+import com.yoke.gainful.network.eastmoney.SearchItemDto
 
 fun SearchItemDto.toAsset(): Asset? {
     val code = code ?: return null

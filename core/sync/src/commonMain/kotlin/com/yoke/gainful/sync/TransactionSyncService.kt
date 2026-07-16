@@ -1,13 +1,15 @@
 package com.yoke.gainful.sync
 
+import com.yoke.gainful.api.CreateTransactionRequest
+import com.yoke.gainful.api.TransactionResponse
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
+import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
-import com.yoke.gainful.network.TransactionApi
-import com.yoke.gainful.network.model.CreateTransactionRequestDto
+import com.yoke.gainful.network.server.TransactionApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,9 +20,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
@@ -166,8 +165,8 @@ class TransactionSyncService(
         }
     }
 
-    private fun com.yoke.gainful.network.model.TransactionDto.toDomain() =
-        com.yoke.gainful.model.Transaction(
+    private fun TransactionResponse.toDomain() =
+        Transaction(
             id = id,
             assetId = assetCode,
             type = TransactionType.fromCode(type),
@@ -179,8 +178,8 @@ class TransactionSyncService(
             updatedAt = parseDateTime(updatedAt),
         )
 
-    private fun com.yoke.gainful.model.Transaction.toCreateRequest() =
-        CreateTransactionRequestDto(
+    private fun Transaction.toCreateRequest() =
+        CreateTransactionRequest(
             assetCode = assetId,
             type = type.value,
             quantity = quantity,
@@ -217,7 +216,7 @@ class TransactionSyncService(
         return ldt.date.toString()
     }
 
-    private suspend fun enrichAssets(transactions: List<com.yoke.gainful.model.Transaction>) {
+    private suspend fun enrichAssets(transactions: List<Transaction>) {
         val codes = transactions.map { it.assetId }.distinct()
         val dbAssets =
             codes.mapNotNull { code ->

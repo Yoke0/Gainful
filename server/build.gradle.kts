@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+    implementation(projects.api.contract)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.server.content.negotiation)
@@ -41,6 +42,12 @@ application {
 
 kotlin {
     jvmToolchain(11)
+}
+
+tasks.processResources {
+    filter<org.apache.tools.ant.filters.ReplaceTokens>(
+        "tokens" to mapOf("VERSION_NAME" to providers.gradleProperty("VERSION_NAME").get()),
+    )
 }
 
 tasks.jar {

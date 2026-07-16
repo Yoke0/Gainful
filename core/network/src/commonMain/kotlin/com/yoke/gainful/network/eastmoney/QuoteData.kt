@@ -1,4 +1,4 @@
-package com.yoke.gainful.network.model
+package com.yoke.gainful.network.eastmoney
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

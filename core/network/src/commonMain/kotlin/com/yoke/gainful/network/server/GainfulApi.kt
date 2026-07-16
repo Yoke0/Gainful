@@ -1,10 +1,10 @@
-package com.yoke.gainful.network
+package com.yoke.gainful.network.server
 
-import com.yoke.gainful.network.model.AuthResponse
-import com.yoke.gainful.network.model.LoginRequest
-import com.yoke.gainful.network.model.RegisterRequest
-import com.yoke.gainful.network.model.UpdateProfileRequest
-import com.yoke.gainful.network.model.UserResponse
+import com.yoke.gainful.api.AuthResponse
+import com.yoke.gainful.api.LoginRequest
+import com.yoke.gainful.api.RegisterRequest
+import com.yoke.gainful.api.UpdateProfileRequest
+import com.yoke.gainful.api.UserResponse
 
 interface GainfulApi {
     suspend fun register(request: RegisterRequest): AuthResponse

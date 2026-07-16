@@ -58,4 +58,5 @@ include(":feature:transactions")
 include(":feature:settings")
 include(":feature:account")
 
+include(":api:contract")
 include(":server")

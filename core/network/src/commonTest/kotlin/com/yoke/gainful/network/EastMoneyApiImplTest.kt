@@ -1,5 +1,7 @@
 package com.yoke.gainful.network
 
+import com.yoke.gainful.network.eastmoney.EastMoneyApi
+import com.yoke.gainful.network.eastmoney.EastMoneyApiImpl
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond

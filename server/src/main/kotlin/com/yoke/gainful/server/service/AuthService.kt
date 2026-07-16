@@ -1,7 +1,7 @@
 package com.yoke.gainful.server.service
 
+import com.yoke.gainful.api.AuthResponse
 import com.yoke.gainful.server.db.Users
-import com.yoke.gainful.server.model.dto.AuthResponse
 import com.yoke.gainful.server.plugins.ConflictException
 import com.yoke.gainful.server.plugins.UnauthorizedException
 import com.yoke.gainful.server.plugins.ValidationException

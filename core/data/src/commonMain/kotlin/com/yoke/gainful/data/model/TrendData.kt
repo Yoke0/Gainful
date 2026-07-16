@@ -1,7 +1,7 @@
 package com.yoke.gainful.data.model
 
 import com.yoke.gainful.model.StockTrend
-import com.yoke.gainful.network.model.TrendData
+import com.yoke.gainful.network.eastmoney.TrendData
 
 private val TRADING_PERIODS = listOf(930 to 1130, 1300 to 1500)
 

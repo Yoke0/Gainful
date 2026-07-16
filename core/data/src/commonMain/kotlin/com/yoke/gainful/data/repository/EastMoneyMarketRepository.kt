@@ -10,7 +10,7 @@ import com.yoke.gainful.model.KLine
 import com.yoke.gainful.model.KLinePeriod
 import com.yoke.gainful.model.StockQuote
 import com.yoke.gainful.model.StockTrend
-import com.yoke.gainful.network.EastMoneyApi
+import com.yoke.gainful.network.eastmoney.EastMoneyApi
 
 class EastMoneyMarketRepository(
     private val api: EastMoneyApi,

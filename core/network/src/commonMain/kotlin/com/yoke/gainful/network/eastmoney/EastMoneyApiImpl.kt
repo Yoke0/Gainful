@@ -1,13 +1,6 @@
-package com.yoke.gainful.network
+package com.yoke.gainful.network.eastmoney
 
-import com.yoke.gainful.network.model.ApiResponse
-import com.yoke.gainful.network.model.BatchQuoteData
-import com.yoke.gainful.network.model.KLineData
-import com.yoke.gainful.network.model.QuoteData
-import com.yoke.gainful.network.model.SearchItemDto
-import com.yoke.gainful.network.model.SearchResponse
-import com.yoke.gainful.network.model.TrendData
-import com.yoke.gainful.network.model.TrendItem
+import com.yoke.gainful.api.ApiResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

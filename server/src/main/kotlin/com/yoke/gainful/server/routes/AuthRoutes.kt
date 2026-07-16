@@ -1,7 +1,7 @@
 package com.yoke.gainful.server.routes
 
-import com.yoke.gainful.server.model.dto.LoginRequest
-import com.yoke.gainful.server.model.dto.RegisterRequest
+import com.yoke.gainful.api.LoginRequest
+import com.yoke.gainful.api.RegisterRequest
 import com.yoke.gainful.server.plugins.ValidationException
 import com.yoke.gainful.server.service.AuthService
 import io.ktor.server.request.receive

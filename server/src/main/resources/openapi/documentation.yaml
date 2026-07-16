@@ -2,7 +2,7 @@ openapi: "3.0.3"
 info:
   title: "Gainful Server API"
   description: "Ktor backend for Gainful stock tracking app"
-  version: "1.0.0"
+  version: "@VERSION_NAME@"
 servers:
   - url: "http://localhost:8080"
 

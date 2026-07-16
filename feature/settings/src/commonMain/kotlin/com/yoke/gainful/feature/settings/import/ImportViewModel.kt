@@ -5,6 +5,7 @@ package com.yoke.gainful.feature.settings.`import`
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -16,8 +17,7 @@ import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.feature.settings.model.toDisplayItems
 import com.yoke.gainful.feature.settings.util.CsvUtil
 import com.yoke.gainful.model.Transaction
-import com.yoke.gainful.network.TransactionApi
-import com.yoke.gainful.network.model.CreateTransactionRequestDto
+import com.yoke.gainful.network.server.TransactionApi
 import com.yoke.gainful.ui.TransactionDisplayItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -231,7 +231,7 @@ class ImportViewModel(
 }
 
 private fun Transaction.toCreateRequest() =
-    CreateTransactionRequestDto(
+    CreateTransactionRequest(
         assetCode = assetId,
         type = type.value,
         quantity = quantity,
