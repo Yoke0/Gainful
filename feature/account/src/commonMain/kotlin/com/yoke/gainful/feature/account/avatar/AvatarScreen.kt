@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.yoke.gainful.common.BuildConfig
 import com.yoke.gainful.designsystem.components.BackNavigationIcon
 import com.yoke.gainful.designsystem.components.GainfulScaffold
 import com.yoke.gainful.designsystem.components.GainfulTopAppBar
@@ -139,7 +140,7 @@ fun AvatarScreen(
                 )
             } else if (avatarUrl != null) {
                 AsyncImage(
-                    model = "http://192.168.31.47:8080$avatarUrl",
+                    model = "${BuildConfig.SERVER_BASE_URL}$avatarUrl",
                     contentDescription = null,
                     modifier =
                         Modifier
