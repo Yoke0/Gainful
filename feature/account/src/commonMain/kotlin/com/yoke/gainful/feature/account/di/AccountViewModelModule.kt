@@ -8,7 +8,7 @@ import org.koin.dsl.module
 
 val accountViewModelModule =
     module {
-        viewModel { LoginViewModel(get()) }
+        viewModel { LoginViewModel(get(), get()) }
         viewModel { RegisterViewModel(get()) }
         viewModel { AvatarViewModel(get()) }
     }

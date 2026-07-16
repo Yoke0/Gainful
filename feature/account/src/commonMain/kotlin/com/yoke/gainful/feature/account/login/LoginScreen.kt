@@ -166,6 +166,7 @@ private fun LoginScreen(
                         when (uiState.error) {
                             LoginError.EMPTY_FIELDS -> stringResource(Res.string.login_error_empty)
                             LoginError.INVALID_CREDENTIALS -> stringResource(Res.string.login_error_invalid)
+                            LoginError.SESSION_EXPIRED -> "登录已过期，请重新登录"
                         },
                     fontSize = 13.sp,
                     color = Color(0xFFE74C3C),

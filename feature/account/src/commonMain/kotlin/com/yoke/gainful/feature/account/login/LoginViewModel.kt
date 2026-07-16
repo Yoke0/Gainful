@@ -3,6 +3,7 @@ package com.yoke.gainful.feature.account.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.data.repository.AuthRepository
+import com.yoke.gainful.sync.TransactionSyncService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,9 +12,18 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val authRepository: AuthRepository,
+    private val transactionSyncService: TransactionSyncService,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+
+    fun setUsername(username: String) {
+        _uiState.update { it.copy(username = username) }
+    }
+
+    fun showSessionExpired() {
+        _uiState.update { it.copy(error = LoginError.SESSION_EXPIRED) }
+    }
 
     fun onIntent(intent: LoginIntent) {
         when (intent) {
@@ -36,6 +46,8 @@ class LoginViewModel(
             authRepository.login(state.username, state.password)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false, loginSuccess = true) }
+                    // Trigger transaction sync after login
+                    viewModelScope.launch { transactionSyncService.sync() }
                 }
                 .onFailure {
                     _uiState.update {
@@ -61,4 +73,5 @@ data class LoginUiState(
 enum class LoginError {
     EMPTY_FIELDS,
     INVALID_CREDENTIALS,
+    SESSION_EXPIRED,
 }

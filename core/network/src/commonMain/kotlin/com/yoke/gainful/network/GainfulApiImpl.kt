@@ -1,5 +1,6 @@
 package com.yoke.gainful.network
 
+import com.yoke.gainful.common.BuildConfig
 import com.yoke.gainful.network.model.AuthResponse
 import com.yoke.gainful.network.model.LoginRequest
 import com.yoke.gainful.network.model.RegisterRequest
@@ -20,30 +21,28 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
-private const val BASE_URL = "http://192.168.31.47:8080"
-
 internal class GainfulApiImpl(
     private val client: HttpClient,
 ) : GainfulApi {
     override suspend fun register(request: RegisterRequest): AuthResponse =
-        client.post("$BASE_URL/api/auth/register") {
+        client.post("${BuildConfig.SERVER_BASE_URL}/api/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
 
     override suspend fun login(request: LoginRequest): AuthResponse =
-        client.post("$BASE_URL/api/auth/login") {
+        client.post("${BuildConfig.SERVER_BASE_URL}/api/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
 
     override suspend fun getProfile(token: String): UserResponse =
-        client.get("$BASE_URL/api/users/me") {
+        client.get("${BuildConfig.SERVER_BASE_URL}/api/users/me") {
             header("Authorization", "Bearer $token")
         }.body()
 
     override suspend fun updateProfile(token: String, request: UpdateProfileRequest): UserResponse =
-        client.put("$BASE_URL/api/users/me") {
+        client.put("${BuildConfig.SERVER_BASE_URL}/api/users/me") {
             header("Authorization", "Bearer $token")
             contentType(ContentType.Application.Json)
             setBody(request)
@@ -65,7 +64,7 @@ internal class GainfulApiImpl(
                 )
             }
         return client.submitFormWithBinaryData(
-            url = "$BASE_URL/api/users/avatar",
+            url = "${BuildConfig.SERVER_BASE_URL}/api/users/avatar",
             formData = formParts,
         ) {
             header("Authorization", "Bearer $token")
@@ -73,7 +72,7 @@ internal class GainfulApiImpl(
     }
 
     override suspend fun revokeSessions(token: String) {
-        client.delete("$BASE_URL/api/users/sessions") {
+        client.delete("${BuildConfig.SERVER_BASE_URL}/api/users/sessions") {
             header("Authorization", "Bearer $token")
         }
     }

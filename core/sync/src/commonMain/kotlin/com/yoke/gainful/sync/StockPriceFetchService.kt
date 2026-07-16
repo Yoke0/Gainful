@@ -11,7 +11,6 @@ import com.yoke.gainful.widget.domain.GetTodayPnlUseCase
 import com.yoke.gainful.widget.syncWidgetData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
@@ -34,7 +33,7 @@ class StockPriceFetchService(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val transactionRepository: TransactionRepository,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var fetchJob: Job? = null
 
     var isRunning: Boolean = false

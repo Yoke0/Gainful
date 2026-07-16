@@ -1,5 +1,6 @@
 package com.yoke.gainful.feature.account.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.yoke.gainful.feature.account.avatar.AvatarScreen
@@ -14,6 +15,21 @@ import org.koin.compose.viewmodel.koinViewModel
 fun EntryProviderScope<NavKey>.accountEntry(navigator: Navigator) {
     entry<LoginNavKey> {
         val viewModel = koinViewModel<LoginViewModel>()
+        LoginScreen(
+            viewModel = viewModel,
+            onBack = { navigator.goBack() },
+            onNavigateToRegister = { navigator.navigate(RegisterNavKey) },
+            onLoginSuccess = { navigator.goBack() },
+        )
+    }
+    entry<LoginWithUsernameNavKey> { key ->
+        val viewModel = koinViewModel<LoginViewModel>()
+        LaunchedEffect(key.username, key.sessionExpired) {
+            viewModel.setUsername(key.username)
+            if (key.sessionExpired) {
+                viewModel.showSessionExpired()
+            }
+        }
         LoginScreen(
             viewModel = viewModel,
             onBack = { navigator.goBack() },

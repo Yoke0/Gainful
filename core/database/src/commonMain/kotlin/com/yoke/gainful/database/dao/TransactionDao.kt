@@ -32,4 +32,15 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    @Query("DELETE FROM transactions WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<String>)
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAll()
+
+    @Query(
+        "SELECT MAX(updated_at) FROM transactions WHERE id NOT IN (SELECT entity_id FROM sync_queue WHERE entity_type = 'transaction' AND operation = 'CREATE')",
+    )
+    suspend fun getMaxUpdatedAt(): Long?
 }

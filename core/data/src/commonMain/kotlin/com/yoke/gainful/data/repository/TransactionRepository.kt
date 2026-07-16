@@ -19,4 +19,8 @@ interface TransactionRepository {
     suspend fun insertTransactions(transactions: List<Transaction>)
 
     suspend fun deleteTransaction(id: String)
+
+    suspend fun deleteByIds(ids: List<String>)
+
+    suspend fun getMaxUpdatedAt(): Long?
 }

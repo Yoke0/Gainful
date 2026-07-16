@@ -15,12 +15,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
+import com.yoke.gainful.data.repository.AuthRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
+import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.GainfulTheme
 import com.yoke.gainful.di.initKoin
 import com.yoke.gainful.feature.account.navigation.AvatarNavKey
 import com.yoke.gainful.feature.account.navigation.LoginNavKey
+import com.yoke.gainful.feature.account.navigation.LoginWithUsernameNavKey
 import com.yoke.gainful.feature.account.navigation.accountEntry
 import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
 import com.yoke.gainful.feature.dashboard.navigation.dashboardEntry
@@ -34,7 +37,13 @@ import com.yoke.gainful.navigation.rememberNavigationState
 import com.yoke.gainful.navigation.serializersConfig
 import com.yoke.gainful.sync.KLineFetchService
 import com.yoke.gainful.sync.StockPriceFetchService
+import com.yoke.gainful.sync.TransactionSyncService
 import com.yoke.gainful.ui.ProvideGainLossColors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
@@ -43,6 +52,9 @@ fun App() {
 
     val fetchService = koinInject<StockPriceFetchService>()
     val kLineFetchService = koinInject<KLineFetchService>()
+    val transactionSyncService = koinInject<TransactionSyncService>()
+    val authRepository = koinInject<AuthRepository>()
+    val authDataSource = koinInject<AuthDataSource>()
 
     GainfulTheme {
         Box(
@@ -58,10 +70,12 @@ fun App() {
 
             ProvideGainLossColors(scheme = userPreferences.gainLossColorScheme) {
                 var showSplash by rememberSaveable { mutableStateOf(true) }
+                var navigateToLoginWithUsername by remember { mutableStateOf<String?>(null) }
 
                 DisposableEffect(Unit) {
                     onDispose {
                         fetchService.stop()
+                        transactionSyncService.stopPeriodicSync()
                     }
                 }
 
@@ -75,10 +89,25 @@ fun App() {
                             onInit = {
                                 fetchService.fetchOnce()
                                 kLineFetchService.fetchAll()
+                                // Validate token and sync transactions on startup
+                                CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+                                    val result = runCatching { authRepository.refreshProfile() }
+                                    if (result.isFailure) {
+                                        // Token invalid - get username then clear auth
+                                        val username = authDataSource.authState.first().username
+                                        authRepository.logout()
+                                        if (username != null) {
+                                            navigateToLoginWithUsername = username
+                                        }
+                                    } else {
+                                        transactionSyncService.sync()
+                                    }
+                                }
                             },
                             onSplashFinished = {
                                 showSplash = false
                                 fetchService.start()
+                                transactionSyncService.startPeriodicSync()
                             },
                         )
                     } else {
@@ -108,6 +137,14 @@ fun App() {
                             navigator = navigator,
                             entryProvider = entryProvider,
                         )
+
+                        // Navigate to login on token expiry
+                        navigateToLoginWithUsername?.let { username ->
+                            navigateToLoginWithUsername = null
+                            navigator.navigate(
+                                com.yoke.gainful.feature.account.navigation.LoginWithUsernameNavKey(username, sessionExpired = true),
+                            )
+                        }
                     }
                 }
             }

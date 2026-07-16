@@ -35,4 +35,6 @@ data class TransactionResponse(
     val amount: Double,
     val tradeDate: String,
     val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
 )

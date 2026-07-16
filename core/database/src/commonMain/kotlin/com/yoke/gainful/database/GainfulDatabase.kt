@@ -12,16 +12,25 @@ import com.yoke.gainful.database.dao.AssetDao
 import com.yoke.gainful.database.dao.KLineCacheDao
 import com.yoke.gainful.database.dao.PnlCacheDao
 import com.yoke.gainful.database.dao.QuoteSnapshotDao
+import com.yoke.gainful.database.dao.SyncQueueDao
 import com.yoke.gainful.database.dao.TransactionDao
 import com.yoke.gainful.database.model.AssetEntity
 import com.yoke.gainful.database.model.KLineCacheEntity
 import com.yoke.gainful.database.model.PnlCacheEntity
 import com.yoke.gainful.database.model.QuoteSnapshotEntity
+import com.yoke.gainful.database.model.SyncQueueEntity
 import com.yoke.gainful.database.model.TransactionEntity
 
 @Database(
-    entities = [AssetEntity::class, TransactionEntity::class, QuoteSnapshotEntity::class, KLineCacheEntity::class, PnlCacheEntity::class],
-    version = 6,
+    entities = [
+        AssetEntity::class,
+        TransactionEntity::class,
+        QuoteSnapshotEntity::class,
+        KLineCacheEntity::class,
+        PnlCacheEntity::class,
+        SyncQueueEntity::class,
+    ],
+    version = 7,
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(GainfulDatabaseConstructor::class)
@@ -29,6 +38,8 @@ abstract class GainfulDatabase : RoomDatabase() {
     abstract fun assetDao(): AssetDao
 
     abstract fun transactionDao(): TransactionDao
+
+    abstract fun syncQueueDao(): SyncQueueDao
 
     abstract fun quoteSnapshotDao(): QuoteSnapshotDao
 
@@ -150,6 +161,17 @@ abstract class GainfulDatabase : RoomDatabase() {
                             PRIMARY KEY(`date`)
                         )
                         """.trimIndent(),
+                    )
+                }
+            }
+
+        val MIGRATION_6_7 =
+            object : Migration(6, 7) {
+                override fun migrate(connection: SQLiteConnection) {
+                    connection.execSQL("ALTER TABLE `transactions` ADD COLUMN `updated_at` INTEGER NOT NULL DEFAULT 0")
+                    connection.execSQL("UPDATE `transactions` SET `updated_at` = `timestamp` WHERE `updated_at` = 0")
+                    connection.execSQL(
+                        "CREATE TABLE IF NOT EXISTS `sync_queue` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `entity_type` TEXT NOT NULL, `entity_id` TEXT NOT NULL, `operation` TEXT NOT NULL, `created_at` INTEGER NOT NULL)",
                     )
                 }
             }

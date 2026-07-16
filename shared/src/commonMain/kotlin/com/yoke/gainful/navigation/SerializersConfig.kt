@@ -4,6 +4,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.yoke.gainful.feature.account.navigation.AvatarNavKey
 import com.yoke.gainful.feature.account.navigation.LoginNavKey
+import com.yoke.gainful.feature.account.navigation.LoginWithUsernameNavKey
 import com.yoke.gainful.feature.account.navigation.RegisterNavKey
 import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
 import com.yoke.gainful.feature.holdings.navigation.HoldingsNavKey
@@ -29,6 +30,7 @@ val serializersConfig =
                     subclass(ImportTransactionsNavKey::class, ImportTransactionsNavKey.serializer())
                     subclass(StockDetailNavKey::class, StockDetailNavKey.serializer())
                     subclass(LoginNavKey::class, LoginNavKey.serializer())
+                    subclass(LoginWithUsernameNavKey::class, LoginWithUsernameNavKey.serializer())
                     subclass(RegisterNavKey::class, RegisterNavKey.serializer())
                     subclass(AvatarNavKey::class, AvatarNavKey.serializer())
                 }

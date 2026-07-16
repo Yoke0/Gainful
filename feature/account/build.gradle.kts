@@ -38,6 +38,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.common)
             implementation(projects.core.data)
+            implementation(projects.core.sync)
             implementation(projects.core.file)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
