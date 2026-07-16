@@ -1,5 +1,7 @@
 package com.yoke.gainful.data.repository
 
+import com.yoke.gainful.database.dao.SyncQueueDao
+import com.yoke.gainful.database.dao.TransactionDao
 import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.model.AuthState
 import com.yoke.gainful.model.UserProfile
@@ -15,6 +17,8 @@ import kotlinx.coroutines.flow.first
 internal class AuthRepositoryImpl(
     private val api: GainfulApi,
     private val authDataSource: AuthDataSource,
+    private val transactionDao: TransactionDao,
+    private val syncQueueDao: SyncQueueDao,
 ) : AuthRepository {
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     override val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
@@ -47,6 +51,10 @@ internal class AuthRepositoryImpl(
         state.token?.let { token ->
             runCatching { api.revokeSessions(token) }
         }
+        // Clear local user data
+        transactionDao.deleteAll()
+        syncQueueDao.deleteAll()
+        authDataSource.clearLastTransactionSyncTime()
         authDataSource.clearAuth()
         _userProfile.value = null
     }

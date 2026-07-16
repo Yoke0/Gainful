@@ -41,4 +41,12 @@ class OfflineTransactionRepository(
     override suspend fun deleteTransaction(id: String) {
         dao.deleteById(id)
     }
+
+    override suspend fun deleteByIds(ids: List<String>) {
+        dao.deleteByIds(ids)
+    }
+
+    override suspend fun getMaxUpdatedAt(): Long? {
+        return dao.getMaxUpdatedAt()
+    }
 }

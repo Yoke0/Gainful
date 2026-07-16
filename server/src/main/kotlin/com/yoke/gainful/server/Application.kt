@@ -12,6 +12,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.calllogging.CallLogging
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 
@@ -31,6 +32,7 @@ fun Application.module() {
 
     val sessionService by inject<SessionService>()
 
+    install(CallLogging)
     configureSerialization()
     configureSecurity(appConfig.jwt, sessionService)
     configureStatusPages()

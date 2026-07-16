@@ -14,4 +14,5 @@ data class TransactionEntity(
     val amount: Double = 0.0,
     @ColumnInfo(name = "trade_date") val tradeDate: Long,
     val timestamp: Long,
+    @ColumnInfo(name = "updated_at", defaultValue = "0") val updatedAt: Long,
 )

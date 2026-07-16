@@ -26,7 +26,13 @@ fun Route.transactionRoutes() {
         route("/transactions") {
             get {
                 val principal = call.principal<UserPrincipal>()!!
-                val transactions = transactionService.getTransactions(principal.userId)
+                val since = call.request.queryParameters["since"]?.toLongOrNull()
+                val transactions =
+                    if (since != null) {
+                        transactionService.getTransactionsSince(principal.userId, since)
+                    } else {
+                        transactionService.getTransactions(principal.userId)
+                    }
                 call.respond(transactions)
             }
 

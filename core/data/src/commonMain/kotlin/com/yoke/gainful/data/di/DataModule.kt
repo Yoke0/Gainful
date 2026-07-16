@@ -10,10 +10,12 @@ import com.yoke.gainful.data.repository.OfflineAssetRepository
 import com.yoke.gainful.data.repository.OfflineKLineCacheRepository
 import com.yoke.gainful.data.repository.OfflinePnlCacheRepository
 import com.yoke.gainful.data.repository.OfflineQuoteCacheRepository
+import com.yoke.gainful.data.repository.OfflineSyncQueueRepository
 import com.yoke.gainful.data.repository.OfflineTransactionRepository
 import com.yoke.gainful.data.repository.OfflineUserPreferencesRepository
 import com.yoke.gainful.data.repository.PnlCacheRepository
 import com.yoke.gainful.data.repository.QuoteCacheRepository
+import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.datastore.AuthDataSource
@@ -25,9 +27,10 @@ val dataModule =
         single<MarketRepository> { EastMoneyMarketRepository(get()) }
         single<AssetRepository> { OfflineAssetRepository(get()) }
         single<TransactionRepository> { OfflineTransactionRepository(get()) }
+        single<SyncQueueRepository> { OfflineSyncQueueRepository(get()) }
         single<UserPreferencesRepository> { OfflineUserPreferencesRepository(get<UserPreferencesDataSource>()) }
         single<QuoteCacheRepository> { OfflineQuoteCacheRepository(get()) }
         single<KLineCacheRepository> { OfflineKLineCacheRepository(get()) }
         single<PnlCacheRepository> { OfflinePnlCacheRepository(get()) }
-        single<AuthRepository> { AuthRepositoryImpl(get(), get<AuthDataSource>()) }
+        single<AuthRepository> { AuthRepositoryImpl(get(), get<AuthDataSource>(), get(), get()) }
     }

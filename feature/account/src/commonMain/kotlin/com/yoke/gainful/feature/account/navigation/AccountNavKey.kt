@@ -11,3 +11,6 @@ data object RegisterNavKey : NavKey
 
 @Serializable
 data object AvatarNavKey : NavKey
+
+@Serializable
+data class LoginWithUsernameNavKey(val username: String, val sessionExpired: Boolean = false) : NavKey
