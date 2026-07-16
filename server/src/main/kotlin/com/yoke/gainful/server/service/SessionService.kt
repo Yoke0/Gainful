@@ -1,7 +1,7 @@
 package com.yoke.gainful.server.service
 
+import com.yoke.gainful.api.SessionResponse
 import com.yoke.gainful.server.db.UserSessions
-import com.yoke.gainful.server.model.dto.SessionResponse
 import com.yoke.gainful.server.plugins.ForbiddenException
 import com.yoke.gainful.server.plugins.NotFoundException
 import kotlinx.datetime.LocalDateTime

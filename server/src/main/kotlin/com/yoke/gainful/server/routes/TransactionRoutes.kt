@@ -1,7 +1,7 @@
 package com.yoke.gainful.server.routes
 
-import com.yoke.gainful.server.model.dto.CreateTransactionRequest
-import com.yoke.gainful.server.model.dto.UpdateTransactionRequest
+import com.yoke.gainful.api.CreateTransactionRequest
+import com.yoke.gainful.api.UpdateTransactionRequest
 import com.yoke.gainful.server.plugins.UserPrincipal
 import com.yoke.gainful.server.plugins.ValidationException
 import com.yoke.gainful.server.service.TransactionService

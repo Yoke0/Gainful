@@ -69,6 +69,7 @@ import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
 import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.KLine
+import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.KLineChart
 import com.yoke.gainful.ui.LineChart
@@ -789,7 +790,7 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
 }
 
 @Composable
-private fun TradeRow(trade: com.yoke.gainful.model.Transaction) {
+private fun TradeRow(trade: Transaction) {
     val typeLabel =
         when (trade.type) {
             TransactionType.BUY -> stringResource(Res.string.buy)

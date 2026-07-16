@@ -1,7 +1,7 @@
 package com.yoke.gainful.data.model
 
 import com.yoke.gainful.model.StockQuote
-import com.yoke.gainful.network.model.QuoteData
+import com.yoke.gainful.network.eastmoney.QuoteData
 
 fun QuoteData.toStockQuote(): StockQuote? {
     return StockQuote(

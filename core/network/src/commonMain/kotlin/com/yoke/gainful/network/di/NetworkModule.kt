@@ -1,13 +1,16 @@
 package com.yoke.gainful.network.di
 
-import com.yoke.gainful.network.EastMoneyApi
-import com.yoke.gainful.network.EastMoneyApiImpl
-import com.yoke.gainful.network.GainfulApi
-import com.yoke.gainful.network.GainfulApiImpl
-import com.yoke.gainful.network.TransactionApi
-import com.yoke.gainful.network.TransactionApiImpl
+import com.yoke.gainful.common.BuildConfig
 import com.yoke.gainful.network.createPlatformHttpClient
+import com.yoke.gainful.network.eastmoney.EastMoneyApi
+import com.yoke.gainful.network.eastmoney.EastMoneyApiImpl
+import com.yoke.gainful.network.server.GainfulApi
+import com.yoke.gainful.network.server.GainfulApiImpl
+import com.yoke.gainful.network.server.TransactionApi
+import com.yoke.gainful.network.server.TransactionApiImpl
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.http.takeFrom
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
@@ -33,6 +36,9 @@ val networkModule =
             createPlatformHttpClient().config {
                 install(ContentNegotiation) {
                     json(get<Json>())
+                }
+                defaultRequest {
+                    url.takeFrom(BuildConfig.SERVER_BASE_URL)
                 }
             }
         }

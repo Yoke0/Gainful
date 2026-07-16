@@ -1,7 +1,7 @@
 package com.yoke.gainful.data.model
 
 import com.yoke.gainful.model.KLine
-import com.yoke.gainful.network.model.KLineData
+import com.yoke.gainful.network.eastmoney.KLineData
 
 fun KLineData.toKLineList(): List<KLine> {
     return klines.map { line ->

@@ -1,9 +1,9 @@
 package com.yoke.gainful.server.service
 
+import com.yoke.gainful.api.UpdateProfileRequest
 import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.db.UserSessions
 import com.yoke.gainful.server.db.Users
-import com.yoke.gainful.server.model.dto.UpdateProfileRequest
 import com.yoke.gainful.server.plugins.ConflictException
 import com.yoke.gainful.server.plugins.NotFoundException
 import com.yoke.gainful.server.util.PasswordUtils

@@ -1,4 +1,4 @@
-package com.yoke.gainful.server.model.dto
+package com.yoke.gainful.api
 
 import kotlinx.serialization.Serializable
 
@@ -16,4 +16,14 @@ data class UserResponse(
 data class UpdateProfileRequest(
     val nickname: String? = null,
     val email: String? = null,
+)
+
+@Serializable
+data class SessionResponse(
+    val id: String,
+    val deviceInfo: String? = null,
+    val ipAddress: String? = null,
+    val createdAt: String,
+    val expiresAt: String,
+    val isRevoked: Boolean = false,
 )

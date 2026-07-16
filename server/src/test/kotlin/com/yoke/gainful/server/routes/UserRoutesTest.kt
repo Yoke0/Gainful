@@ -1,5 +1,7 @@
 package com.yoke.gainful.server.routes
 
+import com.yoke.gainful.api.USERS_ME
+import com.yoke.gainful.api.USERS_SESSIONS
 import com.yoke.gainful.server.config.UploadConfig
 import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.db.UserSessions
@@ -139,7 +141,7 @@ class UserRoutesTest {
             application { testModule() }
 
             val response =
-                client.get("/api/users/me") {
+                client.get(USERS_ME) {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                 }
 
@@ -154,7 +156,7 @@ class UserRoutesTest {
         testApplication {
             application { testModule() }
 
-            val response = client.get("/api/users/me")
+            val response = client.get(USERS_ME)
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
 
@@ -164,7 +166,7 @@ class UserRoutesTest {
             application { testModule() }
 
             val response =
-                client.put("/api/users/me") {
+                client.put(USERS_ME) {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                     contentType(ContentType.Application.Json)
                     setBody("""{"nickname":"New Nickname"}""")
@@ -181,7 +183,7 @@ class UserRoutesTest {
             application { testModule() }
 
             val response =
-                client.get("/api/users/sessions") {
+                client.get(USERS_SESSIONS) {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                 }
 
@@ -196,7 +198,7 @@ class UserRoutesTest {
             application { testModule() }
 
             val response =
-                client.delete("/api/users/sessions") {
+                client.delete(USERS_SESSIONS) {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                 }
 

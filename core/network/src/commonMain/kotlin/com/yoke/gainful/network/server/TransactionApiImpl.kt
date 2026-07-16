@@ -1,8 +1,8 @@
-package com.yoke.gainful.network
+package com.yoke.gainful.network.server
 
-import com.yoke.gainful.common.BuildConfig
-import com.yoke.gainful.network.model.CreateTransactionRequestDto
-import com.yoke.gainful.network.model.TransactionDto
+import com.yoke.gainful.api.CreateTransactionRequest
+import com.yoke.gainful.api.TRANSACTIONS
+import com.yoke.gainful.api.TransactionResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -16,27 +16,27 @@ import io.ktor.http.contentType
 internal class TransactionApiImpl(
     private val client: HttpClient,
 ) : TransactionApi {
-    override suspend fun getTransactions(token: String, since: Long?): List<TransactionDto> {
+    override suspend fun getTransactions(token: String, since: Long?): List<TransactionResponse> {
         val url =
             if (since != null) {
-                "${BuildConfig.SERVER_BASE_URL}/api/transactions?since=$since"
+                "$TRANSACTIONS?since=$since"
             } else {
-                "${BuildConfig.SERVER_BASE_URL}/api/transactions"
+                TRANSACTIONS
             }
         return client.get(url) {
             header("Authorization", "Bearer $token")
         }.body()
     }
 
-    override suspend fun createTransaction(token: String, request: CreateTransactionRequestDto): TransactionDto =
-        client.post("${BuildConfig.SERVER_BASE_URL}/api/transactions") {
+    override suspend fun createTransaction(token: String, request: CreateTransactionRequest): TransactionResponse =
+        client.post(TRANSACTIONS) {
             header("Authorization", "Bearer $token")
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
 
     override suspend fun deleteTransaction(token: String, id: String) {
-        client.delete("${BuildConfig.SERVER_BASE_URL}/api/transactions/$id") {
+        client.delete("$TRANSACTIONS/$id") {
             header("Authorization", "Bearer $token")
         }
     }

@@ -1,8 +1,8 @@
 package com.yoke.gainful.server.service
 
+import com.yoke.gainful.api.UpdateProfileRequest
+import com.yoke.gainful.api.UserResponse
 import com.yoke.gainful.server.db.Users
-import com.yoke.gainful.server.model.dto.UpdateProfileRequest
-import com.yoke.gainful.server.model.dto.UserResponse
 import com.yoke.gainful.server.plugins.ConflictException
 import com.yoke.gainful.server.plugins.NotFoundException
 import kotlinx.datetime.TimeZone
@@ -37,17 +37,20 @@ class UserService {
 
     fun updateProfile(userId: Uuid, request: UpdateProfileRequest): UserResponse {
         transaction {
-            if (request.email != null) {
+            val email = request.email
+            if (email != null) {
                 val existing: ResultRow? =
                     Users.selectAll().where {
-                        (Users.email eq request.email) and (Users.id neq userId)
+                        (Users.email eq email) and (Users.id neq userId)
                     }.firstOrNull()
                 if (existing != null) throw ConflictException("Email already in use")
             }
 
             Users.update({ Users.id eq userId }) {
-                if (request.nickname != null) it[nickname] = request.nickname
-                if (request.email != null) it[email] = request.email
+                val nickname = request.nickname
+                val email = request.email
+                if (nickname != null) it[this.nickname] = nickname
+                if (email != null) it[this.email] = email
                 it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             }
         }

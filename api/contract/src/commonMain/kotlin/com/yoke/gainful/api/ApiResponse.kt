@@ -1,4 +1,4 @@
-package com.yoke.gainful.network.model
+package com.yoke.gainful.api
 
 import kotlinx.serialization.Serializable
 

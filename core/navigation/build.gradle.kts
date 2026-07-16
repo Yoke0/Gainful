@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -39,7 +38,6 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.androidx.lifecycle.viewmodelNavigation3)
-            implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
         }

@@ -1,6 +1,6 @@
 package com.yoke.gainful.server.routes
 
-import com.yoke.gainful.server.model.dto.UpdateProfileRequest
+import com.yoke.gainful.api.UpdateProfileRequest
 import com.yoke.gainful.server.plugins.UserPrincipal
 import com.yoke.gainful.server.service.AvatarService
 import com.yoke.gainful.server.service.SessionService

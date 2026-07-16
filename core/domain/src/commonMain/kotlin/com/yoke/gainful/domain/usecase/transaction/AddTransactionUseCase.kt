@@ -1,22 +1,20 @@
 package com.yoke.gainful.domain.usecase.transaction
 
+import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.data.repository.PnlCacheRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
+import com.yoke.gainful.data.repository.TransactionSyncRepository
 import com.yoke.gainful.datastore.AuthDataSource
 import com.yoke.gainful.model.Transaction
-import com.yoke.gainful.network.TransactionApi
-import com.yoke.gainful.network.model.CreateTransactionRequestDto
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 class AddTransactionUseCase(
     private val transactionRepository: TransactionRepository,
     private val pnlCacheRepository: PnlCacheRepository,
     private val syncQueueRepository: SyncQueueRepository,
-    private val transactionApi: TransactionApi,
+    private val transactionSyncRepository: TransactionSyncRepository,
     private val authDataSource: AuthDataSource,
 ) {
     suspend operator fun invoke(transaction: Transaction) {
@@ -28,7 +26,7 @@ class AddTransactionUseCase(
         if (token != null) {
             val result =
                 runCatching {
-                    transactionApi.createTransaction(token, transaction.toCreateRequest())
+                    transactionSyncRepository.createTransaction(token, transaction.toCreateRequest())
                 }
             if (result.isSuccess) return
         }
@@ -38,7 +36,7 @@ class AddTransactionUseCase(
 }
 
 private fun Transaction.toCreateRequest() =
-    CreateTransactionRequestDto(
+    CreateTransactionRequest(
         assetCode = assetId,
         type = type.value,
         quantity = quantity,

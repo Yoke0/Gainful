@@ -1,9 +1,9 @@
 package com.yoke.gainful.server.service
 
+import com.yoke.gainful.api.CreateTransactionRequest
+import com.yoke.gainful.api.TransactionResponse
+import com.yoke.gainful.api.UpdateTransactionRequest
 import com.yoke.gainful.server.db.Transactions
-import com.yoke.gainful.server.model.dto.CreateTransactionRequest
-import com.yoke.gainful.server.model.dto.TransactionResponse
-import com.yoke.gainful.server.model.dto.UpdateTransactionRequest
 import com.yoke.gainful.server.plugins.NotFoundException
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -104,13 +104,20 @@ class TransactionService {
 
         transaction {
             Transactions.update({ Transactions.id eq transactionId }) {
-                if (request.assetCode != null) it[assetCode] = request.assetCode
-                if (request.assetName != null) it[assetName] = request.assetName
-                if (request.type != null) it[type] = request.type
-                if (request.quantity != null) it[quantity] = request.quantity
-                if (request.price != null) it[price] = request.price
-                if (request.amount != null) it[amount] = request.amount
-                if (request.tradeDate != null) it[tradeDate] = LocalDate.parse(request.tradeDate)
+                val assetCode = request.assetCode
+                val assetName = request.assetName
+                val type = request.type
+                val quantity = request.quantity
+                val price = request.price
+                val amount = request.amount
+                val tradeDate = request.tradeDate
+                if (assetCode != null) it[this.assetCode] = assetCode
+                if (assetName != null) it[this.assetName] = assetName
+                if (type != null) it[this.type] = type
+                if (quantity != null) it[this.quantity] = quantity
+                if (price != null) it[this.price] = price
+                if (amount != null) it[this.amount] = amount
+                if (tradeDate != null) it[this.tradeDate] = LocalDate.parse(tradeDate)
                 it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             }
         }
