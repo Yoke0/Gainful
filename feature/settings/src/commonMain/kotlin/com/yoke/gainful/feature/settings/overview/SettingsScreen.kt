@@ -362,7 +362,7 @@ private fun UserCard(
             ) {
                 if (avatarUrl != null) {
                     AsyncImage(
-                        model = "http://192.168.31.47:8080$avatarUrl",
+                        model = "${BuildConfig.SERVER_BASE_URL}$avatarUrl",
                         contentDescription = null,
                         modifier = Modifier.size(56.dp).clip(CircleShape),
                         contentScale = ContentScale.Crop,

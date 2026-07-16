@@ -1,11 +1,21 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
 }
 
-val versionName = property("VERSION_NAME").toString()
+val versionNameValue = property("VERSION_NAME").toString()
+
+val localProps =
+    Properties().apply {
+        val file = rootProject.file("local.properties")
+        if (file.exists()) {
+            file.inputStream().use { load(it) }
+        }
+    }
+val serverBaseUrlValue = localProps.getProperty("SERVER_BASE_URL", "")
 
 kotlin {
     listOf(
@@ -40,6 +50,9 @@ abstract class GenerateBuildConfigTask : DefaultTask() {
     @get:Input
     abstract val versionName: Property<String>
 
+    @get:Input
+    abstract val serverBaseUrl: Property<String>
+
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
@@ -53,6 +66,7 @@ abstract class GenerateBuildConfigTask : DefaultTask() {
             |
             |object BuildConfig {
             |    const val APP_VERSION = "${versionName.get()}"
+            |    const val SERVER_BASE_URL = "${serverBaseUrl.get()}"
             |}
             """.trimMargin(),
         )
@@ -62,7 +76,8 @@ abstract class GenerateBuildConfigTask : DefaultTask() {
 val generateBuildConfig =
     tasks.register<GenerateBuildConfigTask>("generateBuildConfig") {
         description = "Generates BuildConfig.kt with app version"
-        versionName.set(project.property("VERSION_NAME").toString())
+        versionName.set(versionNameValue)
+        serverBaseUrl.set(serverBaseUrlValue)
         outputDir.set(layout.buildDirectory.dir("generated/buildconfig"))
     }
 
