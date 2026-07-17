@@ -45,12 +45,12 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-            authRepository.authState.collect { authState ->
+            authRepository.userState.collect { userState ->
                 _uiState.update {
                     it.copy(
-                        isLoggedIn = authState.isLoggedIn,
-                        userId = authState.userId,
-                        userNickname = authState.username,
+                        isLoggedIn = userState.isLoggedIn,
+                        userId = userState.userId,
+                        userNickname = userState.username,
                     )
                 }
             }
@@ -69,8 +69,8 @@ class SettingsViewModel(
         }
 
         viewModelScope.launch {
-            authRepository.authState.first().let { authState ->
-                if (authState.isLoggedIn) {
+            authRepository.userState.first().let { userState ->
+                if (userState.isLoggedIn) {
                     authRepository.refreshProfile()
                 }
             }

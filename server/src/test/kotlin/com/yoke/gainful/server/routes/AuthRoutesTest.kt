@@ -59,7 +59,7 @@ class AuthRoutesTest {
     }
 
     private fun Application.testModule() {
-        val testTokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000)
+        val testTokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000, 2592000000)
         val sessionService = SessionService()
 
         install(ContentNegotiation) { json() }
@@ -135,7 +135,7 @@ class AuthRoutesTest {
 
             assertEquals(HttpStatusCode.OK, response.status)
             val body = response.bodyAsText()
-            assertTrue(body.contains("token"))
+            assertTrue(body.contains("accessToken"))
         }
 
     @Test

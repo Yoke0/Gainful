@@ -6,11 +6,11 @@ import com.yoke.gainful.network.server.TransactionApi
 class ServerTransactionRepository(
     private val transactionApi: TransactionApi,
 ) : TransactionSyncRepository {
-    override suspend fun createTransaction(token: String, request: CreateTransactionRequest) {
-        transactionApi.createTransaction(token, request)
+    override suspend fun createTransaction(request: CreateTransactionRequest) {
+        transactionApi.createTransaction(request)
     }
 
-    override suspend fun deleteTransaction(token: String, id: String) {
-        transactionApi.deleteTransaction(token, id)
+    override suspend fun deleteTransaction(id: String) {
+        transactionApi.deleteTransaction(id)
     }
 }

@@ -1,12 +1,12 @@
 package com.yoke.gainful.data.repository
 
-import com.yoke.gainful.model.AuthState
 import com.yoke.gainful.model.UserProfile
+import com.yoke.gainful.model.UserState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface AuthRepository {
-    val authState: Flow<AuthState>
+    val userState: Flow<UserState>
     val userProfile: StateFlow<UserProfile?>
     val avatarEmoji: Flow<String?>
 

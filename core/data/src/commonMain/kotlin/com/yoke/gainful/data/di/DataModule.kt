@@ -20,8 +20,8 @@ import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.data.repository.TransactionSyncRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
-import com.yoke.gainful.datastore.AuthDataSource
-import com.yoke.gainful.datastore.UserPreferencesDataSource
+import com.yoke.gainful.datastore.SettingsDataSource
+import com.yoke.gainful.datastore.UserDataSource
 import org.koin.dsl.module
 
 val dataModule =
@@ -30,10 +30,18 @@ val dataModule =
         single<AssetRepository> { OfflineAssetRepository(get()) }
         single<TransactionRepository> { OfflineTransactionRepository(get()) }
         single<SyncQueueRepository> { OfflineSyncQueueRepository(get()) }
-        single<UserPreferencesRepository> { OfflineUserPreferencesRepository(get<UserPreferencesDataSource>()) }
+        single<UserPreferencesRepository> { OfflineUserPreferencesRepository(get<SettingsDataSource>()) }
         single<QuoteCacheRepository> { OfflineQuoteCacheRepository(get()) }
         single<KLineCacheRepository> { OfflineKLineCacheRepository(get()) }
         single<PnlCacheRepository> { OfflinePnlCacheRepository(get()) }
         single<TransactionSyncRepository> { ServerTransactionRepository(get()) }
-        single<AuthRepository> { AuthRepositoryImpl(get(), get<AuthDataSource>(), get(), get()) }
+        single<AuthRepository> {
+            AuthRepositoryImpl(
+                publicApi = get(),
+                authenticatedApi = get(),
+                userDataSource = get<UserDataSource>(),
+                transactionDao = get(),
+                syncQueueDao = get(),
+            )
+        }
     }

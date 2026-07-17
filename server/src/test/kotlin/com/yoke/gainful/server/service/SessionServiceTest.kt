@@ -17,7 +17,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 class SessionServiceTest {
@@ -54,15 +53,16 @@ class SessionServiceTest {
 
     @Test
     fun `createSession creates session record`() {
-        val session = sessionService.createSession(testUserId, "TestDevice", "127.0.0.1")
+        val session = sessionService.createSession(testUserId, "test-refresh-token", 2592000000, "TestDevice", "127.0.0.1")
         assertNotNull(session.id)
         assertEquals(testUserId, session.userId)
+        assertEquals("test-refresh-token", session.refreshToken)
     }
 
     @Test
     fun `getSessions returns user sessions`() {
-        sessionService.createSession(testUserId, "Device1", "127.0.0.1")
-        sessionService.createSession(testUserId, "Device2", "192.168.1.1")
+        sessionService.createSession(testUserId, "token1", 2592000000, "Device1", "127.0.0.1")
+        sessionService.createSession(testUserId, "token2", 2592000000, "Device2", "192.168.1.1")
 
         val sessions = sessionService.getSessions(testUserId)
         assertEquals(2, sessions.size)
@@ -70,7 +70,7 @@ class SessionServiceTest {
 
     @Test
     fun `revokeSession marks session as revoked`() {
-        val session = sessionService.createSession(testUserId, "Device1", "127.0.0.1")
+        val session = sessionService.createSession(testUserId, "test-refresh-token", 2592000000, "Device1", "127.0.0.1")
         sessionService.revokeSession(testUserId, session.id)
 
         assertFalse(sessionService.isSessionValid(session.id))
@@ -85,7 +85,7 @@ class SessionServiceTest {
 
     @Test
     fun `revokeSession for other user's session throws ForbiddenException`() {
-        val session = sessionService.createSession(testUserId, "Device1", "127.0.0.1")
+        val session = sessionService.createSession(testUserId, "test-refresh-token", 2592000000, "Device1", "127.0.0.1")
         val otherUserId = Uuid.random()
 
         assertFailsWith<ForbiddenException> {
@@ -94,13 +94,11 @@ class SessionServiceTest {
     }
 
     @Test
-    fun `revokeAllOtherSessions revokes all except current`() {
-        val session1 = sessionService.createSession(testUserId, "Device1", "127.0.0.1")
-        val session2 = sessionService.createSession(testUserId, "Device2", "192.168.1.1")
+    fun `rotateRefreshToken updates refresh token`() {
+        val session = sessionService.createSession(testUserId, "old-refresh-token", 2592000000, "Device1", "127.0.0.1")
+        val rotated = sessionService.rotateRefreshToken("old-refresh-token", 2592000000) { "new-refresh-token" }
 
-        sessionService.revokeAllOtherSessions(testUserId, session1.id)
-
-        assertTrue(sessionService.isSessionValid(session1.id))
-        assertFalse(sessionService.isSessionValid(session2.id))
+        assertEquals("new-refresh-token", rotated.refreshToken)
+        assertEquals(session.id, rotated.id)
     }
 }

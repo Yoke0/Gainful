@@ -17,14 +17,15 @@ class JwtTokenServiceTest {
             audience = "test-audience",
             realm = "test-realm",
             expiresIn = 86400000,
+            refreshExpiresIn = 2592000000,
         )
 
     private val tokenService = JwtTokenService()
 
     @Test
-    fun `generateToken produces valid JWT`() {
+    fun `generateAccessToken produces valid JWT`() {
         val token =
-            tokenService.generate(
+            tokenService.generateAccessToken(
                 config,
                 TokenClaim("sub", "user-id"),
                 TokenClaim("username", "testuser"),
@@ -37,7 +38,7 @@ class JwtTokenServiceTest {
     @Test
     fun `generated token contains correct claims`() {
         val token =
-            tokenService.generate(
+            tokenService.generateAccessToken(
                 config,
                 TokenClaim("sub", "user-id"),
                 TokenClaim("username", "testuser"),
@@ -53,6 +54,19 @@ class JwtTokenServiceTest {
         assertEquals("user-id", decoded.subject)
         assertEquals("testuser", decoded.getClaim("username").asString())
         assertEquals("test-audience", decoded.audience.first())
+    }
+
+    @Test
+    fun `generateRefreshToken produces valid JWT`() {
+        val token =
+            tokenService.generateRefreshToken(
+                config,
+                TokenClaim("sub", "user-id"),
+                TokenClaim("type", "refresh"),
+            )
+
+        assertTrue(token.isNotEmpty())
+        assertTrue(token.split(".").size == 3)
     }
 
     @Test

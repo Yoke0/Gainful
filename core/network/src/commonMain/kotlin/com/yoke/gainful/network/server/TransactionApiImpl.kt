@@ -7,7 +7,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -16,28 +15,23 @@ import io.ktor.http.contentType
 internal class TransactionApiImpl(
     private val client: HttpClient,
 ) : TransactionApi {
-    override suspend fun getTransactions(token: String, since: Long?): List<TransactionResponse> {
+    override suspend fun getTransactions(since: Long?): List<TransactionResponse> {
         val url =
             if (since != null) {
                 "$TRANSACTIONS?since=$since"
             } else {
                 TRANSACTIONS
             }
-        return client.get(url) {
-            header("Authorization", "Bearer $token")
-        }.body()
+        return client.get(url).body()
     }
 
-    override suspend fun createTransaction(token: String, request: CreateTransactionRequest): TransactionResponse =
+    override suspend fun createTransaction(request: CreateTransactionRequest): TransactionResponse =
         client.post(TRANSACTIONS) {
-            header("Authorization", "Bearer $token")
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
 
-    override suspend fun deleteTransaction(token: String, id: String) {
-        client.delete("$TRANSACTIONS/$id") {
-            header("Authorization", "Bearer $token")
-        }
+    override suspend fun deleteTransaction(id: String) {
+        client.delete("$TRANSACTIONS/$id")
     }
 }

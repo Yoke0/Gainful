@@ -6,16 +6,20 @@ import com.yoke.gainful.api.RegisterRequest
 import com.yoke.gainful.api.UpdateProfileRequest
 import com.yoke.gainful.api.UserResponse
 
-interface GainfulApi {
+interface PublicApi {
     suspend fun register(request: RegisterRequest): AuthResponse
 
     suspend fun login(request: LoginRequest): AuthResponse
 
-    suspend fun getProfile(token: String): UserResponse
+    suspend fun refreshToken(refreshToken: String): AuthResponse
 
-    suspend fun updateProfile(token: String, request: UpdateProfileRequest): UserResponse
+    suspend fun logout()
+}
 
-    suspend fun uploadAvatar(token: String, imageBytes: ByteArray, fileName: String): UserResponse
+interface AuthenticatedApi {
+    suspend fun getProfile(): UserResponse
 
-    suspend fun revokeSessions(token: String)
+    suspend fun updateProfile(request: UpdateProfileRequest): UserResponse
+
+    suspend fun uploadAvatar(imageBytes: ByteArray, fileName: String): String
 }

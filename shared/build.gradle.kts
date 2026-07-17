@@ -51,6 +51,7 @@ kotlin {
             implementation(projects.core.database)
             implementation(projects.core.datastore)
             implementation(projects.core.network)
+            implementation(projects.core.ksafe)
             implementation(projects.core.sync)
             implementation(projects.core.widget)
             implementation(projects.core.file)

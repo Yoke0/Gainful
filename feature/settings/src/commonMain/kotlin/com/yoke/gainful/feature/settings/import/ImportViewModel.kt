@@ -9,7 +9,7 @@ import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
-import com.yoke.gainful.datastore.AuthDataSource
+import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnceUseCase
 import com.yoke.gainful.feature.settings.model.CsvConfig
@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -38,7 +37,7 @@ class ImportViewModel(
     private val transactionRepository: TransactionRepository,
     private val syncQueueRepository: SyncQueueRepository,
     private val transactionApi: TransactionApi,
-    private val authDataSource: AuthDataSource,
+    private val userDataSource: UserDataSource,
     private val getTransactionsWithAssetsOnceUseCase: GetTransactionsWithAssetsOnceUseCase,
     private val assetRepository: AssetRepository,
     private val searchAssetsUseCase: SearchAssetsUseCase,
@@ -188,14 +187,13 @@ class ImportViewModel(
 
     private fun uploadToServer(transactions: List<Transaction>) {
         uploadScope.launch {
-            val state = authDataSource.authState.first()
-            val token = state.token
+            val state = userDataSource.userState.first()
             transactions.map { tx ->
                 async {
-                    if (token != null) {
+                    if (state.isLoggedIn) {
                         val result =
                             runCatching {
-                                transactionApi.createTransaction(token, tx.toCreateRequest())
+                                transactionApi.createTransaction(tx.toCreateRequest())
                             }
                         if (result.isSuccess) return@async
                     }
@@ -242,7 +240,7 @@ private fun Transaction.toCreateRequest() =
 
 private fun formatDate(millis: Long): String {
     val ldt =
-        Instant.fromEpochMilliseconds(millis)
+        kotlin.time.Instant.fromEpochMilliseconds(millis)
             .toLocalDateTime(TimeZone.currentSystemDefault())
     return ldt.date.toString()
 }

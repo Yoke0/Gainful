@@ -1,12 +1,12 @@
 package com.yoke.gainful.data.repository
 
-import com.yoke.gainful.datastore.UserPreferencesDataSource
+import com.yoke.gainful.datastore.SettingsDataSource
 import com.yoke.gainful.model.GainLossColorScheme
 import com.yoke.gainful.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
 class OfflineUserPreferencesRepository(
-    private val dataSource: UserPreferencesDataSource,
+    private val dataSource: SettingsDataSource,
 ) : UserPreferencesRepository {
     override val userPreferences: Flow<UserPreferences> = dataSource.userPreferences
 

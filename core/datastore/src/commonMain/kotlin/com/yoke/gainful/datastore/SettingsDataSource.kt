@@ -9,7 +9,7 @@ import com.yoke.gainful.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class UserPreferencesDataSource(
+class SettingsDataSource(
     private val dataStore: DataStore<Preferences>,
 ) {
     private object Keys {

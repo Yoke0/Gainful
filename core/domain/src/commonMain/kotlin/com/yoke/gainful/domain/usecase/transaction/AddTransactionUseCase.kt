@@ -5,7 +5,7 @@ import com.yoke.gainful.data.repository.PnlCacheRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.data.repository.TransactionSyncRepository
-import com.yoke.gainful.datastore.AuthDataSource
+import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.model.Transaction
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.toLocalDateTime
@@ -15,18 +15,17 @@ class AddTransactionUseCase(
     private val pnlCacheRepository: PnlCacheRepository,
     private val syncQueueRepository: SyncQueueRepository,
     private val transactionSyncRepository: TransactionSyncRepository,
-    private val authDataSource: AuthDataSource,
+    private val userDataSource: UserDataSource,
 ) {
     suspend operator fun invoke(transaction: Transaction) {
         transactionRepository.insertTransaction(transaction)
         pnlCacheRepository.clear()
         // Try upload to server immediately
-        val state = authDataSource.authState.first()
-        val token = state.token
-        if (token != null) {
+        val state = userDataSource.userState.first()
+        if (state.isLoggedIn) {
             val result =
                 runCatching {
-                    transactionSyncRepository.createTransaction(token, transaction.toCreateRequest())
+                    transactionSyncRepository.createTransaction(transaction.toCreateRequest())
                 }
             if (result.isSuccess) return
         }

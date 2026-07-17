@@ -49,6 +49,8 @@ object UserSessions : Table("user_sessions") {
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val expiresAt = datetime("expires_at")
     val isRevoked = bool("is_revoked").default(false)
+    val refreshToken = varchar("refresh_token", 500).nullable()
+    val refreshTokenExpiresAt = datetime("refresh_token_expires_at").nullable()
 
     override val primaryKey = PrimaryKey(id)
 

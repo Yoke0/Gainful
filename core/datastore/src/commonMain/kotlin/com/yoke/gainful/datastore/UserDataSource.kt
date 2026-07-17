@@ -5,27 +5,24 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.yoke.gainful.model.AuthState
+import com.yoke.gainful.model.UserState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class AuthDataSource(
+class UserDataSource(
     private val dataStore: DataStore<Preferences>,
 ) {
     private object Keys {
-        val AUTH_TOKEN = stringPreferencesKey("auth_token")
         val USER_ID = stringPreferencesKey("user_id")
         val USERNAME = stringPreferencesKey("username")
         val AVATAR_EMOJI = stringPreferencesKey("avatar_emoji")
         val LAST_TRANSACTION_SYNC_TIME = longPreferencesKey("last_transaction_sync_time")
     }
 
-    val authState: Flow<AuthState> =
+    val userState: Flow<UserState> =
         dataStore.data.map { prefs ->
-            val token = prefs[Keys.AUTH_TOKEN]
-            AuthState(
-                isLoggedIn = token != null,
-                token = token,
+            UserState(
+                isLoggedIn = prefs[Keys.USER_ID] != null,
                 userId = prefs[Keys.USER_ID],
                 username = prefs[Keys.USERNAME],
             )
@@ -36,21 +33,18 @@ class AuthDataSource(
             prefs[Keys.AVATAR_EMOJI]
         }
 
-    suspend fun saveAuth(
-        token: String,
+    suspend fun saveUser(
         userId: String,
         username: String,
     ) {
         dataStore.edit {
-            it[Keys.AUTH_TOKEN] = token
             it[Keys.USER_ID] = userId
             it[Keys.USERNAME] = username
         }
     }
 
-    suspend fun clearAuth() {
+    suspend fun clearUser() {
         dataStore.edit {
-            it.remove(Keys.AUTH_TOKEN)
             it.remove(Keys.USER_ID)
             it.remove(Keys.USERNAME)
         }

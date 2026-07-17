@@ -4,9 +4,9 @@ import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.api.TransactionResponse
 
 interface TransactionApi {
-    suspend fun getTransactions(token: String, since: Long? = null): List<TransactionResponse>
+    suspend fun getTransactions(since: Long? = null): List<TransactionResponse>
 
-    suspend fun createTransaction(token: String, request: CreateTransactionRequest): TransactionResponse
+    suspend fun createTransaction(request: CreateTransactionRequest): TransactionResponse
 
-    suspend fun deleteTransaction(token: String, id: String)
+    suspend fun deleteTransaction(id: String)
 }
