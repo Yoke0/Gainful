@@ -42,16 +42,35 @@ class AuthService(
             }
         }
 
-        val session = sessionService.createSession(userId = userId, deviceInfo = deviceInfo, ipAddress = ipAddress)
-        val token =
-            tokenService.generate(
+        val refreshToken =
+            tokenService.generateRefreshToken(
+                config = tokenConfig,
+                TokenClaim("sub", userId.toString()),
+                TokenClaim("type", "refresh"),
+                TokenClaim("jti", Uuid.random().toString()),
+            )
+        val session =
+            sessionService.createSession(
+                userId = userId,
+                refreshToken = refreshToken,
+                refreshExpiresInMs = tokenConfig.refreshExpiresIn,
+                deviceInfo = deviceInfo,
+                ipAddress = ipAddress,
+            )
+        val accessToken =
+            tokenService.generateAccessToken(
                 config = tokenConfig,
                 TokenClaim("sub", userId.toString()),
                 TokenClaim("sessionId", session.id.toString()),
                 TokenClaim("username", username),
             )
 
-        return AuthResponse(token = token, userId = userId.toString(), username = username)
+        return AuthResponse(
+            accessToken = accessToken,
+            refreshToken = session.refreshToken,
+            userId = userId.toString(),
+            username = username,
+        )
     }
 
     fun login(username: String, password: String, deviceInfo: String?, ipAddress: String?): AuthResponse {
@@ -64,15 +83,24 @@ class AuthService(
             throw UnauthorizedException("Invalid username or password")
         }
 
+        val refreshToken =
+            tokenService.generateRefreshToken(
+                config = tokenConfig,
+                TokenClaim("sub", user[Users.id].toString()),
+                TokenClaim("type", "refresh"),
+                TokenClaim("jti", Uuid.random().toString()),
+            )
         val session =
             sessionService.createSession(
                 userId = user[Users.id],
+                refreshToken = refreshToken,
+                refreshExpiresInMs = tokenConfig.refreshExpiresIn,
                 deviceInfo = deviceInfo,
                 ipAddress = ipAddress,
             )
 
-        val token =
-            tokenService.generate(
+        val accessToken =
+            tokenService.generateAccessToken(
                 config = tokenConfig,
                 TokenClaim("sub", user[Users.id].toString()),
                 TokenClaim("sessionId", session.id.toString()),
@@ -80,8 +108,44 @@ class AuthService(
             )
 
         return AuthResponse(
-            token = token,
+            accessToken = accessToken,
+            refreshToken = session.refreshToken,
             userId = user[Users.id].toString(),
+            username = user[Users.username],
+        )
+    }
+
+    fun refreshAccessToken(refreshToken: String): AuthResponse {
+        val session =
+            sessionService.rotateRefreshToken(
+                oldRefreshToken = refreshToken,
+                refreshExpiresInMs = tokenConfig.refreshExpiresIn,
+            ) { userId ->
+                tokenService.generateRefreshToken(
+                    config = tokenConfig,
+                    TokenClaim("sub", userId.toString()),
+                    TokenClaim("type", "refresh"),
+                    TokenClaim("jti", Uuid.random().toString()),
+                )
+            }
+
+        val user =
+            transaction {
+                Users.selectAll().where { Users.id eq session.userId }.singleOrNull()
+            } ?: throw UnauthorizedException("User not found")
+
+        val accessToken =
+            tokenService.generateAccessToken(
+                config = tokenConfig,
+                TokenClaim("sub", session.userId.toString()),
+                TokenClaim("sessionId", session.id.toString()),
+                TokenClaim("username", user[Users.username]),
+            )
+
+        return AuthResponse(
+            accessToken = accessToken,
+            refreshToken = session.refreshToken,
+            userId = session.userId.toString(),
             username = user[Users.username],
         )
     }

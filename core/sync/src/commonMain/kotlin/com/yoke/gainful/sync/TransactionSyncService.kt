@@ -5,7 +5,7 @@ import com.yoke.gainful.api.TransactionResponse
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
-import com.yoke.gainful.datastore.AuthDataSource
+import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
@@ -22,12 +22,13 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration.Companion.milliseconds
 
 class TransactionSyncService(
     private val transactionApi: TransactionApi,
     private val transactionRepository: TransactionRepository,
     private val syncQueueRepository: SyncQueueRepository,
-    private val authDataSource: AuthDataSource,
+    private val userDataSource: UserDataSource,
     private val assetRepository: AssetRepository,
     private val searchAssetsUseCase: SearchAssetsUseCase,
 ) {
@@ -39,7 +40,7 @@ class TransactionSyncService(
         syncJob =
             scope.launch {
                 while (isActive) {
-                    delay(PERIODIC_SYNC_INTERVAL_MS)
+                    delay(PERIODIC_SYNC_INTERVAL_MS.milliseconds)
                     sync()
                 }
             }
@@ -51,13 +52,15 @@ class TransactionSyncService(
     }
 
     suspend fun sync() {
-        val state = authDataSource.authState.first()
-        val token = state.token ?: return
+        val state = userDataSource.userState.first()
+        val isLoggedIn = state.isLoggedIn
 
-        println("TransactionSync: Starting sync, token=${token?.take(10)}...")
+        if (!isLoggedIn) return
+
+        println("TransactionSync: Starting sync...")
         try {
             // 1. Process sync queue (upload pending operations)
-            processSyncQueue(token)
+            processSyncQueue()
 
             // 2. Get max updatedAt from local transactions (more accurate than DataStore)
             val lastSyncTime = transactionRepository.getMaxUpdatedAt() ?: 0L
@@ -65,15 +68,14 @@ class TransactionSyncService(
             // 3. Fetch from server (incremental or full)
             val serverTransactions =
                 if (lastSyncTime > 0) {
-                    transactionApi.getTransactions(token, since = lastSyncTime)
+                    transactionApi.getTransactions(since = lastSyncTime)
                 } else {
-                    transactionApi.getTransactions(token)
+                    transactionApi.getTransactions()
                 }
             println("TransactionSync: Got ${serverTransactions.size} transactions from server, since=$lastSyncTime")
 
             // 4. Get local transactions
             val localTransactions = transactionRepository.getAllTransactions()
-            val localMap = localTransactions.associateBy { it.id }
             val serverMap = serverTransactions.associateBy { it.id }
 
             // 5. Merge: server data overwrites local (INSERT OR REPLACE)
@@ -111,7 +113,7 @@ class TransactionSyncService(
                 runCatching {
                     val result =
                         runCatching {
-                            transactionApi.createTransaction(token, tx.toCreateRequest())
+                            transactionApi.createTransaction(tx.toCreateRequest())
                         }
                     if (result.isFailure) {
                         syncQueueRepository.enqueue("transaction", tx.id, "CREATE")
@@ -121,10 +123,9 @@ class TransactionSyncService(
 
             // 8. Cleanup: local has, server doesn't, not in sync queue -> delete
             val serverIds = serverTransactions.filter { it.deletedAt == null }.map { it.id }.toSet()
-            val allPendingIds = pendingCreates
             val toCleanup =
                 localTransactions.filter {
-                    it.id !in serverIds && it.id !in allPendingIds
+                    it.id !in serverIds && it.id !in pendingCreates
                 }.map { it.id }
             if (toCleanup.isNotEmpty()) {
                 transactionRepository.deleteByIds(toCleanup)
@@ -137,7 +138,7 @@ class TransactionSyncService(
         }
     }
 
-    private suspend fun processSyncQueue(token: String) {
+    private suspend fun processSyncQueue() {
         val pendingItems = syncQueueRepository.getAll()
         for (item in pendingItems) {
             when (item.operation) {
@@ -146,7 +147,7 @@ class TransactionSyncService(
                     val tx = transactionRepository.getTransactionById(item.entityId)
                     if (tx != null) {
                         runCatching {
-                            transactionApi.createTransaction(token, tx.toCreateRequest())
+                            transactionApi.createTransaction(tx.toCreateRequest())
                             syncQueueRepository.remove(item.id)
                         }
                     } else {
@@ -157,7 +158,7 @@ class TransactionSyncService(
 
                 "DELETE" -> {
                     runCatching {
-                        transactionApi.deleteTransaction(token, item.entityId)
+                        transactionApi.deleteTransaction(item.entityId)
                         syncQueueRepository.remove(item.id)
                     }
                 }
@@ -211,7 +212,7 @@ class TransactionSyncService(
     }
 
     private fun formatDate(millis: Long): String {
-        val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(millis)
+        val instant = kotlin.time.Instant.fromEpochMilliseconds(millis)
         val ldt = instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
         return ldt.date.toString()
     }

@@ -1,8 +1,7 @@
 package com.yoke.gainful.model
 
-data class AuthState(
+data class UserState(
     val isLoggedIn: Boolean = false,
-    val token: String? = null,
     val userId: String? = null,
     val username: String? = null,
 )

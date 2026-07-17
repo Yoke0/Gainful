@@ -6,4 +6,5 @@ data class TokenConfig(
     val realm: String,
     val secret: String,
     val expiresIn: Long,
+    val refreshExpiresIn: Long,
 )

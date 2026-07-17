@@ -41,6 +41,7 @@ fun Application.loadConfig(): AppConfig {
             audience = config.property("jwt.audience").getString(),
             realm = config.property("jwt.realm").getString(),
             expiresIn = config.property("jwt.expiresIn").getString().toLong(),
+            refreshExpiresIn = config.property("jwt.refreshExpiresIn").getString().toLong(),
         )
 
     val upload =

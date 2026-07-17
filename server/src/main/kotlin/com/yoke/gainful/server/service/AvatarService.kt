@@ -33,7 +33,7 @@ class AvatarService(private val uploadConfig: UploadConfig) {
             if (part is PartData.FileItem) {
                 val contentType = part.contentType?.toString() ?: ""
                 if (contentType !in ALLOWED_TYPES) {
-                    part.dispose()
+                    part.release()
                     throw UnsupportedMediaTypeException("Only JPEG, PNG, and WEBP images are allowed")
                 }
 
@@ -46,7 +46,7 @@ class AvatarService(private val uploadConfig: UploadConfig) {
                 val bytes = part.streamProvider().readBytes()
 
                 if (bytes.size > uploadConfig.maxFileSizeBytes) {
-                    part.dispose()
+                    part.release()
                     file.delete()
                     throw PayloadTooLargeException("File size exceeds maximum of ${uploadConfig.maxFileSizeBytes / 1024 / 1024}MB")
                 }
@@ -69,7 +69,7 @@ class AvatarService(private val uploadConfig: UploadConfig) {
                     }
                 }
             }
-            part.dispose()
+            part.release()
         }
 
         return avatarUrl ?: throw UnsupportedMediaTypeException("No valid image file provided")

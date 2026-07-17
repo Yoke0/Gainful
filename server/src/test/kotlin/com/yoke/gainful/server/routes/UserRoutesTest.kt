@@ -34,7 +34,9 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.testing.testApplication
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -65,7 +67,7 @@ class UserRoutesTest {
             SchemaUtils.create(Users, Transactions, UserSessions)
         }
 
-        tokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000)
+        tokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000, 2592000000)
         tokenService = JwtTokenService()
 
         testUserId = Uuid.random()
@@ -83,10 +85,10 @@ class UserRoutesTest {
                 it[id] = testSessionId
                 it[userId] = testUserId
                 it[expiresAt] =
-                    kotlinx.datetime.LocalDateTime(
+                    LocalDateTime(
                         year = now.year,
-                        monthNumber = now.monthNumber,
-                        dayOfMonth = now.dayOfMonth + 1,
+                        month = now.month.number,
+                        day = now.day + 1,
                         hour = now.hour,
                         minute = now.minute,
                         second = now.second,
@@ -96,7 +98,7 @@ class UserRoutesTest {
         }
 
         testToken =
-            tokenService.generate(
+            tokenService.generateAccessToken(
                 tokenConfig,
                 TokenClaim("sub", testUserId.toString()),
                 TokenClaim("sessionId", testSessionId.toString()),
@@ -112,7 +114,7 @@ class UserRoutesTest {
     }
 
     private fun Application.testModule() {
-        val testTokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000)
+        val testTokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000, 2592000000)
         val sessionService = SessionService()
 
         install(ContentNegotiation) { json() }

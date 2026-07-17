@@ -34,13 +34,14 @@ class AuthServiceTest {
             SchemaUtils.create(Users, Transactions, UserSessions)
         }
 
-        val tokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000)
+        val tokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000, 2592000000)
         val tokenService = JwtTokenService()
         sessionService = mockk(relaxed = true)
-        every { sessionService.createSession(any(), any(), any()) } returns
+        every { sessionService.createSession(any(), any(), any(), any(), any()) } returns
             SessionService.SessionInfo(
                 id = Uuid.random(),
                 userId = Uuid.random(),
+                refreshToken = "test-refresh-token",
             )
         authService = AuthService(tokenConfig, sessionService, tokenService)
     }
@@ -55,8 +56,8 @@ class AuthServiceTest {
     @Test
     fun `register creates user successfully`() {
         val response = authService.register("testuser", "test@test.com", "123456")
-        assertNotNull(response.token)
-        assertTrue(response.token.isNotEmpty())
+        assertNotNull(response.accessToken)
+        assertTrue(response.accessToken.isNotEmpty())
         assertEquals("testuser", response.username)
     }
 
@@ -87,7 +88,7 @@ class AuthServiceTest {
     fun `login with valid credentials returns token`() {
         authService.register("testuser", "test@test.com", "123456")
         val response = authService.login("testuser", "123456", "TestDevice", "127.0.0.1")
-        assertTrue(response.token.isNotEmpty())
+        assertTrue(response.accessToken.isNotEmpty())
         assertEquals("testuser", response.username)
     }
 
@@ -111,6 +112,6 @@ class AuthServiceTest {
         authService.register("testuser", "test@test.com", "123456")
         authService.login("testuser", "123456", null, null)
 
-        io.mockk.verify(exactly = 2) { sessionService.createSession(any(), any(), any()) }
+        io.mockk.verify(exactly = 2) { sessionService.createSession(any(), any(), any(), any(), any()) }
     }
 }

@@ -4,40 +4,53 @@ import com.yoke.gainful.api.SessionResponse
 import com.yoke.gainful.server.db.UserSessions
 import com.yoke.gainful.server.plugins.ForbiddenException
 import com.yoke.gainful.server.plugins.NotFoundException
+import com.yoke.gainful.server.plugins.UnauthorizedException
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class SessionService {
     data class SessionInfo(
         val id: Uuid,
         val userId: Uuid,
+        val refreshToken: String,
     )
 
-    fun createSession(userId: Uuid, deviceInfo: String?, ipAddress: String?): SessionInfo {
+    fun createSession(
+        userId: Uuid,
+        refreshToken: String,
+        refreshExpiresInMs: Long,
+        deviceInfo: String?,
+        ipAddress: String?,
+    ): SessionInfo {
         val sessionId = Uuid.random()
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val expiresAt =
-            kotlinx.datetime.LocalDateTime(
+            LocalDateTime(
                 year = now.year,
-                monthNumber = now.monthNumber,
-                dayOfMonth = now.dayOfMonth + 1,
+                month = now.month,
+                day = now.day + 1,
                 hour = now.hour,
                 minute = now.minute,
                 second = now.second,
                 nanosecond = now.nanosecond,
             )
+        val refreshExpiresAt =
+            Instant.fromEpochMilliseconds(
+                now.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds() + refreshExpiresInMs,
+            ).toLocalDateTime(TimeZone.currentSystemDefault())
 
         transaction {
             UserSessions.insert {
@@ -46,12 +59,15 @@ class SessionService {
                 it[UserSessions.deviceInfo] = deviceInfo
                 it[UserSessions.ipAddress] = ipAddress
                 it[UserSessions.expiresAt] = expiresAt
+                it[UserSessions.refreshToken] = refreshToken
+                it[UserSessions.refreshTokenExpiresAt] = refreshExpiresAt
             }
         }
 
         return SessionInfo(
             id = sessionId,
             userId = userId,
+            refreshToken = refreshToken,
         )
     }
 
@@ -90,16 +106,6 @@ class SessionService {
         }
     }
 
-    fun revokeAllOtherSessions(userId: Uuid, currentSessionId: Uuid) {
-        transaction {
-            UserSessions.update({
-                UserSessions.userId eq userId and (UserSessions.id neq currentSessionId)
-            }) {
-                it[isRevoked] = true
-            }
-        }
-    }
-
     fun isSessionValid(sessionId: Uuid): Boolean {
         return transaction {
             val session: ResultRow? = UserSessions.selectAll().where { UserSessions.id eq sessionId }.singleOrNull()
@@ -110,5 +116,49 @@ class SessionService {
                     )
             } ?: false
         }
+    }
+
+    fun rotateRefreshToken(
+        oldRefreshToken: String,
+        refreshExpiresInMs: Long,
+        generateNewToken: (userId: Uuid) -> String,
+    ): SessionInfo {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val refreshExpiresAt =
+            Instant.fromEpochMilliseconds(
+                now.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds() + refreshExpiresInMs,
+            ).toLocalDateTime(TimeZone.currentSystemDefault())
+
+        val session: ResultRow? =
+            transaction {
+                UserSessions.selectAll().where {
+                    UserSessions.refreshToken eq oldRefreshToken
+                }.singleOrNull()
+            }
+
+        if (session == null) throw UnauthorizedException("Invalid refresh token")
+
+        if (session[UserSessions.isRevoked]) throw UnauthorizedException("Refresh token has been revoked")
+
+        val sessionExpiresAt = session[UserSessions.refreshTokenExpiresAt]
+        if (sessionExpiresAt == null || sessionExpiresAt < now) {
+            throw UnauthorizedException("Refresh token has expired")
+        }
+
+        val userId = session[UserSessions.userId]
+        val newRefreshToken = generateNewToken(userId)
+
+        transaction {
+            UserSessions.update({ UserSessions.refreshToken eq oldRefreshToken }) {
+                it[refreshToken] = newRefreshToken
+                it[refreshTokenExpiresAt] = refreshExpiresAt
+            }
+        }
+
+        return SessionInfo(
+            id = session[UserSessions.id],
+            userId = userId,
+            refreshToken = newRefreshToken,
+        )
     }
 }

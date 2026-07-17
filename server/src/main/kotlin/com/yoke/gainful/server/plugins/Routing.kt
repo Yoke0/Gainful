@@ -13,7 +13,6 @@ import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
-import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import org.koin.ktor.ext.inject
 import java.io.File
@@ -29,11 +28,9 @@ fun Application.configureRouting() {
     }
 
     routing {
-        route("/api") {
-            authRoutes()
-            userRoutes()
-            transactionRoutes()
-        }
+        authRoutes()
+        userRoutes()
+        transactionRoutes()
         staticFiles("/avatars", File(uploadConfig.dir))
 
         get("/openapi/documentation.yaml") {

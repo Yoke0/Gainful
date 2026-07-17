@@ -4,34 +4,35 @@ import com.yoke.gainful.api.LoginRequest
 import com.yoke.gainful.api.RegisterRequest
 import com.yoke.gainful.database.dao.SyncQueueDao
 import com.yoke.gainful.database.dao.TransactionDao
-import com.yoke.gainful.datastore.AuthDataSource
-import com.yoke.gainful.model.AuthState
+import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.model.UserProfile
-import com.yoke.gainful.network.server.GainfulApi
+import com.yoke.gainful.model.UserState
+import com.yoke.gainful.network.server.AuthenticatedApi
+import com.yoke.gainful.network.server.PublicApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 
 internal class AuthRepositoryImpl(
-    private val api: GainfulApi,
-    private val authDataSource: AuthDataSource,
+    private val publicApi: PublicApi,
+    private val authenticatedApi: AuthenticatedApi,
+    private val userDataSource: UserDataSource,
     private val transactionDao: TransactionDao,
     private val syncQueueDao: SyncQueueDao,
 ) : AuthRepository {
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     override val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
-    override val authState: Flow<AuthState> = authDataSource.authState
-    override val avatarEmoji: Flow<String?> = authDataSource.avatarEmoji
+    override val userState: Flow<UserState> = userDataSource.userState
+    override val avatarEmoji: Flow<String?> = userDataSource.avatarEmoji
 
     override suspend fun login(
         username: String,
         password: String,
     ): Result<Unit> =
         runCatching {
-            val resp = api.login(LoginRequest(username, password))
-            authDataSource.saveAuth(resp.token, resp.userId, resp.username)
+            val resp = publicApi.login(LoginRequest(username, password))
+            userDataSource.saveUser(resp.userId, resp.username)
             refreshProfile()
         }
 
@@ -41,55 +42,39 @@ internal class AuthRepositoryImpl(
         password: String,
     ): Result<Unit> =
         runCatching {
-            val resp = api.register(RegisterRequest(username = nickname, email, password))
-            authDataSource.saveAuth(resp.token, resp.userId, resp.username)
+            val resp = publicApi.register(RegisterRequest(username = nickname, email, password))
+            userDataSource.saveUser(resp.userId, resp.username)
             refreshProfile()
         }
 
     override suspend fun logout() {
-        val state = authState.first()
-        state.token?.let { token ->
-            runCatching { api.revokeSessions(token) }
-        }
-        // Clear local user data
+        runCatching { publicApi.logout() }
         transactionDao.deleteAll()
         syncQueueDao.deleteAll()
-        authDataSource.clearLastTransactionSyncTime()
-        authDataSource.clearAuth()
+        userDataSource.clearLastTransactionSyncTime()
+        userDataSource.clearUser()
         _userProfile.value = null
     }
 
     override suspend fun refreshProfile() {
-        val state = authState.first()
-        state.token?.let { token ->
-            val resp = api.getProfile(token)
-            _userProfile.value =
-                UserProfile(
-                    id = resp.id,
-                    username = resp.username,
-                    email = resp.email,
-                    nickname = resp.nickname,
-                    avatarUrl = resp.avatarUrl,
-                )
-        }
+        val resp = authenticatedApi.getProfile()
+        _userProfile.value =
+            UserProfile(
+                id = resp.id,
+                username = resp.username,
+                email = resp.email,
+                nickname = resp.nickname,
+                avatarUrl = resp.avatarUrl,
+            )
     }
 
     override suspend fun setAvatarEmoji(emoji: String) {
-        authDataSource.setAvatarEmoji(emoji)
+        userDataSource.setAvatarEmoji(emoji)
     }
 
     override suspend fun uploadAvatar(imageBytes: ByteArray, fileName: String): Result<Unit> =
         runCatching {
-            val state = authState.first()
-            val token = state.token ?: throw IllegalStateException("Not logged in")
-            val resp = api.uploadAvatar(token, imageBytes, fileName)
-            _userProfile.value =
-                UserProfile(
-                    id = resp.id,
-                    username = resp.username,
-                    email = resp.email,
-                    nickname = resp.nickname,
-                    avatarUrl = resp.avatarUrl,
-                )
+            val avatarUrl = authenticatedApi.uploadAvatar(imageBytes, fileName)
+            _userProfile.value = _userProfile.value?.copy(avatarUrl = avatarUrl)
         }
 }

@@ -19,8 +19,10 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.client.auth)
             implementation(libs.ktor.serialization.json)
             implementation(libs.koin.core)
+            implementation(projects.core.ksafe)
         }
         jvmMain.dependencies {
             implementation(libs.ktor.client.okhttp)

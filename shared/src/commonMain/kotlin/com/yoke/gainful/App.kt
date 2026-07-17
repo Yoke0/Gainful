@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import com.yoke.gainful.data.repository.AuthRepository
 import com.yoke.gainful.data.repository.UserPreferencesRepository
-import com.yoke.gainful.datastore.AuthDataSource
+import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.GainfulTheme
 import com.yoke.gainful.di.initKoin
@@ -54,7 +54,7 @@ fun App() {
     val kLineFetchService = koinInject<KLineFetchService>()
     val transactionSyncService = koinInject<TransactionSyncService>()
     val authRepository = koinInject<AuthRepository>()
-    val authDataSource = koinInject<AuthDataSource>()
+    val userDataSource = koinInject<UserDataSource>()
 
     GainfulTheme {
         Box(
@@ -94,7 +94,7 @@ fun App() {
                                     val result = runCatching { authRepository.refreshProfile() }
                                     if (result.isFailure) {
                                         // Token invalid - get username then clear auth
-                                        val username = authDataSource.authState.first().username
+                                        val username = userDataSource.userState.first().username
                                         authRepository.logout()
                                         if (username != null) {
                                             navigateToLoginWithUsername = username
