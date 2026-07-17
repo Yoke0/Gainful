@@ -5,6 +5,7 @@ import com.yoke.gainful.api.TransactionResponse
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
+import com.yoke.gainful.datastore.SyncDataSource
 import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.model.Transaction
@@ -23,12 +24,14 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
 
 class TransactionSyncService(
     private val transactionApi: TransactionApi,
     private val transactionRepository: TransactionRepository,
     private val syncQueueRepository: SyncQueueRepository,
     private val userDataSource: UserDataSource,
+    private val syncDataSource: SyncDataSource,
     private val assetRepository: AssetRepository,
     private val searchAssetsUseCase: SearchAssetsUseCase,
 ) {
@@ -53,19 +56,12 @@ class TransactionSyncService(
 
     suspend fun sync() {
         val state = userDataSource.userState.first()
-        val isLoggedIn = state.isLoggedIn
-
-        if (!isLoggedIn) return
+        if (!state.isLoggedIn) return
 
         println("TransactionSync: Starting sync...")
         try {
-            // 1. Process sync queue (upload pending operations)
-            processSyncQueue()
-
-            // 2. Get max updatedAt from local transactions (more accurate than DataStore)
-            val lastSyncTime = transactionRepository.getMaxUpdatedAt() ?: 0L
-
-            // 3. Fetch from server (incremental or full)
+            // 1. PULL — fetch from server and merge into local DB
+            val lastSyncTime = syncDataSource.getLastTransactionSyncTime()
             val serverTransactions =
                 if (lastSyncTime > 0) {
                     transactionApi.getTransactions(since = lastSyncTime)
@@ -74,22 +70,15 @@ class TransactionSyncService(
                 }
             println("TransactionSync: Got ${serverTransactions.size} transactions from server, since=$lastSyncTime")
 
-            // 4. Get local transactions
-            val localTransactions = transactionRepository.getAllTransactions()
-            val serverMap = serverTransactions.associateBy { it.id }
-
-            // 5. Merge: server data overwrites local (INSERT OR REPLACE)
-            val toUpsert =
+            val toMerge =
                 serverTransactions
                     .filter { it.deletedAt == null }
                     .map { it.toDomain() }
-            println("TransactionSync: Upserting ${toUpsert.size} transactions to local DB")
-            if (toUpsert.isNotEmpty()) {
-                transactionRepository.insertTransactions(toUpsert)
-                enrichAssets(toUpsert)
+            if (toMerge.isNotEmpty()) {
+                transactionRepository.mergeServerTransactions(toMerge)
+                enrichAssets(toMerge)
             }
 
-            // 6. Handle soft deletes
             val toDeleteLocally =
                 serverTransactions
                     .filter { it.deletedAt != null }
@@ -98,43 +87,15 @@ class TransactionSyncService(
                 transactionRepository.deleteByIds(toDeleteLocally)
             }
 
-            // 7. Upload local-only transactions (orphan from offline mode)
-            val pendingCreates =
-                syncQueueRepository.getAll()
-                    .filter { it.operation == "CREATE" }
-                    .map { it.entityId }
-                    .toSet()
+            // Update timestamp ONLY after successful merge
+            syncDataSource.setLastTransactionSyncTime(kotlin.time.Clock.System.now().toEpochMilliseconds())
 
-            val localOnly =
-                localTransactions.filter {
-                    it.id !in serverMap && it.id !in pendingCreates
-                }
-            for (tx in localOnly) {
-                runCatching {
-                    val result =
-                        runCatching {
-                            transactionApi.createTransaction(tx.toCreateRequest())
-                        }
-                    if (result.isFailure) {
-                        syncQueueRepository.enqueue("transaction", tx.id, "CREATE")
-                    }
-                }
-            }
-
-            // 8. Cleanup: local has, server doesn't, not in sync queue -> delete
-            val serverIds = serverTransactions.filter { it.deletedAt == null }.map { it.id }.toSet()
-            val toCleanup =
-                localTransactions.filter {
-                    it.id !in serverIds && it.id !in pendingCreates
-                }.map { it.id }
-            if (toCleanup.isNotEmpty()) {
-                transactionRepository.deleteByIds(toCleanup)
-            }
+            // 2. PUSH — upload pending local operations
+            processSyncQueue()
 
             println("TransactionSync: Sync completed successfully")
         } catch (e: Exception) {
             println("TransactionSync: Sync failed: ${e.message}")
-            // Sync failed, will retry on next periodic sync
         }
     }
 
@@ -143,15 +104,15 @@ class TransactionSyncService(
         for (item in pendingItems) {
             when (item.operation) {
                 "CREATE" -> {
-                    // Check if transaction still exists locally
                     val tx = transactionRepository.getTransactionById(item.entityId)
                     if (tx != null) {
                         runCatching {
-                            transactionApi.createTransaction(tx.toCreateRequest())
+                            val result = transactionApi.createTransaction(tx.toCreateRequest())
                             syncQueueRepository.remove(item.id)
+                            // Update local ID to match server-assigned ID
+                            transactionRepository.updateId(item.entityId, result.id)
                         }
                     } else {
-                        // Transaction deleted locally, remove from queue
                         syncQueueRepository.remove(item.id)
                     }
                 }
@@ -212,7 +173,7 @@ class TransactionSyncService(
     }
 
     private fun formatDate(millis: Long): String {
-        val instant = kotlin.time.Instant.fromEpochMilliseconds(millis)
+        val instant = Instant.fromEpochMilliseconds(millis)
         val ldt = instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
         return ldt.date.toString()
     }

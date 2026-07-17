@@ -42,6 +42,7 @@ val dataModule =
                 userDataSource = get<UserDataSource>(),
                 transactionDao = get(),
                 syncQueueDao = get(),
+                syncDataSource = get(),
             )
         }
     }

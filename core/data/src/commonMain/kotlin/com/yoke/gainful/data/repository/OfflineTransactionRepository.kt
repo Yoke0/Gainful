@@ -46,7 +46,18 @@ class OfflineTransactionRepository(
         dao.deleteByIds(ids)
     }
 
-    override suspend fun getMaxUpdatedAt(): Long? {
-        return dao.getMaxUpdatedAt()
+    override suspend fun mergeServerTransactions(transactions: List<Transaction>) {
+        for (tx in transactions) {
+            val local = dao.getById(tx.id)
+            if (local == null) {
+                dao.insert(tx.toEntity())
+            } else if (tx.updatedAt >= local.updatedAt) {
+                dao.insert(tx.toEntity())
+            }
+        }
+    }
+
+    override suspend fun updateId(oldId: String, newId: String) {
+        dao.updateId(oldId, newId)
     }
 }
