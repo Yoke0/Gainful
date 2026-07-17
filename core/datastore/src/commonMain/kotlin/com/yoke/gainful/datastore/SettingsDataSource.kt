@@ -1,60 +1,59 @@
 package com.yoke.gainful.datastore
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
+import com.yoke.gainful.model.AppSettings
 import com.yoke.gainful.model.GainLossColorScheme
-import com.yoke.gainful.model.UserPreferences
+import com.yoke.gainful.proto.AppSettingsProto
+import com.yoke.gainful.proto.GainfulDataProto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class SettingsDataSource(
-    private val dataStore: DataStore<Preferences>,
+    private val dataStore: DataStore<GainfulDataProto>,
 ) {
-    private object Keys {
-        val REFRESH_MINUTES = intPreferencesKey("refresh_minutes")
-        val OPEN_HOUR = intPreferencesKey("open_hour")
-        val OPEN_MINUTE = intPreferencesKey("open_minute")
-        val CLOSE_HOUR = intPreferencesKey("close_hour")
-        val CLOSE_MINUTE = intPreferencesKey("close_minute")
-        val GAIN_LOSS_COLOR_SCHEME = intPreferencesKey("gain_loss_color_scheme")
-    }
-
-    val userPreferences: Flow<UserPreferences> =
-        dataStore.data.map { prefs ->
-            UserPreferences(
-                refreshMinutes = prefs[Keys.REFRESH_MINUTES] ?: UserPreferences().refreshMinutes,
-                openHour = prefs[Keys.OPEN_HOUR] ?: UserPreferences().openHour,
-                openMinute = prefs[Keys.OPEN_MINUTE] ?: UserPreferences().openMinute,
-                closeHour = prefs[Keys.CLOSE_HOUR] ?: UserPreferences().closeHour,
-                closeMinute = prefs[Keys.CLOSE_MINUTE] ?: UserPreferences().closeMinute,
+    val appSettings: Flow<AppSettings> =
+        dataStore.data.map { data ->
+            val config = data.app_settings ?: AppSettingsProto()
+            AppSettings(
+                refreshMinutes = config.refresh_minutes.ifZero { AppSettings().refreshMinutes },
+                openHour = config.open_hour.ifZero { AppSettings().openHour },
+                openMinute = config.open_minute.ifZero { AppSettings().openMinute },
+                closeHour = config.close_hour.ifZero { AppSettings().closeHour },
+                closeMinute = config.close_minute.ifZero { AppSettings().closeMinute },
                 gainLossColorScheme =
-                    prefs[Keys.GAIN_LOSS_COLOR_SCHEME]?.let {
-                        GainLossColorScheme.entries.getOrElse(it) { GainLossColorScheme.RED_UP }
-                    } ?: UserPreferences().gainLossColorScheme,
+                    GainLossColorScheme.entries.getOrElse(config.gain_loss_color_scheme) {
+                        GainLossColorScheme.RED_UP
+                    },
             )
         }
 
     suspend fun setRefreshMinutes(minutes: Int) {
-        dataStore.edit { it[Keys.REFRESH_MINUTES] = minutes }
+        dataStore.updateData { data ->
+            val config = data.app_settings ?: AppSettingsProto()
+            data.copy(app_settings = config.copy(refresh_minutes = minutes))
+        }
     }
 
     suspend fun setOpenTime(hour: Int, minute: Int) {
-        dataStore.edit {
-            it[Keys.OPEN_HOUR] = hour
-            it[Keys.OPEN_MINUTE] = minute
+        dataStore.updateData { data ->
+            val config = data.app_settings ?: AppSettingsProto()
+            data.copy(app_settings = config.copy(open_hour = hour, open_minute = minute))
         }
     }
 
     suspend fun setCloseTime(hour: Int, minute: Int) {
-        dataStore.edit {
-            it[Keys.CLOSE_HOUR] = hour
-            it[Keys.CLOSE_MINUTE] = minute
+        dataStore.updateData { data ->
+            val config = data.app_settings ?: AppSettingsProto()
+            data.copy(app_settings = config.copy(close_hour = hour, close_minute = minute))
         }
     }
 
     suspend fun setGainLossColorScheme(scheme: GainLossColorScheme) {
-        dataStore.edit { it[Keys.GAIN_LOSS_COLOR_SCHEME] = scheme.ordinal }
+        dataStore.updateData { data ->
+            val config = data.app_settings ?: AppSettingsProto()
+            data.copy(app_settings = config.copy(gain_loss_color_scheme = scheme.ordinal))
+        }
     }
+
+    private fun Int.ifZero(default: () -> Int): Int = if (this == 0) default() else this
 }

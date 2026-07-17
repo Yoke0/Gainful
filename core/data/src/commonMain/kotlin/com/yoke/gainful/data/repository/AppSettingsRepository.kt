@@ -1,11 +1,11 @@
 package com.yoke.gainful.data.repository
 
+import com.yoke.gainful.model.AppSettings
 import com.yoke.gainful.model.GainLossColorScheme
-import com.yoke.gainful.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
-interface UserPreferencesRepository {
-    val userPreferences: Flow<UserPreferences>
+interface AppSettingsRepository {
+    val appSettings: Flow<AppSettings>
 
     suspend fun setRefreshMinutes(minutes: Int)
 

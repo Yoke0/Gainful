@@ -52,6 +52,7 @@ include(":core:ksafe")
 include(":core:sync")
 include(":core:file")
 include(":core:widget")
+include(":core:proto")
 
 include(":feature:dashboard")
 include(":feature:holdings")

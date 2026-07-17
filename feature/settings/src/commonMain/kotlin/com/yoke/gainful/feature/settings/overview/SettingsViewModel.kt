@@ -3,8 +3,8 @@ package com.yoke.gainful.feature.settings.overview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.common.extensions.pad2
+import com.yoke.gainful.data.repository.AppSettingsRepository
 import com.yoke.gainful.data.repository.AuthRepository
-import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnceUseCase
 import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.feature.settings.util.CsvUtil
@@ -21,7 +21,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 
 class SettingsViewModel(
-    private val repository: UserPreferencesRepository,
+    private val repository: AppSettingsRepository,
     private val getTransactionsWithAssetsOnceUseCase: GetTransactionsWithAssetsOnceUseCase,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
@@ -30,7 +30,7 @@ class SettingsViewModel(
 
     init {
         viewModelScope.launch {
-            repository.userPreferences.collect { prefs ->
+            repository.appSettings.collect { prefs ->
                 _uiState.update {
                     it.copy(
                         refreshMinutes = prefs.refreshMinutes,

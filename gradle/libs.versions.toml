@@ -36,6 +36,7 @@ logback = "1.5.13"
 mockk = "1.13.13"
 coil = "3.5.0"
 ksafe = "2.2.1"
+wire = "6.4.5"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -79,6 +80,7 @@ sqlite-bundled = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-bund
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 icu4j = { module = "com.ibm.icu:icu4j", version.ref = "icu4j" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+datastore-okio = { module = "androidx.datastore:datastore-core-okio", version.ref = "datastore" }
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "multiplatform-nav3-ui" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
@@ -118,6 +120,9 @@ coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.re
 # KSafe
 ksafe = { module = "eu.anifantakis:ksafe", version.ref = "ksafe" }
 
+# Wire
+wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
+
 # Swagger/OpenAPI
 ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor" }
 ktor-server-openapi = { module = "io.ktor:ktor-server-openapi", version.ref = "ktor" }
@@ -133,3 +138,4 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 ksp = { id = "com.google.devtools.ksp", version = "2.3.9" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+wire = { id = "com.squareup.wire", version.ref = "wire" }
