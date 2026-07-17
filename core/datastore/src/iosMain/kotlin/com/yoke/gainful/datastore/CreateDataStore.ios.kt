@@ -7,7 +7,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class)
-fun getDatastorePath(): () -> okio.Path = {
+private fun documentDir(): String? {
     val documentDirectory =
         NSFileManager.defaultManager.URLForDirectory(
             directory = NSDocumentDirectory,
@@ -16,5 +16,9 @@ fun getDatastorePath(): () -> okio.Path = {
             create = false,
             error = null,
         )
-    (requireNotNull(documentDirectory).path + "/$DATASTORE_FILE").toPath()
+    return requireNotNull(documentDirectory).path
+}
+
+fun getDataStorePath(): () -> okio.Path = {
+    (documentDir() + "/$DATASTORE_FILE").toPath()
 }

@@ -1,10 +1,10 @@
 package com.yoke.gainful.sync
 
+import com.yoke.gainful.data.repository.AppSettingsRepository
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.MarketRepository
 import com.yoke.gainful.data.repository.QuoteCacheRepository
 import com.yoke.gainful.data.repository.TransactionRepository
-import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
 import com.yoke.gainful.model.QuoteSnapshot
 import com.yoke.gainful.widget.domain.GetTodayPnlUseCase
@@ -30,7 +30,7 @@ class StockPriceFetchService(
     private val assetRepository: AssetRepository,
     private val marketRepository: MarketRepository,
     private val quoteCacheRepository: QuoteCacheRepository,
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appSettingsRepository: AppSettingsRepository,
     private val transactionRepository: TransactionRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -45,7 +45,7 @@ class StockPriceFetchService(
         fetchJob =
             scope.launch {
                 while (currentCoroutineContext().isActive) {
-                    val prefs = userPreferencesRepository.userPreferences.first()
+                    val prefs = appSettingsRepository.appSettings.first()
                     val now = Clock.System.now()
                     val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
                     val time = localDateTime.time

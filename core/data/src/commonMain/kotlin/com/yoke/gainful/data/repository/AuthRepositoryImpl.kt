@@ -51,7 +51,6 @@ internal class AuthRepositoryImpl(
         runCatching { publicApi.logout() }
         transactionDao.deleteAll()
         syncQueueDao.deleteAll()
-        userDataSource.clearLastTransactionSyncTime()
         userDataSource.clearUser()
         _userProfile.value = null
     }

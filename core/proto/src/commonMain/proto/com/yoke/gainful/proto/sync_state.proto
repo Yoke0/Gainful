@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package com.yoke.gainful.proto;
+
+option java_package = "com.yoke.gainful.proto";
+
+message SyncStateProto {
+  int64 last_transaction_sync_time = 1;
+}

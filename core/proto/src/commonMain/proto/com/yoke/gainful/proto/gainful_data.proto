@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.yoke.gainful.proto;
+
+option java_package = "com.yoke.gainful.proto";
+
+import "com/yoke/gainful/proto/user_profile.proto";
+import "com/yoke/gainful/proto/app_settings.proto";
+import "com/yoke/gainful/proto/sync_state.proto";
+
+message GainfulDataProto {
+  UserProfileProto user_profile = 1;
+  AppSettingsProto app_settings = 2;
+  SyncStateProto sync_state = 3;
+}

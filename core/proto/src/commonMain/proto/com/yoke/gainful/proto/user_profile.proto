@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package com.yoke.gainful.proto;
+
+option java_package = "com.yoke.gainful.proto";
+
+message UserProfileProto {
+  string id = 1;
+  string username = 2;
+  string avatar_emoji = 3;
+}

@@ -15,8 +15,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
+import com.yoke.gainful.data.repository.AppSettingsRepository
 import com.yoke.gainful.data.repository.AuthRepository
-import com.yoke.gainful.data.repository.UserPreferencesRepository
 import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.GainfulTheme
@@ -30,6 +30,7 @@ import com.yoke.gainful.feature.dashboard.navigation.dashboardEntry
 import com.yoke.gainful.feature.holdings.navigation.holdingsEntry
 import com.yoke.gainful.feature.settings.navigation.settingsEntry
 import com.yoke.gainful.feature.transactions.navigation.transactionsEntry
+import com.yoke.gainful.model.AppSettings
 import com.yoke.gainful.navigation.GainfulNavGraph
 import com.yoke.gainful.navigation.Navigator
 import com.yoke.gainful.navigation.TOP_LEVEL_NAV_ITEMS
@@ -63,12 +64,12 @@ fun App() {
                     .fillMaxSize()
                     .background(Background),
         ) {
-            val repository = koinInject<UserPreferencesRepository>()
-            val userPreferences by repository.userPreferences.collectAsState(
-                initial = com.yoke.gainful.model.UserPreferences(),
+            val repository = koinInject<AppSettingsRepository>()
+            val appSettings by repository.appSettings.collectAsState(
+                initial = AppSettings(),
             )
 
-            ProvideGainLossColors(scheme = userPreferences.gainLossColorScheme) {
+            ProvideGainLossColors(scheme = appSettings.gainLossColorScheme) {
                 var showSplash by rememberSaveable { mutableStateOf(true) }
                 var navigateToLoginWithUsername by remember { mutableStateOf<String?>(null) }
 

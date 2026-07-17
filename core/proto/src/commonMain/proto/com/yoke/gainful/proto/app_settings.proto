@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package com.yoke.gainful.proto;
+
+option java_package = "com.yoke.gainful.proto";
+
+message AppSettingsProto {
+  int32 refresh_minutes = 1;
+  int32 open_hour = 2;
+  int32 open_minute = 3;
+  int32 close_hour = 4;
+  int32 close_minute = 5;
+  int32 gain_loss_color_scheme = 6;
+}

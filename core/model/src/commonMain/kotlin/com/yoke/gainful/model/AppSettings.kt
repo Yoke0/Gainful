@@ -5,7 +5,7 @@ enum class GainLossColorScheme {
     GREEN_UP,
 }
 
-data class UserPreferences(
+data class AppSettings(
     val refreshMinutes: Int = 3,
     val openHour: Int = 9,
     val openMinute: Int = 30,
