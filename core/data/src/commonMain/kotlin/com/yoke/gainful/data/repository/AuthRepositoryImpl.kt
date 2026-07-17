@@ -4,6 +4,7 @@ import com.yoke.gainful.api.LoginRequest
 import com.yoke.gainful.api.RegisterRequest
 import com.yoke.gainful.database.dao.SyncQueueDao
 import com.yoke.gainful.database.dao.TransactionDao
+import com.yoke.gainful.datastore.SyncDataSource
 import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.model.UserProfile
 import com.yoke.gainful.model.UserState
@@ -20,6 +21,7 @@ internal class AuthRepositoryImpl(
     private val userDataSource: UserDataSource,
     private val transactionDao: TransactionDao,
     private val syncQueueDao: SyncQueueDao,
+    private val syncDataSource: SyncDataSource,
 ) : AuthRepository {
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     override val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
@@ -51,6 +53,7 @@ internal class AuthRepositoryImpl(
         runCatching { publicApi.logout() }
         transactionDao.deleteAll()
         syncQueueDao.deleteAll()
+        syncDataSource.clearSyncState()
         userDataSource.clearUser()
         _userProfile.value = null
     }

@@ -22,5 +22,5 @@ val syncModule =
             )
         }
         single { KLineFetchService(get(), get(), get(), get(), get()) }
-        single { TransactionSyncService(get(), get(), get(), get(), get(), get()) }
+        single { TransactionSyncService(get(), get(), get(), get(), get(), get(), get()) }
     }

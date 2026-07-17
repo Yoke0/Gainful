@@ -22,5 +22,7 @@ interface TransactionRepository {
 
     suspend fun deleteByIds(ids: List<String>)
 
-    suspend fun getMaxUpdatedAt(): Long?
+    suspend fun mergeServerTransactions(transactions: List<Transaction>)
+
+    suspend fun updateId(oldId: String, newId: String)
 }
