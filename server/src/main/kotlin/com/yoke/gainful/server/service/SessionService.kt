@@ -1,5 +1,6 @@
 package com.yoke.gainful.server.service
 
+import com.auth0.jwt.JWT
 import com.yoke.gainful.api.SessionResponse
 import com.yoke.gainful.server.db.UserSessions
 import com.yoke.gainful.server.plugins.ForbiddenException
@@ -23,20 +24,18 @@ class SessionService {
     data class SessionInfo(
         val id: Uuid,
         val userId: Uuid,
-        val refreshToken: String,
     )
 
     fun createSession(
+        sessionId: Uuid,
         userId: Uuid,
-        refreshToken: String,
-        refreshExpiresInMs: Long,
+        expiresInMs: Long,
         deviceInfo: String?,
         ipAddress: String?,
     ): SessionInfo {
-        val sessionId = Uuid.random()
         val now = Clock.System.now()
-        val refreshExpiresAt =
-            Instant.fromEpochMilliseconds(now.toEpochMilliseconds() + refreshExpiresInMs)
+        val expiresAt =
+            Instant.fromEpochMilliseconds(now.toEpochMilliseconds() + expiresInMs)
                 .toLocalDateTime(TimeZone.currentSystemDefault())
 
         transaction {
@@ -45,16 +44,11 @@ class SessionService {
                 it[UserSessions.userId] = userId
                 it[UserSessions.deviceInfo] = deviceInfo
                 it[UserSessions.ipAddress] = ipAddress
-                it[UserSessions.refreshToken] = refreshToken
-                it[UserSessions.refreshTokenExpiresAt] = refreshExpiresAt
+                it[UserSessions.expiresAt] = expiresAt
             }
         }
 
-        return SessionInfo(
-            id = sessionId,
-            userId = userId,
-            refreshToken = refreshToken,
-        )
+        return SessionInfo(id = sessionId, userId = userId)
     }
 
     fun getSessions(userId: Uuid): List<SessionResponse> {
@@ -92,19 +86,35 @@ class SessionService {
     }
 
     fun validateRefreshToken(refreshToken: String): SessionInfo {
+        val jti =
+            try {
+                JWT.decode(refreshToken).getClaim("jti").asString()
+            } catch (_: Exception) {
+                throw UnauthorizedException("Invalid refresh token")
+            }
+
+        if (jti.isNullOrBlank()) throw UnauthorizedException("Invalid refresh token")
+
+        val sessionId =
+            try {
+                Uuid.parse(jti)
+            } catch (_: Exception) {
+                throw UnauthorizedException("Invalid refresh token")
+            }
+
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
         val session: ResultRow? =
             transaction {
                 UserSessions.selectAll().where {
-                    UserSessions.refreshToken eq refreshToken
+                    UserSessions.id eq sessionId
                 }.singleOrNull()
             }
 
         if (session == null) throw UnauthorizedException("Invalid refresh token")
         if (session[UserSessions.isRevoked]) throw UnauthorizedException("Refresh token has been revoked")
 
-        val sessionExpiresAt = session[UserSessions.refreshTokenExpiresAt]
+        val sessionExpiresAt = session[UserSessions.expiresAt]
         if (sessionExpiresAt == null || sessionExpiresAt < now) {
             throw UnauthorizedException("Refresh token has expired")
         }
@@ -112,7 +122,6 @@ class SessionService {
         return SessionInfo(
             id = session[UserSessions.id],
             userId = session[UserSessions.userId],
-            refreshToken = refreshToken,
         )
     }
 }
