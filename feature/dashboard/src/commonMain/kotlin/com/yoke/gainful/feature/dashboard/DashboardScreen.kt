@@ -85,6 +85,7 @@ import com.yoke.gainful.ui.lossDimColor
 import gainful.core.designsystem.generated.resources.ic_chevron_left
 import gainful.core.designsystem.generated.resources.ic_chevron_right
 import gainful.feature.dashboard.generated.resources.Res
+import gainful.feature.dashboard.generated.resources.countdown_badge
 import gainful.feature.dashboard.generated.resources.daily_pnl
 import gainful.feature.dashboard.generated.resources.dashboard_title
 import gainful.feature.dashboard.generated.resources.holdings_count
@@ -93,7 +94,6 @@ import gainful.feature.dashboard.generated.resources.holdings_overview
 import gainful.feature.dashboard.generated.resources.holdings_quantity_label
 import gainful.feature.dashboard.generated.resources.holdings_trend
 import gainful.feature.dashboard.generated.resources.key_metrics
-import gainful.feature.dashboard.generated.resources.live_badge
 import gainful.feature.dashboard.generated.resources.no_transactions
 import gainful.feature.dashboard.generated.resources.no_trend_data
 import gainful.feature.dashboard.generated.resources.pnl_day_label
@@ -120,6 +120,7 @@ import gainful.feature.dashboard.generated.resources.pnl_year_cell_label
 import gainful.feature.dashboard.generated.resources.pnl_year_label
 import gainful.feature.dashboard.generated.resources.pnl_year_month_label
 import gainful.feature.dashboard.generated.resources.profit_rate
+import gainful.feature.dashboard.generated.resources.syncing_badge
 import gainful.feature.dashboard.generated.resources.today_badge
 import gainful.feature.dashboard.generated.resources.total_assets
 import gainful.feature.dashboard.generated.resources.total_cost
@@ -139,6 +140,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
 import gainful.core.designsystem.generated.resources.Res as DesignRes
 
 @Composable
@@ -146,13 +148,15 @@ fun DashboardScreen(
     viewModel: DashboardViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val countdown by viewModel.countdown.collectAsState()
 
-    DashboardScreen(uiState = uiState, onIntent = viewModel::onIntent)
+    DashboardScreen(uiState = uiState, countdown = countdown, onIntent = viewModel::onIntent)
 }
 
 @Composable
 private fun DashboardScreen(
     uiState: DashboardUiState,
+    countdown: Int = 0,
     onIntent: (DashboardIntent) -> Unit = {},
 ) {
     GainfulScaffold(
@@ -176,10 +180,15 @@ private fun DashboardScreen(
                                     Modifier
                                         .size(6.dp)
                                         .clip(CircleShape)
-                                        .background(GainGreen),
+                                        .background(if (countdown == 0) Gold else GainGreen),
                             )
                             Text(
-                                text = stringResource(Res.string.live_badge),
+                                text =
+                                    if (countdown == 0) {
+                                        stringResource(Res.string.syncing_badge)
+                                    } else {
+                                        stringResource(Res.string.countdown_badge, countdown)
+                                    },
                                 fontSize = 12.sp,
                                 color = TextSecondary,
                             )
@@ -290,7 +299,7 @@ private fun PnlOverviewCard(
                 onNavigate = { },
             )
         } else {
-            val today = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
             val isCurrentPeriod =
                 when (uiState.selectedPnlPeriod) {
                     PnlPeriodType.DAY, PnlPeriodType.WEEK -> {

@@ -2,6 +2,7 @@ package com.yoke.gainful.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yoke.gainful.data.repository.AppSettingsRepository
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.domain.usecase.dashboard.GetPnlDataUseCase
 import com.yoke.gainful.domain.usecase.holding.GetHoldingsDisplayUseCase
@@ -12,17 +13,27 @@ import com.yoke.gainful.model.PnlPeriodType
 import com.yoke.gainful.model.StockPnlDetail
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.sync.StockPriceFetchService
 import com.yoke.gainful.widget.domain.GetTodayPnlUseCase
 import com.yoke.gainful.widget.syncWidgetData
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
 class DashboardViewModel(
@@ -31,15 +42,30 @@ class DashboardViewModel(
     private val getPnlDataUseCase: GetPnlDataUseCase,
     private val getTodayPnlUseCase: GetTodayPnlUseCase,
     private val assetRepository: AssetRepository,
+    private val stockPriceFetchService: StockPriceFetchService,
+    private val appSettingsRepository: AppSettingsRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DashboardUiState.now())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
+    private val _countdown = MutableStateFlow(0)
+    val countdown: StateFlow<Int> = _countdown.asStateFlow()
+
     private var allTransactions: List<Transaction> = emptyList()
-    private val today = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    private var pollingJob: Job? = null
+    private val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     init {
         onIntent(DashboardIntent.LoadPortfolioSummary)
+        startPolling()
+        // Restart polling immediately when refresh interval changes
+        viewModelScope.launch {
+            appSettingsRepository.appSettings
+                .map { it.refreshMinutes }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { restartPolling() }
+        }
     }
 
     fun onIntent(intent: DashboardIntent) {
@@ -142,6 +168,32 @@ class DashboardViewModel(
                 syncWidgetDataIfNeeded()
             }
         }
+    }
+
+    private fun startPolling() {
+        pollingJob =
+            viewModelScope.launch {
+                while (isActive) {
+                    val minutes = appSettingsRepository.appSettings.first().refreshMinutes
+                    for (remaining in minutes * 60 downTo 1) {
+                        _countdown.value = remaining
+                        delay(1000.milliseconds)
+                    }
+
+                    _countdown.value = 0
+                    stockPriceFetchService.fetchAllHoldings()
+                }
+            }
+    }
+
+    private fun restartPolling() {
+        pollingJob?.cancel()
+        startPolling()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        pollingJob?.cancel()
     }
 
     private fun selectPnlPeriod(periodType: PnlPeriodType) {
@@ -304,6 +356,7 @@ class DashboardViewModel(
 
 data class DashboardUiState(
     val isLoading: Boolean = false,
+    val countdown: Int = 0,
     val holdings: List<HoldingDisplay> = emptyList(),
     val totalBuys: Double = 0.0,
     val totalSells: Double = 0.0,
@@ -328,7 +381,7 @@ data class DashboardUiState(
 
     companion object {
         fun now(): DashboardUiState {
-            val date = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
             return DashboardUiState(pnlYear = date.year, pnlMonth = date.month.ordinal + 1)
         }
     }

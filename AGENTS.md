@@ -83,6 +83,7 @@ Run tests after making changes. CI runs `./gradlew allTests`.
 - iOS framework name: `Shared` (static)
 - Compose resources in `shared/src/commonMain/composeResources/`
 - Generated resource IDs: `gainful.shared.generated.resources.*`
+- **No fully-qualified references** — always import then use directly. E.g. `delay(1000)` not `kotlinx.coroutines.delay(1000)`, `Clock.System.now()` not `kotlin.time.Clock.System.now()`
 
 ## Dependency Rules
 

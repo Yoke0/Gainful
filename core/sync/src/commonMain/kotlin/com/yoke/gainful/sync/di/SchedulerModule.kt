@@ -1,6 +1,5 @@
 package com.yoke.gainful.sync.di
 
-import com.yoke.gainful.data.repository.AppSettingsRepository
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.MarketRepository
 import com.yoke.gainful.data.repository.QuoteCacheRepository
@@ -17,7 +16,6 @@ val syncModule =
                 assetRepository = get<AssetRepository>(),
                 marketRepository = get<MarketRepository>(),
                 quoteCacheRepository = get<QuoteCacheRepository>(),
-                appSettingsRepository = get<AppSettingsRepository>(),
                 transactionRepository = get<TransactionRepository>(),
             )
         }

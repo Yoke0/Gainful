@@ -23,7 +23,6 @@ import com.yoke.gainful.designsystem.theme.GainfulTheme
 import com.yoke.gainful.di.initKoin
 import com.yoke.gainful.feature.account.navigation.AvatarNavKey
 import com.yoke.gainful.feature.account.navigation.LoginNavKey
-import com.yoke.gainful.feature.account.navigation.LoginWithUsernameNavKey
 import com.yoke.gainful.feature.account.navigation.accountEntry
 import com.yoke.gainful.feature.dashboard.navigation.DashboardNavKey
 import com.yoke.gainful.feature.dashboard.navigation.dashboardEntry
@@ -75,7 +74,6 @@ fun App() {
 
                 DisposableEffect(Unit) {
                     onDispose {
-                        fetchService.stop()
                         transactionSyncService.stopPeriodicSync()
                     }
                 }
@@ -88,7 +86,7 @@ fun App() {
                     if (isSplash) {
                         SplashScreen(
                             onInit = {
-                                fetchService.fetchOnce()
+                                fetchService.fetchAllHoldings()
                                 kLineFetchService.fetchAll()
                                 // Validate token and sync transactions on startup
                                 CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
@@ -107,7 +105,6 @@ fun App() {
                             },
                             onSplashFinished = {
                                 showSplash = false
-                                fetchService.start()
                                 transactionSyncService.startPeriodicSync()
                             },
                         )

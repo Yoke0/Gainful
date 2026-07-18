@@ -1,6 +1,7 @@
 <resources>
     <string name="dashboard_title">仪表盘</string>
-    <string name="live_badge">实时</string>
+    <string name="syncing_badge">同步中</string>
+    <string name="countdown_badge">%1$d秒</string>
     <string name="total_pnl">总盈亏</string>
     <string name="pnl_overview">盈亏概览</string>
     <string name="total_market_value_label">总市值: </string>
