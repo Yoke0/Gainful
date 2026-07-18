@@ -78,7 +78,7 @@ class AuthRoutesTest {
                 },
             )
         }
-        configureSecurity(testTokenConfig, sessionService)
+        configureSecurity(testTokenConfig)
         configureRouting()
     }
 

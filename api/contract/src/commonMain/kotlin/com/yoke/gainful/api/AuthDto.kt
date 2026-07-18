@@ -27,3 +27,8 @@ data class AuthResponse(
 data class RefreshTokenRequest(
     val refreshToken: String,
 )
+
+@Serializable
+data class RefreshTokenResponse(
+    val accessToken: String,
+)

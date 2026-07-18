@@ -34,10 +34,6 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.testing.testApplication
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -49,7 +45,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 class UserRoutesTest {
@@ -80,20 +75,9 @@ class UserRoutesTest {
                 it[email] = "test@test.com"
                 it[passwordHash] = PasswordUtils.hashPassword("123456")
             }
-            val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             UserSessions.insert {
                 it[id] = testSessionId
                 it[userId] = testUserId
-                it[expiresAt] =
-                    LocalDateTime(
-                        year = now.year,
-                        month = now.month.number,
-                        day = now.day + 1,
-                        hour = now.hour,
-                        minute = now.minute,
-                        second = now.second,
-                        nanosecond = now.nanosecond,
-                    )
             }
         }
 
@@ -133,7 +117,7 @@ class UserRoutesTest {
                 },
             )
         }
-        configureSecurity(testTokenConfig, sessionService)
+        configureSecurity(testTokenConfig)
         configureRouting()
     }
 

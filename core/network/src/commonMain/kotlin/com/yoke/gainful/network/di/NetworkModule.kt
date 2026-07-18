@@ -67,7 +67,7 @@ val networkModule =
                         refreshTokens {
                             val refreshToken = oldTokens?.refreshToken ?: secureTokenStorage.refreshToken ?: return@refreshTokens null
                             val newAuth = publicApi.refreshToken(refreshToken)
-                            BearerTokens(newAuth.accessToken, newAuth.refreshToken)
+                            BearerTokens(newAuth.accessToken, refreshToken)
                         }
                         sendWithoutRequest { true }
                     }

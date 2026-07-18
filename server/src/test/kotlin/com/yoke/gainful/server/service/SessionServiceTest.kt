@@ -15,7 +15,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.uuid.Uuid
 
@@ -73,7 +72,8 @@ class SessionServiceTest {
         val session = sessionService.createSession(testUserId, "test-refresh-token", 2592000000, "Device1", "127.0.0.1")
         sessionService.revokeSession(testUserId, session.id)
 
-        assertFalse(sessionService.isSessionValid(session.id))
+        val sessions = sessionService.getSessions(testUserId)
+        assertEquals(0, sessions.size)
     }
 
     @Test
@@ -94,11 +94,11 @@ class SessionServiceTest {
     }
 
     @Test
-    fun `rotateRefreshToken updates refresh token`() {
-        val session = sessionService.createSession(testUserId, "old-refresh-token", 2592000000, "Device1", "127.0.0.1")
-        val rotated = sessionService.rotateRefreshToken("old-refresh-token", 2592000000) { "new-refresh-token" }
+    fun `validateRefreshToken returns session info`() {
+        val session = sessionService.createSession(testUserId, "valid-refresh-token", 2592000000, "Device1", "127.0.0.1")
+        val validated = sessionService.validateRefreshToken("valid-refresh-token")
 
-        assertEquals("new-refresh-token", rotated.refreshToken)
-        assertEquals(session.id, rotated.id)
+        assertEquals("valid-refresh-token", validated.refreshToken)
+        assertEquals(session.id, validated.id)
     }
 }

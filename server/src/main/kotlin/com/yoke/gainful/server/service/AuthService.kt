@@ -1,6 +1,7 @@
 package com.yoke.gainful.server.service
 
 import com.yoke.gainful.api.AuthResponse
+import com.yoke.gainful.api.RefreshTokenResponse
 import com.yoke.gainful.server.db.Users
 import com.yoke.gainful.server.plugins.ConflictException
 import com.yoke.gainful.server.plugins.UnauthorizedException
@@ -115,19 +116,8 @@ class AuthService(
         )
     }
 
-    fun refreshAccessToken(refreshToken: String): AuthResponse {
-        val session =
-            sessionService.rotateRefreshToken(
-                oldRefreshToken = refreshToken,
-                refreshExpiresInMs = tokenConfig.refreshExpiresIn,
-            ) { userId ->
-                tokenService.generateRefreshToken(
-                    config = tokenConfig,
-                    TokenClaim("sub", userId.toString()),
-                    TokenClaim("type", "refresh"),
-                    TokenClaim("jti", Uuid.random().toString()),
-                )
-            }
+    fun refreshAccessToken(refreshToken: String): RefreshTokenResponse {
+        val session = sessionService.validateRefreshToken(refreshToken)
 
         val user =
             transaction {
@@ -142,11 +132,6 @@ class AuthService(
                 TokenClaim("username", user[Users.username]),
             )
 
-        return AuthResponse(
-            accessToken = accessToken,
-            refreshToken = session.refreshToken,
-            userId = session.userId.toString(),
-            username = user[Users.username],
-        )
+        return RefreshTokenResponse(accessToken = accessToken)
     }
 }

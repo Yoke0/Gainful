@@ -2,6 +2,7 @@ package com.yoke.gainful.network.server
 
 import com.yoke.gainful.api.AuthResponse
 import com.yoke.gainful.api.LoginRequest
+import com.yoke.gainful.api.RefreshTokenResponse
 import com.yoke.gainful.api.RegisterRequest
 import com.yoke.gainful.api.UpdateProfileRequest
 import com.yoke.gainful.api.UserResponse
@@ -11,7 +12,7 @@ interface PublicApi {
 
     suspend fun login(request: LoginRequest): AuthResponse
 
-    suspend fun refreshToken(refreshToken: String): AuthResponse
+    suspend fun refreshToken(refreshToken: String): RefreshTokenResponse
 
     suspend fun logout()
 }

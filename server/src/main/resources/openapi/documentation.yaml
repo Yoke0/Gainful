@@ -44,6 +44,12 @@ components:
         refreshToken:
           type: "string"
 
+    RefreshTokenResponse:
+      type: "object"
+      properties:
+        accessToken:
+          type: "string"
+
     AuthResponse:
       type: "object"
       properties:
@@ -96,8 +102,6 @@ components:
           type: "string"
           nullable: true
         createdAt:
-          type: "string"
-        expiresAt:
           type: "string"
         isRevoked:
           type: "boolean"
@@ -264,7 +268,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthResponse"
+                $ref: "#/components/schemas/RefreshTokenResponse"
         "401":
           description: "Invalid or expired refresh token"
           content:
