@@ -41,7 +41,6 @@ class AuthServiceTest {
             SessionService.SessionInfo(
                 id = Uuid.random(),
                 userId = Uuid.random(),
-                refreshToken = "test-refresh-token",
             )
         authService = AuthService(tokenConfig, sessionService, tokenService)
     }

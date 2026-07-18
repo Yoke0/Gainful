@@ -43,18 +43,19 @@ class AuthService(
             }
         }
 
+        val sessionId = Uuid.random()
         val refreshToken =
             tokenService.generateRefreshToken(
                 config = tokenConfig,
                 TokenClaim("sub", userId.toString()),
                 TokenClaim("type", "refresh"),
-                TokenClaim("jti", Uuid.random().toString()),
+                TokenClaim("jti", sessionId.toString()),
             )
         val session =
             sessionService.createSession(
+                sessionId = sessionId,
                 userId = userId,
-                refreshToken = refreshToken,
-                refreshExpiresInMs = tokenConfig.refreshExpiresIn,
+                expiresInMs = tokenConfig.refreshExpiresIn,
                 deviceInfo = deviceInfo,
                 ipAddress = ipAddress,
             )
@@ -68,7 +69,7 @@ class AuthService(
 
         return AuthResponse(
             accessToken = accessToken,
-            refreshToken = session.refreshToken,
+            refreshToken = refreshToken,
             userId = userId.toString(),
             username = username,
         )
@@ -84,18 +85,19 @@ class AuthService(
             throw UnauthorizedException("Invalid username or password")
         }
 
+        val sessionId = Uuid.random()
         val refreshToken =
             tokenService.generateRefreshToken(
                 config = tokenConfig,
                 TokenClaim("sub", user[Users.id].toString()),
                 TokenClaim("type", "refresh"),
-                TokenClaim("jti", Uuid.random().toString()),
+                TokenClaim("jti", sessionId.toString()),
             )
         val session =
             sessionService.createSession(
+                sessionId = sessionId,
                 userId = user[Users.id],
-                refreshToken = refreshToken,
-                refreshExpiresInMs = tokenConfig.refreshExpiresIn,
+                expiresInMs = tokenConfig.refreshExpiresIn,
                 deviceInfo = deviceInfo,
                 ipAddress = ipAddress,
             )
@@ -110,7 +112,7 @@ class AuthService(
 
         return AuthResponse(
             accessToken = accessToken,
-            refreshToken = session.refreshToken,
+            refreshToken = refreshToken,
             userId = user[Users.id].toString(),
             username = user[Users.username],
         )

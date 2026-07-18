@@ -1,5 +1,7 @@
 package com.yoke.gainful.server.service
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.db.UserSessions
 import com.yoke.gainful.server.db.Users
@@ -10,6 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import java.util.Date
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -50,18 +53,28 @@ class SessionServiceTest {
         }
     }
 
+    private fun generateRefreshToken(jti: String): String {
+        return JWT.create()
+            .withAudience("test-audience")
+            .withIssuer("test-issuer")
+            .withExpiresAt(Date(System.currentTimeMillis() + 2592000000))
+            .withClaim("jti", jti)
+            .sign(Algorithm.HMAC256("test-secret"))
+    }
+
     @Test
     fun `createSession creates session record`() {
-        val session = sessionService.createSession(testUserId, "test-refresh-token", 2592000000, "TestDevice", "127.0.0.1")
+        val sessionId = Uuid.random()
+        val session = sessionService.createSession(sessionId, testUserId, 2592000000, "TestDevice", "127.0.0.1")
         assertNotNull(session.id)
         assertEquals(testUserId, session.userId)
-        assertEquals("test-refresh-token", session.refreshToken)
+        assertEquals(sessionId, session.id)
     }
 
     @Test
     fun `getSessions returns user sessions`() {
-        sessionService.createSession(testUserId, "token1", 2592000000, "Device1", "127.0.0.1")
-        sessionService.createSession(testUserId, "token2", 2592000000, "Device2", "192.168.1.1")
+        sessionService.createSession(Uuid.random(), testUserId, 2592000000, "Device1", "127.0.0.1")
+        sessionService.createSession(Uuid.random(), testUserId, 2592000000, "Device2", "192.168.1.1")
 
         val sessions = sessionService.getSessions(testUserId)
         assertEquals(2, sessions.size)
@@ -69,7 +82,7 @@ class SessionServiceTest {
 
     @Test
     fun `revokeSession marks session as revoked`() {
-        val session = sessionService.createSession(testUserId, "test-refresh-token", 2592000000, "Device1", "127.0.0.1")
+        val session = sessionService.createSession(Uuid.random(), testUserId, 2592000000, "Device1", "127.0.0.1")
         sessionService.revokeSession(testUserId, session.id)
 
         val sessions = sessionService.getSessions(testUserId)
@@ -85,7 +98,7 @@ class SessionServiceTest {
 
     @Test
     fun `revokeSession for other user's session throws ForbiddenException`() {
-        val session = sessionService.createSession(testUserId, "test-refresh-token", 2592000000, "Device1", "127.0.0.1")
+        val session = sessionService.createSession(Uuid.random(), testUserId, 2592000000, "Device1", "127.0.0.1")
         val otherUserId = Uuid.random()
 
         assertFailsWith<ForbiddenException> {
@@ -95,10 +108,12 @@ class SessionServiceTest {
 
     @Test
     fun `validateRefreshToken returns session info`() {
-        val session = sessionService.createSession(testUserId, "valid-refresh-token", 2592000000, "Device1", "127.0.0.1")
-        val validated = sessionService.validateRefreshToken("valid-refresh-token")
+        val sessionId = Uuid.random()
+        sessionService.createSession(sessionId, testUserId, 2592000000, "Device1", "127.0.0.1")
+        val refreshToken = generateRefreshToken(sessionId.toString())
+        val validated = sessionService.validateRefreshToken(refreshToken)
 
-        assertEquals("valid-refresh-token", validated.refreshToken)
-        assertEquals(session.id, validated.id)
+        assertEquals(sessionId, validated.id)
+        assertEquals(testUserId, validated.userId)
     }
 }
