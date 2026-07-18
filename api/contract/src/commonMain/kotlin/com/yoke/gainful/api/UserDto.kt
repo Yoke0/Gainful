@@ -24,6 +24,5 @@ data class SessionResponse(
     val deviceInfo: String? = null,
     val ipAddress: String? = null,
     val createdAt: String,
-    val expiresAt: String,
     val isRevoked: Boolean = false,
 )

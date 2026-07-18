@@ -3,7 +3,6 @@ package com.yoke.gainful.server.plugins
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.yoke.gainful.server.security.token.TokenConfig
-import com.yoke.gainful.server.service.SessionService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -15,7 +14,7 @@ import kotlin.uuid.Uuid
 
 data class UserPrincipal(val userId: Uuid, val sessionId: Uuid, val username: String) : Principal
 
-fun Application.configureSecurity(config: TokenConfig, sessionService: SessionService) {
+fun Application.configureSecurity(config: TokenConfig) {
     install(Authentication) {
         jwt("auth-jwt") {
             realm = config.realm
@@ -34,12 +33,7 @@ fun Application.configureSecurity(config: TokenConfig, sessionService: SessionSe
                     val userId = Uuid.parse(credential.payload.subject)
                     val sessionId = Uuid.parse(credential.payload.getClaim("sessionId").asString())
                     val username = credential.payload.getClaim("username").asString()
-
-                    if (sessionService.isSessionValid(sessionId)) {
-                        UserPrincipal(userId, sessionId, username)
-                    } else {
-                        null
-                    }
+                    UserPrincipal(userId, sessionId, username)
                 }
             }
 

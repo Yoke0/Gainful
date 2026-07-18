@@ -7,13 +7,11 @@ import com.yoke.gainful.server.plugins.configureRouting
 import com.yoke.gainful.server.plugins.configureSecurity
 import com.yoke.gainful.server.plugins.configureSerialization
 import com.yoke.gainful.server.plugins.configureStatusPages
-import com.yoke.gainful.server.service.SessionService
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.calllogging.CallLogging
-import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 
 fun main() {
@@ -30,11 +28,9 @@ fun Application.module() {
         modules(serverModule(appConfig))
     }
 
-    val sessionService by inject<SessionService>()
-
     install(CallLogging)
     configureSerialization()
-    configureSecurity(appConfig.jwt, sessionService)
+    configureSecurity(appConfig.jwt)
     configureStatusPages()
     configureRouting()
 }

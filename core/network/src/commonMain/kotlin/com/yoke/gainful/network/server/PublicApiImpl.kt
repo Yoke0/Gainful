@@ -6,6 +6,7 @@ import com.yoke.gainful.api.AUTH_REGISTER
 import com.yoke.gainful.api.AuthResponse
 import com.yoke.gainful.api.LoginRequest
 import com.yoke.gainful.api.RefreshTokenRequest
+import com.yoke.gainful.api.RefreshTokenResponse
 import com.yoke.gainful.api.RegisterRequest
 import com.yoke.gainful.api.USERS_SESSIONS
 import com.yoke.gainful.ksafe.SecureTokenStorage
@@ -41,13 +42,13 @@ internal class PublicApiImpl(
         return resp
     }
 
-    override suspend fun refreshToken(refreshToken: String): AuthResponse {
-        val resp: AuthResponse =
+    override suspend fun refreshToken(refreshToken: String): RefreshTokenResponse {
+        val resp: RefreshTokenResponse =
             client.post(AUTH_REFRESH) {
                 contentType(ContentType.Application.Json)
                 setBody(RefreshTokenRequest(refreshToken))
             }.body()
-        secureTokenStorage.saveTokens(resp.accessToken, resp.refreshToken)
+        secureTokenStorage.saveTokens(resp.accessToken, refreshToken)
         return resp
     }
 
