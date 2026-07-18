@@ -1,6 +1,7 @@
 <resources>
     <string name="dashboard_title">Dashboard</string>
-    <string name="live_badge">Live</string>
+    <string name="syncing_badge">Syncing</string>
+    <string name="countdown_badge">%1$ds</string>
     <string name="total_pnl">Total P&amp;L</string>
     <string name="pnl_overview">P&amp;L Overview</string>
     <string name="total_market_value_label">Market Value: </string>

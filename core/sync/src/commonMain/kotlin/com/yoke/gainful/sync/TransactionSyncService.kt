@@ -17,12 +17,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
@@ -88,7 +90,7 @@ class TransactionSyncService(
             }
 
             // Update timestamp ONLY after successful merge
-            syncDataSource.setLastTransactionSyncTime(kotlin.time.Clock.System.now().toEpochMilliseconds())
+            syncDataSource.setLastTransactionSyncTime(Clock.System.now().toEpochMilliseconds())
 
             // 2. PUSH — upload pending local operations
             processSyncQueue()
@@ -187,7 +189,7 @@ class TransactionSyncService(
             }.toMap()
         val codesToSearch = codes.filter { it !in dbAssets }
         val searchResults =
-            kotlinx.coroutines.coroutineScope {
+            coroutineScope {
                 codesToSearch.map { code ->
                     async {
                         runCatching {

@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 class ImportViewModel(
     private val transactionRepository: TransactionRepository,
@@ -240,7 +241,7 @@ private fun Transaction.toCreateRequest() =
 
 private fun formatDate(millis: Long): String {
     val ldt =
-        kotlin.time.Instant.fromEpochMilliseconds(millis)
+        Instant.fromEpochMilliseconds(millis)
             .toLocalDateTime(TimeZone.currentSystemDefault())
     return ldt.date.toString()
 }
