@@ -4,7 +4,7 @@
 
 [English](README.en.md)
 
-Gainful 是一款面向个人用户的收益追踪与财务分析工具，基于 Kotlin Multiplatform + Compose Multiplatform 构建，支持 Android、iOS 和 Desktop (JVM) 三端。
+Gainful 是一款面向个人用户的收益追踪与财务分析工具，基于 Kotlin Multiplatform + Compose Multiplatform 构建，支持 Android、iOS 和 Desktop (JVM) 三端，后端采用 Ktor 提供 RESTful API 与 JWT 认证。
 
 ## 架构设计
 
@@ -44,12 +44,18 @@ Gainful/
 │   │   └── transaction/       # 交易相关
 │   ├── sync/                  # 后台数据同步（行情拉取、K线缓存）
 │   ├── file/                  # 文件 I/O 工具
-│   └── navigation/            # 导航配置（Navigation3）
+│   ├── navigation/            # 导航配置（Navigation3）
+│   ├── ksafe/                 # 安全存储（平台原生密钥存储）
+│   ├── widget/                # 小组件数据桥接（iOS/Android 桌面小组件）
+│   └── proto/                 # Protobuf 数据模型（Wire）
 ├── feature/                   # 功能模块（按业务拆分）
 │   ├── dashboard/             # 仪表盘
 │   ├── holdings/              # 持仓（overview/ + detail/ + di/）
 │   ├── transactions/          # 交易记录（overview/ + add/ + di/）
-│   └── settings/              # 设置
+│   ├── settings/              # 设置
+│   └── account/               # 账户（login/ + register/ + avatar/ + di/）
+├── api/                       # API 契约
+│   └── contract/              # 共享 DTO、API 路径常量
 ├── androidApp/                # Android 应用入口
 ├── desktopApp/                # Desktop 应用入口
 ├── iosApp/                    # iOS 应用（Xcode 项目）
@@ -86,7 +92,7 @@ Gainful/
 
 ### 平台支持
 
-- **Android**: minSdk 24, targetSdk 37, compileSdk 37
+- **Android**: minSdk 26, targetSdk 37, compileSdk 37
 - **iOS**: iOS 18.2+, arm64 (真机 + Apple Silicon 模拟器)
 - **Desktop**: JVM 11+, 支持 macOS/Windows/Linux
 
@@ -115,6 +121,59 @@ Gainful/
 3. 点击运行（首次构建会自动触发 Gradle 编译共享模块）
 
 > ⚠️ iOS 构建需要先设置 `iosApp/Configuration/Config.xcconfig` 中的 `TEAM_ID`
+
+### Server
+
+后端服务提供 RESTful API、JWT 认证和数据管理。
+
+```bash
+./gradlew :server:run
+```
+
+**技术栈**: Kotlin + Ktor (Netty) + Exposed 1.3.1 (DSL) + PostgreSQL
+
+| 类别 | 技术 |
+|------|------|
+| HTTP 框架 | Ktor (Netty engine) |
+| ORM | Exposed 1.3.1 (DSL) |
+| 数据库 | PostgreSQL（生产）/ H2（测试） |
+| 认证 | JWT + 服务端 Session 管理 |
+| 文档 | Swagger UI (`/swagger`) |
+
+**API 端点**:
+
+| 端点 | 说明 |
+|------|------|
+| `POST /api/auth/register` | 注册 |
+| `POST /api/auth/login` | 登录（返回 JWT） |
+| `POST /api/auth/refresh` | 刷新 Token |
+| `GET /api/users/me` | 获取用户信息 |
+| `PUT /api/users/me` | 更新用户信息 |
+| `POST /api/users/avatar` | 上传头像（multipart） |
+| `GET /api/users/sessions` | 列出会话 |
+| `DELETE /api/users/sessions` | 撤销其他会话 |
+| `GET /api/transactions` | 列出交易记录 |
+| `POST /api/transactions` | 创建交易 |
+| `DELETE /api/transactions/{id}` | 删除交易 |
+
+**项目结构**:
+
+```
+server/
+├── src/main/kotlin/com/yoke/gainful/server/
+│   ├── Application.kt          # 入口
+│   ├── config/                 # AppConfig, DatabaseFactory, KoinModule
+│   ├── db/                     # Exposed 表定义
+│   ├── model/dto/              # Request/Response DTOs
+│   ├── plugins/                # Ktor 插件（Security, Routing, Serialization）
+│   ├── routes/                 # 路由处理（Auth, User, Transaction）
+│   ├── security/token/         # JWT 相关（TokenConfig, TokenService）
+│   └── service/                # 业务逻辑（Auth, User, Session, Transaction）
+├── src/main/resources/
+│   ├── application.conf        # HOCON 配置
+│   └── openapi/documentation.yaml
+└── src/test/                   # 单元测试（H2）
+```
 
 ## 开发指南
 

@@ -2,7 +2,7 @@
 
 ## Project
 
-Kotlin Multiplatform + Compose Multiplatform app targeting Android, iOS, and Desktop (JVM).
+Kotlin Multiplatform + Compose Multiplatform app targeting Android, iOS, and Desktop (JVM), with a Ktor backend server.
 Architecture: **MVI** (Model-View-Intent), Clean Architecture layering.
 UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
 
@@ -26,13 +26,18 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
   - `sync/` — Background data sync (stock price fetching, KLine caching)
   - `file/` — File I/O utilities
   - `navigation/` — Navigation config (Navigation3)
+  - `ksafe/` — Secure storage (platform-native keychain/keystore)
+  - `widget/` — Widget data bridge (iOS/Android home screen widgets)
+  - `proto/` — Protobuf data models (Wire)
 
 - `feature/` — Feature modules (per business)
-  - `dashboard/`, `holdings/`, `transactions/`, `settings/`
+  - `dashboard/`, `holdings/`, `transactions/`, `settings/`, `account/`
   - Sub-packages: `overview/` (main list), `add/` or `detail/` (secondary screens), `di/` (Koin modules)
 - `androidApp/` — Android entry point (`MainActivity`)
 - `desktopApp/` — Desktop entry point (`main.kt`, main class `com.yoke.gainful.MainKt`)
 - `iosApp/` — iOS project (Xcode, Swift). Uses `MainViewController.kt` from `shared/iosMain`
+- `api/` — API contracts (shared DTOs, path constants)
+  - `contract/` — `AuthDto`, `UserDto`, `TransactionDto`, `ApiPaths`, `ApiError`, `ApiResponse`
 - `server/` — Ktor backend server (see [Server](#server) below)
 
 ## Build & Run
@@ -68,7 +73,7 @@ Run tests after making changes. CI runs `./gradlew allTests`.
 - Compose Multiplatform 1.11.1
 - Material3 1.12.0-alpha02
 - JVM target: 11
-- compileSdk/targetSdk: 37, minSdk: 24
+- compileSdk/targetSdk: 37, minSdk: 26
 - Ktor 3.5.1
 - Room 2.8.4
 - Koin 4.2.2
@@ -290,6 +295,7 @@ Ktor backend server for API, authentication, and data management.
 ### API Endpoints
 - `POST /api/auth/register` — Register
 - `POST /api/auth/login` — Login (returns JWT)
+- `POST /api/auth/refresh` — Refresh JWT token
 - `GET /api/users/me` — Get profile
 - `PUT /api/users/me` — Update profile
 - `POST /api/users/avatar` — Upload avatar (multipart)

@@ -4,7 +4,7 @@
 
 [中文版](../README.md)
 
-Gainful is a revenue tracking and financial analysis tool for personal users, built with Kotlin Multiplatform + Compose Multiplatform, targeting Android, iOS, and Desktop (JVM).
+Gainful is a revenue tracking and financial analysis tool for personal users, built with Kotlin Multiplatform + Compose Multiplatform, targeting Android, iOS, and Desktop (JVM), with a Ktor backend providing RESTful API and JWT authentication.
 
 ## Architecture
 
@@ -44,12 +44,18 @@ Gainful/
 │   │   └── transaction/       # Transaction-related
 │   ├── sync/                  # Background data sync (price fetching, KLine caching)
 │   ├── file/                  # File I/O utilities
-│   └── navigation/            # Navigation config (Navigation3)
+│   ├── navigation/            # Navigation config (Navigation3)
+│   ├── ksafe/                 # Secure storage (platform-native keychain)
+│   ├── widget/                # Widget data bridge (iOS/Android home screen widgets)
+│   └── proto/                 # Protobuf data models (Wire)
 ├── feature/                   # Feature modules (per business)
 │   ├── dashboard/             # Dashboard
 │   ├── holdings/              # Holdings (overview/ + detail/ + di/)
 │   ├── transactions/          # Transactions (overview/ + add/ + di/)
-│   └── settings/              # Settings
+│   ├── settings/              # Settings
+│   └── account/               # Account (login/ + register/ + avatar/ + di/)
+├── api/                       # API contracts
+│   └── contract/              # Shared DTOs, API path constants
 ├── androidApp/                # Android application entry
 ├── desktopApp/                # Desktop application entry
 ├── iosApp/                    # iOS application (Xcode project)
@@ -86,7 +92,7 @@ Gainful/
 
 ### Platform Support
 
-- **Android**: minSdk 24, targetSdk 37, compileSdk 37
+- **Android**: minSdk 26, targetSdk 37, compileSdk 37
 - **iOS**: iOS 18.2+, arm64 (device + Apple Silicon simulator)
 - **Desktop**: JVM 11+, supports macOS/Windows/Linux
 
@@ -115,6 +121,59 @@ Gainful/
 3. Click Run (first build triggers Gradle to compile shared module automatically)
 
 > ⚠️ iOS build requires setting `TEAM_ID` in `iosApp/Configuration/Config.xcconfig`
+
+### Server
+
+Backend server providing RESTful API, JWT authentication, and data management.
+
+```bash
+./gradlew :server:run
+```
+
+**Tech Stack**: Kotlin + Ktor (Netty) + Exposed 1.3.1 (DSL) + PostgreSQL
+
+| Category | Technology |
+|----------|------------|
+| HTTP Framework | Ktor (Netty engine) |
+| ORM | Exposed 1.3.1 (DSL) |
+| Database | PostgreSQL (production) / H2 (testing) |
+| Auth | JWT + server-side session management |
+| Docs | Swagger UI (`/swagger`) |
+
+**API Endpoints**:
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/auth/register` | Register |
+| `POST /api/auth/login` | Login (returns JWT) |
+| `POST /api/auth/refresh` | Refresh token |
+| `GET /api/users/me` | Get user profile |
+| `PUT /api/users/me` | Update user profile |
+| `POST /api/users/avatar` | Upload avatar (multipart) |
+| `GET /api/users/sessions` | List sessions |
+| `DELETE /api/users/sessions` | Revoke other sessions |
+| `GET /api/transactions` | List transactions |
+| `POST /api/transactions` | Create transaction |
+| `DELETE /api/transactions/{id}` | Delete transaction |
+
+**Project Structure**:
+
+```
+server/
+├── src/main/kotlin/com/yoke/gainful/server/
+│   ├── Application.kt          # Entry point
+│   ├── config/                 # AppConfig, DatabaseFactory, KoinModule
+│   ├── db/                     # Exposed table definitions
+│   ├── model/dto/              # Request/Response DTOs
+│   ├── plugins/                # Ktor plugins (Security, Routing, Serialization)
+│   ├── routes/                 # Route handlers (Auth, User, Transaction)
+│   ├── security/token/         # JWT (TokenConfig, TokenService)
+│   └── service/                # Business logic (Auth, User, Session, Transaction)
+├── src/main/resources/
+│   ├── application.conf        # HOCON config
+│   └── openapi/documentation.yaml
+└── src/test/                   # Unit tests (H2)
+```
 
 ## Development Guide
 
