@@ -23,8 +23,8 @@ import com.yoke.gainful.designsystem.components.LoadingDots
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
+import gainful.core.designsystem.generated.resources.app_icon
 import gainful.shared.generated.resources.Res
-import gainful.shared.generated.resources.app_icon
 import gainful.shared.generated.resources.app_name
 import gainful.shared.generated.resources.splash_subtitle
 import kotlinx.coroutines.delay
@@ -32,6 +32,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import gainful.core.designsystem.generated.resources.Res as DsRes
 
 private const val MIN_SPLASH_DURATION_MS = 1500L
 
@@ -63,7 +64,7 @@ fun SplashScreen(
             verticalArrangement = Arrangement.Center,
         ) {
             Image(
-                painter = painterResource(Res.drawable.app_icon),
+                painter = painterResource(DsRes.drawable.app_icon),
                 contentDescription = stringResource(Res.string.app_name),
                 modifier =
                     Modifier

@@ -49,8 +49,8 @@ fun DashboardIcon(
         val rx = CornerRadius(s * 0.12f, s * 0.12f)
         val p = progress.value
         val dashEffect =
-            if (p in 0.01f..0.99f) {
-                val dashLen = s * 0.3f * p
+            if (p in 0.01f..0.99f && s > 0f) {
+                val dashLen = (s * 0.3f * p).coerceAtLeast(1f)
                 PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
             } else {
                 null
@@ -118,8 +118,8 @@ fun RecordsIcon(
         val sw = 1.6f
         val p = progress.value
         val dashEffect =
-            if (p in 0.01f..0.99f) {
-                val dashLen = s * 0.3f * p
+            if (p in 0.01f..0.99f && s > 0f) {
+                val dashLen = (s * 0.3f * p).coerceAtLeast(1f)
                 PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
             } else {
                 null
@@ -180,8 +180,8 @@ fun HoldingsIcon(
         val sw = 1.6f
         val p = progress.value
         val dashEffect =
-            if (p in 0.01f..0.99f) {
-                val dashLen = s * 0.3f * p
+            if (p in 0.01f..0.99f && s > 0f) {
+                val dashLen = (s * 0.3f * p).coerceAtLeast(1f)
                 PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
             } else {
                 null
@@ -246,8 +246,8 @@ fun SettingsIcon(
         val cy = s * 0.50f
         val p = progress.value
         val dashEffect =
-            if (p in 0.01f..0.99f) {
-                val dashLen = s * 0.15f * p
+            if (p in 0.01f..0.99f && s > 0f) {
+                val dashLen = (s * 0.15f * p).coerceAtLeast(1f)
                 PathEffect.dashPathEffect(floatArrayOf(dashLen, s * 3f))
             } else {
                 null

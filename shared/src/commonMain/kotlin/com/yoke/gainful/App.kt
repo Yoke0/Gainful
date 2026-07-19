@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,16 +40,22 @@ import com.yoke.gainful.sync.KLineFetchService
 import com.yoke.gainful.sync.StockPriceFetchService
 import com.yoke.gainful.sync.TransactionSyncService
 import com.yoke.gainful.ui.ProvideGainLossColors
+import gainful.shared.generated.resources.Res
+import gainful.shared.generated.resources.app_name
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
-fun App() {
+fun App(onTitleReady: (String) -> Unit = {}) {
     initKoin()
+
+    val title = stringResource(Res.string.app_name)
+    LaunchedEffect(title) { onTitleReady(title) }
 
     val fetchService = koinInject<StockPriceFetchService>()
     val kLineFetchService = koinInject<KLineFetchService>()

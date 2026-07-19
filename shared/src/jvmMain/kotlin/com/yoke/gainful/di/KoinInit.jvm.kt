@@ -1,7 +1,10 @@
 package com.yoke.gainful.di
 
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 
 actual fun initKoin() {
-    startKoin { modules(allModules()) }
+    if (GlobalContext.getOrNull() == null) {
+        startKoin { modules(allModules()) }
+    }
 }
