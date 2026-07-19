@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Dark background -->
+    <path
+        android:fillColor="#070B15"
+        android:pathData="M0,0h108v108h-108z" />
+
+    <!-- Gold letter G -->
+    <path
+        android:fillColor="#C8A34E"
+        android:pathData="M35.9,34.8H67.7C72.7,34.8 75.7,37.8 75.7,42.8V52.8H61.4V44.8H49.1V61.1H67.7V57.1H75.7V65.1C75.7,70.1 72.7,73.1 67.7,73.1H35.9C30.9,73.1 27.9,70.1 27.9,65.1V42.8C27.9,37.8 30.9,34.8 35.9,34.8Z" />
+
+</vector>

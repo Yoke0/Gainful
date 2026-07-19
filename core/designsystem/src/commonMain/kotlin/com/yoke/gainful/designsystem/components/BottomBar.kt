@@ -1,8 +1,8 @@
 package com.yoke.gainful.designsystem.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -16,12 +16,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +43,7 @@ val BottomBarHeight = 80.dp
 fun Modifier.bottomBarPadding(): Modifier =
     this
         .padding(bottom = BottomBarHeight)
-        .navigationBarsPadding()
+        .platformNavigationBarsPadding()
 
 @Composable
 fun BottomBar(
@@ -53,17 +53,25 @@ fun BottomBar(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val alpha by animateFloatAsState(
-        targetValue = if (visible) 1f else 0f,
-        animationSpec = tween(durationMillis = 350),
-    )
+    val slideOffset = remember { Animatable(0f) }
+    val alpha = remember { Animatable(1f) }
+
+    LaunchedEffect(visible) {
+        if (visible) {
+            alpha.animateTo(1f, tween(150))
+            slideOffset.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        } else {
+            slideOffset.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+            alpha.animateTo(0f, tween(150))
+        }
+    }
 
     var rowSize by remember { mutableStateOf(IntSize.Zero) }
     val density = LocalDensity.current
 
     val tabWidthDp = if (rowSize.width > 0) with(density) { (rowSize.width / itemCount).toDp() } else 0.dp
 
-    val animatedOffset by animateDpAsState(
+    val animatedIndicatorOffset by animateDpAsState(
         targetValue = tabWidthDp * selectedIndex,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
     )
@@ -71,9 +79,10 @@ fun BottomBar(
     Box(
         modifier =
             modifier
+                .offset(y = (slideOffset.value * BottomBarHeight.value).dp)
+                .alpha(alpha.value)
                 .fillMaxWidth()
                 .height(BottomBarHeight)
-                .alpha(alpha)
                 .clip(RoundedCornerShape(22.dp))
                 .background(Surface.copy(alpha = 0.88f))
                 .padding(8.dp),
@@ -82,7 +91,7 @@ fun BottomBar(
             Box(
                 modifier =
                     Modifier
-                        .offset(x = animatedOffset)
+                        .offset(x = animatedIndicatorOffset)
                         .width(tabWidthDp)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(16.dp))

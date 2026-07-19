@@ -72,6 +72,8 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.compose.material3.adaptive)
+            implementation(libs.compose.material3.adaptive.layout)
         }
     }
 }
