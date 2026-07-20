@@ -1,0 +1,9 @@
+.git
+.gradle
+build
+iosApp
+*.apk
+*.ipa
+local.properties
+.mimocode
+.idea

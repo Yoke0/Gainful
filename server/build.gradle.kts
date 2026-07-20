@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.shadow)
     application
 }
 
@@ -50,10 +51,9 @@ tasks.processResources {
     )
 }
 
-tasks.jar {
+tasks.shadowJar {
+    archiveClassifier.set("")
     manifest {
         attributes["Main-Class"] = "com.yoke.gainful.server.ApplicationKt"
     }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

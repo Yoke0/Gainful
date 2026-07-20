@@ -3,8 +3,6 @@ info:
   title: "Gainful Server API"
   description: "Ktor backend for Gainful stock tracking app"
   version: "@VERSION_NAME@"
-servers:
-  - url: "http://localhost:8080"
 
 components:
   securitySchemes:

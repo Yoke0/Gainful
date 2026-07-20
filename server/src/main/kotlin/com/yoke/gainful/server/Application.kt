@@ -15,7 +15,9 @@ import io.ktor.server.plugins.calllogging.CallLogging
 import org.koin.ktor.plugin.Koin
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
+    val host = System.getenv("HOST") ?: "0.0.0.0"
+    embeddedServer(Netty, port = port, host = host, module = Application::module)
         .start(wait = true)
 }
 
