@@ -38,12 +38,12 @@ jobs:
           # Signing config (optional, skips signing if not set)
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > /tmp/release.jks
-            cat >> local.properties <<EOF
-            RELEASE_STORE_FILE=/tmp/release.jks
-            RELEASE_STORE_PASSWORD=$RELEASE_STORE_PASSWORD
-            RELEASE_KEY_ALIAS=$RELEASE_KEY_ALIAS
-            RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD
-            EOF
+            printf '%s\n' \
+              "RELEASE_STORE_FILE=/tmp/release.jks" \
+              "RELEASE_STORE_PASSWORD=$RELEASE_STORE_PASSWORD" \
+              "RELEASE_KEY_ALIAS=$RELEASE_KEY_ALIAS" \
+              "RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD" \
+              >> local.properties
           fi
 
       - name: Build release APK
