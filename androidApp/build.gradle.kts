@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -30,6 +31,12 @@ dependencies {
     implementation(libs.koin.core)
 }
 
+val localProps =
+    Properties().apply {
+        val file = rootProject.file("local.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+    }
+
 android {
     namespace = "com.yoke.gainful"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -46,6 +53,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        create("release") {
+            storeFile = localProps.getProperty("RELEASE_STORE_FILE")?.let { file(it) }
+            storePassword = localProps.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias = localProps.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD")
+        }
+    }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -54,6 +69,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 file("proguard-rules.pro"),
             )
+            val releaseSigning = signingConfigs.findByName("release")
+            if (releaseSigning?.storeFile != null) {
+                signingConfig = releaseSigning
+            }
         }
     }
     compileOptions {
