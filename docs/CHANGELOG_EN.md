@@ -2,6 +2,56 @@
 
 All notable changes to the Gainful application are documented in this file. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] - 2026-07-21
+
+### Added
+
+#### UI
+- Added tablet/large-screen navigation rail support
+
+#### Server
+- Added Ktor backend server with auth, transactions, and user management
+- Optimized swagger spec and improved logging configuration
+
+#### Auth
+- Implemented access token + refresh token with KSafe encryption
+
+#### Sync
+- Added server sync with sync queue and login expiration handling
+
+#### Account
+- Added user authentication and account management
+
+#### DataStore
+- Migrated to Proto DataStore with Wire protobuf
+
+#### Dashboard
+- Added tab switch animation and pre-transaction date styling
+- Optimized PnL overview navigation and detail clicks
+
+#### Common
+- Extracted server base URL to BuildConfig from local.properties
+
+### Fixed
+
+- Simplified token refresh and removed unused session expiresAt
+
+### Refactored
+
+- Simplified server session architecture with session ID as refresh token jti
+- Moved stock price polling into dashboard with sync countdown
+- Rewrote transaction sync with pull-first-then-push and DataStore timestamp
+- Extracted api:contract module and restructured network layer
+
+### Build & Dependencies
+
+- Added GitHub Actions release workflow and simplified build script
+- Added Docker containerization and Shadow fat JAR build
+
+### Documentation
+
+- Added server documentation and updated project structure
+
 ## [1.1.0] - 2026-07-12
 
 ### Added

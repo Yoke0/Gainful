@@ -2,6 +2,56 @@
 
 本文件记录盈迹 (Gainful) 应用的所有重要变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [1.2.0] - 2026-07-21
+
+### 新增功能
+
+#### UI
+- 新增平板/大屏导航栏 (Navigation Rail) 支持
+
+#### Server
+- 新增 Ktor 后端服务器，支持认证、交易和用户管理
+- 优化 Swagger 规范和日志配置
+
+#### 认证
+- 实现 Access Token + Refresh Token 双 token 认证，使用 KSafe 加密存储
+
+#### 数据同步
+- 新增服务器同步功能，支持同步队列和登录过期处理
+
+#### 账户
+- 新增用户认证和账户管理功能
+
+#### DataStore
+- 迁移到 Proto DataStore (Wire protobuf)
+
+#### Dashboard
+- 新增标签切换动画和交易前日期样式
+- 优化 PnL 概览导航和详情点击
+
+#### Common
+- 从 local.properties 提取服务器地址到 BuildConfig
+
+### 修复问题
+
+- 简化 token 刷新逻辑，移除未使用的 session expiresAt
+
+### 重构
+
+- 简化服务器会话架构，使用 session ID 作为 refresh token jti
+- 将股票价格轮询移至 Dashboard 并添加同步倒计时
+- 重写交易同步逻辑，采用 pull-first-then-push 和 DataStore 时间戳
+- 提取 api:contract 模块并重构网络层
+
+### 构建与依赖
+
+- 新增 GitHub Actions release 工作流，简化构建脚本
+- 新增 Docker 容器化和 Shadow fat JAR 构建
+
+### 文档
+
+- 添加服务器文档并更新项目结构
+
 ## [1.1.0] - 2026-07-12
 
 ### 新增功能

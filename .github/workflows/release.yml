@@ -23,18 +23,28 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Write signing config
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      - name: Write local.properties
         env:
+          SERVER_BASE_URL: ${{ secrets.SERVER_BASE_URL }}
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/release.jks
-          cat >> local.properties <<EOF
-          RELEASE_STORE_FILE=/tmp/release.jks
-          RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}
-          RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}
-          EOF
+          # Server URL (required for working APK)
+          if [ -n "$SERVER_BASE_URL" ]; then
+            echo "SERVER_BASE_URL=$SERVER_BASE_URL" >> local.properties
+          fi
+          # Signing config (optional, skips signing if not set)
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > /tmp/release.jks
+            cat >> local.properties <<EOF
+            RELEASE_STORE_FILE=/tmp/release.jks
+            RELEASE_STORE_PASSWORD=$RELEASE_STORE_PASSWORD
+            RELEASE_KEY_ALIAS=$RELEASE_KEY_ALIAS
+            RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD
+            EOF
+          fi
 
       - name: Build release APK
         run: ./gradlew :androidApp:assembleRelease
