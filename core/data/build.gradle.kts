@@ -20,6 +20,7 @@ kotlin {
             implementation(projects.core.datastore)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
+            implementation(libs.ktor.client.core)
         }
     }
 }

@@ -2,6 +2,7 @@ package com.yoke.gainful.data.repository
 
 import com.yoke.gainful.model.UserProfile
 import com.yoke.gainful.model.UserState
+import com.yoke.gainful.network.exception.RefreshProfileResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -23,7 +24,7 @@ interface AuthRepository {
 
     suspend fun logout()
 
-    suspend fun refreshProfile()
+    suspend fun refreshProfile(): RefreshProfileResult
 
     suspend fun setAvatarEmoji(emoji: String)
 

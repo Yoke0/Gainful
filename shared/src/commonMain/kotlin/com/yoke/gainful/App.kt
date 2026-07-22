@@ -36,6 +36,7 @@ import com.yoke.gainful.navigation.Navigator
 import com.yoke.gainful.navigation.TOP_LEVEL_NAV_ITEMS
 import com.yoke.gainful.navigation.rememberNavigationState
 import com.yoke.gainful.navigation.serializersConfig
+import com.yoke.gainful.network.exception.RefreshProfileResult
 import com.yoke.gainful.sync.KLineFetchService
 import com.yoke.gainful.sync.StockPriceFetchService
 import com.yoke.gainful.sync.TransactionSyncService
@@ -97,16 +98,23 @@ fun App(onTitleReady: (String) -> Unit = {}) {
                                 kLineFetchService.fetchAll()
                                 // Validate token and sync transactions on startup
                                 CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-                                    val result = runCatching { authRepository.refreshProfile() }
-                                    if (result.isFailure) {
-                                        // Token invalid - get username then clear auth
-                                        val username = userDataSource.userState.first().username
-                                        authRepository.logout()
-                                        if (username != null) {
-                                            navigateToLoginWithUsername = username
+                                    val isLoggedIn = userDataSource.userState.first().isLoggedIn
+                                    if (!isLoggedIn) return@launch
+
+                                    val result = authRepository.refreshProfile()
+                                    when (result) {
+                                        is RefreshProfileResult.Unauthorized -> {
+                                            val username = userDataSource.userState.first().username
+                                            if (username != null) {
+                                                navigateToLoginWithUsername = username
+                                            }
                                         }
-                                    } else {
-                                        transactionSyncService.sync()
+
+                                        is RefreshProfileResult.Success -> {
+                                            transactionSyncService.sync()
+                                        }
+
+                                        is RefreshProfileResult.Error -> { /* transient, ignore */ }
                                     }
                                 }
                             },
