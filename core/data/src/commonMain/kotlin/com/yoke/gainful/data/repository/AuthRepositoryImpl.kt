@@ -8,8 +8,11 @@ import com.yoke.gainful.datastore.SyncDataSource
 import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.model.UserProfile
 import com.yoke.gainful.model.UserState
+import com.yoke.gainful.network.exception.RefreshProfileResult
 import com.yoke.gainful.network.server.AuthenticatedApi
 import com.yoke.gainful.network.server.PublicApi
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +38,8 @@ internal class AuthRepositoryImpl(
         runCatching {
             val resp = publicApi.login(LoginRequest(username, password))
             userDataSource.saveUser(resp.userId, resp.username)
-            refreshProfile()
+            val profileResult = refreshProfile()
+            check(profileResult is RefreshProfileResult.Success) { "Failed to load profile" }
         }
 
     override suspend fun register(
@@ -46,7 +50,8 @@ internal class AuthRepositoryImpl(
         runCatching {
             val resp = publicApi.register(RegisterRequest(username = nickname, email, password))
             userDataSource.saveUser(resp.userId, resp.username)
-            refreshProfile()
+            val profileResult = refreshProfile()
+            check(profileResult is RefreshProfileResult.Success) { "Failed to load profile" }
         }
 
     override suspend fun logout() {
@@ -58,8 +63,18 @@ internal class AuthRepositoryImpl(
         _userProfile.value = null
     }
 
-    override suspend fun refreshProfile() {
-        val resp = authenticatedApi.getProfile()
+    override suspend fun refreshProfile(): RefreshProfileResult {
+        val resp =
+            try {
+                authenticatedApi.getProfile()
+            } catch (e: ResponseException) {
+                if (e.response.status == HttpStatusCode.Unauthorized) {
+                    return RefreshProfileResult.Unauthorized
+                }
+                return RefreshProfileResult.Error(e)
+            } catch (e: Exception) {
+                return RefreshProfileResult.Error(e)
+            }
         _userProfile.value =
             UserProfile(
                 id = resp.id,
@@ -68,6 +83,7 @@ internal class AuthRepositoryImpl(
                 nickname = resp.nickname,
                 avatarUrl = resp.avatarUrl,
             )
+        return RefreshProfileResult.Success
     }
 
     override suspend fun setAvatarEmoji(emoji: String) {

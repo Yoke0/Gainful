@@ -1,5 +1,6 @@
 package com.yoke.gainful.network.server
 
+import com.yoke.gainful.api.AvatarResponse
 import com.yoke.gainful.api.USERS_AVATAR
 import com.yoke.gainful.api.USERS_ME
 import com.yoke.gainful.api.UpdateProfileRequest
@@ -44,7 +45,7 @@ internal class AuthenticatedApiImpl(
                     ),
                 )
             }
-        val resp: com.yoke.gainful.api.AvatarResponse =
+        val resp: AvatarResponse =
             client.submitFormWithBinaryData(
                 url = USERS_AVATAR,
                 formData = formParts,
