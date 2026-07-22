@@ -60,4 +60,7 @@
     <string name="pnl_detail_sell_fee_total">卖出手续费合计</string>
     <string name="pnl_detail_dividend_total">股息合计</string>
     <string name="pnl_detail_daily_gain_total">当日盈收合计</string>
+
+    <!-- Error Messages -->
+    <string name="load_failed">数据加载失败</string>
 </resources>

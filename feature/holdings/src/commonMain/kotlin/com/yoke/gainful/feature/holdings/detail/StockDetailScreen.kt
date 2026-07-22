@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
@@ -36,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -44,7 +42,6 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
@@ -57,10 +54,8 @@ import com.yoke.gainful.designsystem.components.GainfulTopAppBar
 import com.yoke.gainful.designsystem.components.LoadingDots
 import com.yoke.gainful.designsystem.components.LoadingSpinner
 import com.yoke.gainful.designsystem.components.bottomBarPadding
-import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Border
 import com.yoke.gainful.designsystem.theme.Card
-import com.yoke.gainful.designsystem.theme.GainRed
 import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.GoldDim
 import com.yoke.gainful.designsystem.theme.Surface
@@ -71,6 +66,7 @@ import com.yoke.gainful.model.ChartPeriod
 import com.yoke.gainful.model.KLine
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.GainfulErrorPage
 import com.yoke.gainful.ui.KLineChart
 import com.yoke.gainful.ui.LineChart
 import com.yoke.gainful.ui.gainColor
@@ -162,11 +158,13 @@ private fun StockDetailScreen(
         }
 
         is StockDetailUiState.Error -> {
-            ErrorCenterArea(
-                pinYin = uiState.pinYin,
-                name = uiState.name,
+            GainfulErrorPage(
+                title = stringResource(Res.string.error_title),
+                description = stringResource(Res.string.error_desc),
                 onRetry = onRetry,
+                retryLabel = stringResource(Res.string.retry),
                 onBack = onBack,
+                backLabel = stringResource(Res.string.back_to_holdings),
             )
         }
 
@@ -247,144 +245,6 @@ private fun LoadingCenterArea(pinYin: String, name: String) {
                     fontSize = 11.sp,
                     color = TextMuted,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ErrorCenterArea(
-    pinYin: String,
-    name: String,
-    onRetry: () -> Unit,
-    onBack: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = pinYin,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = FontFamily.Monospace,
-                    color = TextPrimary,
-                    letterSpacing = 0.4.sp,
-                )
-                Text(
-                    text = name,
-                    fontSize = 13.sp,
-                    color = TextMuted,
-                )
-            }
-
-            Box(
-                modifier =
-                    Modifier
-                        .size(96.dp)
-                        .clip(CircleShape)
-                        .background(GainRed.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Canvas(modifier = Modifier.size(40.dp)) {
-                    val stroke = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-                    drawCircle(color = GainRed, style = stroke)
-                    drawLine(
-                        color = GainRed,
-                        start = Offset(size.width / 2, size.height * 0.33f),
-                        end = Offset(size.width / 2, size.height * 0.58f),
-                        strokeWidth = 2.dp.toPx(),
-                        cap = StrokeCap.Round,
-                    )
-                    drawCircle(
-                        color = GainRed,
-                        radius = 1.2.dp.toPx(),
-                        center = Offset(size.width / 2, size.height * 0.73f),
-                    )
-                }
-            }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.error_title),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                )
-                Text(
-                    text = stringResource(Res.string.error_desc),
-                    fontSize = 13.sp,
-                    color = TextMuted,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 18.sp,
-                    modifier = Modifier.widthIn(max = 260.dp),
-                )
-            }
-
-            Text(
-                text = "ERR_TIMEOUT · NET_ERR",
-                fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace,
-                color = TextMuted,
-                letterSpacing = 0.3.sp,
-                modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(9999.dp))
-                        .background(Surface)
-                        .border(1.dp, Border, RoundedCornerShape(9999.dp))
-                        .padding(horizontal = 14.dp, vertical = 4.dp),
-            )
-
-            Column(
-                modifier = Modifier.widthIn(max = 240.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(9999.dp))
-                            .background(Gold)
-                            .clickable(onClick = onRetry)
-                            .padding(vertical = 14.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.retry),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Background,
-                    )
-                }
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(9999.dp))
-                            .border(1.dp, Border, RoundedCornerShape(9999.dp))
-                            .clickable(onClick = onBack)
-                            .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.back_to_holdings),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextSecondary,
-                    )
-                }
             }
         }
     }

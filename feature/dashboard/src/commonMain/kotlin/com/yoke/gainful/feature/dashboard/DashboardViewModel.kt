@@ -14,6 +14,8 @@ import com.yoke.gainful.model.StockPnlDetail
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.sync.StockPriceFetchService
+import com.yoke.gainful.ui.EventChannel
+import com.yoke.gainful.ui.SnackbarEvent
 import com.yoke.gainful.widget.domain.GetTodayPnlUseCase
 import com.yoke.gainful.widget.syncWidgetData
 import kotlinx.coroutines.Job
@@ -47,6 +49,9 @@ class DashboardViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DashboardUiState.now())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+
+    private val _events = EventChannel<SnackbarEvent>()
+    val events = _events.events
 
     private val _countdown = MutableStateFlow(0)
     val countdown: StateFlow<Int> = _countdown.asStateFlow()
@@ -105,67 +110,71 @@ class DashboardViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            combine(
-                getHoldingsDisplayUseCase(),
-                getTransactionsUseCase(),
-            ) { holdings, transactions ->
-                allTransactions = transactions
+            try {
+                combine(
+                    getHoldingsDisplayUseCase(),
+                    getTransactionsUseCase(),
+                ) { holdings, transactions ->
+                    allTransactions = transactions
 
-                // Calculate first transaction year and month
-                val firstTransaction = transactions.minByOrNull { it.tradeDate }
-                val firstTransactionYear =
-                    firstTransaction?.let { tx ->
-                        Instant.fromEpochMilliseconds(tx.tradeDate)
-                            .toLocalDateTime(TimeZone.currentSystemDefault()).date.year
-                    } ?: 2023
-                val firstTransactionMonth =
-                    firstTransaction?.let { tx ->
-                        Instant.fromEpochMilliseconds(tx.tradeDate)
-                            .toLocalDateTime(TimeZone.currentSystemDefault()).date.month.ordinal + 1
-                    } ?: 8
-                val firstTransactionDate =
-                    firstTransaction?.let { tx ->
-                        Instant.fromEpochMilliseconds(tx.tradeDate)
-                            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    // Calculate first transaction year and month
+                    val firstTransaction = transactions.minByOrNull { it.tradeDate }
+                    val firstTransactionYear =
+                        firstTransaction?.let { tx ->
+                            Instant.fromEpochMilliseconds(tx.tradeDate)
+                                .toLocalDateTime(TimeZone.currentSystemDefault()).date.year
+                        } ?: 2023
+                    val firstTransactionMonth =
+                        firstTransaction?.let { tx ->
+                            Instant.fromEpochMilliseconds(tx.tradeDate)
+                                .toLocalDateTime(TimeZone.currentSystemDefault()).date.month.ordinal + 1
+                        } ?: 8
+                    val firstTransactionDate =
+                        firstTransaction?.let { tx ->
+                            Instant.fromEpochMilliseconds(tx.tradeDate)
+                                .toLocalDateTime(TimeZone.currentSystemDefault()).date
+                        }
+
+                    var totalBuys = 0.0
+                    var totalSells = 0.0
+                    var totalDividends = 0.0
+
+                    transactions.forEach { tx ->
+                        when (tx.type) {
+                            TransactionType.BUY -> totalBuys += tx.amount
+                            TransactionType.SELL -> totalSells += tx.amount
+                            TransactionType.DIVIDEND -> totalDividends += tx.amount
+                        }
                     }
 
-                var totalBuys = 0.0
-                var totalSells = 0.0
-                var totalDividends = 0.0
+                    val currentState = _uiState.value
+                    val pnlData =
+                        getPnlDataUseCase(
+                            transactions = transactions,
+                            periodType = currentState.selectedPnlPeriod,
+                            year = currentState.pnlYear,
+                            month = currentState.pnlMonth,
+                        )
 
-                transactions.forEach { tx ->
-                    when (tx.type) {
-                        TransactionType.BUY -> totalBuys += tx.amount
-                        TransactionType.SELL -> totalSells += tx.amount
-                        TransactionType.DIVIDEND -> totalDividends += tx.amount
-                    }
-                }
-
-                val currentState = _uiState.value
-                val pnlData =
-                    getPnlDataUseCase(
-                        transactions = transactions,
-                        periodType = currentState.selectedPnlPeriod,
-                        year = currentState.pnlYear,
-                        month = currentState.pnlMonth,
+                    DashboardUiState(
+                        holdings = holdings,
+                        totalBuys = totalBuys,
+                        totalSells = totalSells,
+                        totalDividends = totalDividends,
+                        selectedPnlPeriod = currentState.selectedPnlPeriod,
+                        pnlYear = currentState.pnlYear,
+                        pnlMonth = currentState.pnlMonth,
+                        pnlData = pnlData,
+                        firstTransactionYear = firstTransactionYear,
+                        firstTransactionMonth = firstTransactionMonth,
+                        firstTransactionDate = firstTransactionDate,
                     )
-
-                DashboardUiState(
-                    holdings = holdings,
-                    totalBuys = totalBuys,
-                    totalSells = totalSells,
-                    totalDividends = totalDividends,
-                    selectedPnlPeriod = currentState.selectedPnlPeriod,
-                    pnlYear = currentState.pnlYear,
-                    pnlMonth = currentState.pnlMonth,
-                    pnlData = pnlData,
-                    firstTransactionYear = firstTransactionYear,
-                    firstTransactionMonth = firstTransactionMonth,
-                    firstTransactionDate = firstTransactionDate,
-                )
-            }.collect { state ->
-                _uiState.value = state
-                syncWidgetDataIfNeeded()
+                }.collect { state ->
+                    _uiState.value = state
+                    syncWidgetDataIfNeeded()
+                }
+            } catch (_: Exception) {
+                _events.send(SnackbarEvent.Error())
             }
         }
     }
@@ -365,7 +374,6 @@ data class DashboardUiState(
     val pnlYear: Int = 0,
     val pnlMonth: Int = 0,
     val pnlData: PnlData? = null,
-    val error: String? = null,
     val selectedPnlDate: LocalDate? = null,
     val stockPnlDetails: List<StockPnlDetail> = emptyList(),
     val firstTransactionYear: Int = 2023,

@@ -48,4 +48,7 @@
     <string name="error_desc">网络连接超时，请检查网络后重试</string>
     <string name="retry">重新加载</string>
     <string name="back_to_holdings">返回持仓</string>
+
+    <!-- Error/Success Messages -->
+    <string name="load_failed">加载失败</string>
 </resources>

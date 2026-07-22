@@ -56,4 +56,7 @@
         <item>本月</item>
         <item>更早</item>
     </string-array>
+
+    <!-- Error/Success Messages -->
+    <string name="save_failed">保存失败</string>
 </resources>

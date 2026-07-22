@@ -70,7 +70,6 @@ data class TransactionsUiState(
     val isLoading: Boolean = false,
     val transactions: List<TransactionItem> = emptyList(),
     val filterType: TransactionType? = null,
-    val error: String? = null,
 )
 
 data class TransactionItem(

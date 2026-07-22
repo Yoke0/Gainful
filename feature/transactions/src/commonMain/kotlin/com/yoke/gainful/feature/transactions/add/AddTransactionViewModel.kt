@@ -11,6 +11,8 @@ import com.yoke.gainful.model.Asset
 import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.ui.EventChannel
+import com.yoke.gainful.ui.SnackbarEvent
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +37,9 @@ class AddTransactionViewModel(
             AddTransactionUiState(),
         )
     val uiState: StateFlow<AddTransactionUiState> = _uiState.asStateFlow()
+
+    private val _events = EventChannel<SnackbarEvent>()
+    val events = _events.events
 
     init {
         loadHoldings()
@@ -266,45 +271,49 @@ class AddTransactionViewModel(
         val tradeDateMs = state.dateTimeMillis
 
         viewModelScope.launch {
-            if (state.type == TransactionType.DIVIDEND) {
-                val amount = state.amount.toDoubleOrNull() ?: return@launch
+            runCatching {
+                if (state.type == TransactionType.DIVIDEND) {
+                    val amount = state.amount.toDoubleOrNull() ?: return@runCatching
+                    val timestamp = Clock.System.now().toEpochMilliseconds()
+                    val id = Uuid.random().toString()
+                    val transaction =
+                        Transaction(
+                            id = id,
+                            assetId = asset.unifiedCode.ifBlank { asset.code },
+                            type = TransactionType.DIVIDEND,
+                            quantity = 0.0,
+                            price = 0.0,
+                            amount = amount,
+                            tradeDate = tradeDateMs,
+                            timestamp = timestamp,
+                        )
+                    addTransactionUseCase(transaction)
+                    _uiState.update { it.copy(saveSuccess = true) }
+                    return@runCatching
+                }
+
+                val amount = state.amount.toDoubleOrNull() ?: return@runCatching
+                val price = state.price.toDoubleOrNull() ?: return@runCatching
+                val qty = state.quantity.toDoubleOrNull() ?: return@runCatching
+
                 val timestamp = Clock.System.now().toEpochMilliseconds()
                 val id = Uuid.random().toString()
                 val transaction =
                     Transaction(
                         id = id,
                         assetId = asset.unifiedCode.ifBlank { asset.code },
-                        type = TransactionType.DIVIDEND,
-                        quantity = 0.0,
-                        price = 0.0,
+                        type = state.type,
+                        quantity = qty,
+                        price = price,
                         amount = amount,
                         tradeDate = tradeDateMs,
                         timestamp = timestamp,
                     )
                 addTransactionUseCase(transaction)
                 _uiState.update { it.copy(saveSuccess = true) }
-                return@launch
+            }.onFailure {
+                _events.send(SnackbarEvent.Error())
             }
-
-            val amount = state.amount.toDoubleOrNull() ?: return@launch
-            val price = state.price.toDoubleOrNull() ?: return@launch
-            val qty = state.quantity.toDoubleOrNull() ?: return@launch
-
-            val timestamp = Clock.System.now().toEpochMilliseconds()
-            val id = Uuid.random().toString()
-            val transaction =
-                Transaction(
-                    id = id,
-                    assetId = asset.unifiedCode.ifBlank { asset.code },
-                    type = state.type,
-                    quantity = qty,
-                    price = price,
-                    amount = amount,
-                    tradeDate = tradeDateMs,
-                    timestamp = timestamp,
-                )
-            addTransactionUseCase(transaction)
-            _uiState.update { it.copy(saveSuccess = true) }
         }
     }
 }

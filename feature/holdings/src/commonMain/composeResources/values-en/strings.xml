@@ -48,4 +48,7 @@
     <string name="error_desc">Connection timed out. Please check your network and try again</string>
     <string name="retry">Retry</string>
     <string name="back_to_holdings">Back to Holdings</string>
+
+    <!-- Error/Success Messages -->
+    <string name="load_failed">Failed to load</string>
 </resources>

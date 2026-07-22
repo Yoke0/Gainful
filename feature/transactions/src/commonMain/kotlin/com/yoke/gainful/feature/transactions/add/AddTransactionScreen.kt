@@ -63,6 +63,7 @@ import com.yoke.gainful.model.HoldingDisplay
 import com.yoke.gainful.model.TransactionType
 import com.yoke.gainful.ui.DateTimePickerDialog
 import com.yoke.gainful.ui.DateTimePickerField
+import com.yoke.gainful.ui.LocalSnackbarHostState
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
@@ -92,6 +93,7 @@ import gainful.feature.transactions.generated.resources.no_selection
 import gainful.feature.transactions.generated.resources.quantity_format
 import gainful.feature.transactions.generated.resources.quantity_unit
 import gainful.feature.transactions.generated.resources.save
+import gainful.feature.transactions.generated.resources.save_failed
 import gainful.feature.transactions.generated.resources.search_stock_placeholder
 import gainful.feature.transactions.generated.resources.sell
 import gainful.feature.transactions.generated.resources.sell_amount_hint
@@ -119,6 +121,17 @@ fun AddTransactionScreen(
     onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = LocalSnackbarHostState.current
+
+    val saveFailedMessage = stringResource(Res.string.save_failed)
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            if (snackbarHostState.currentSnackbarData == null) {
+                snackbarHostState.showSnackbar(saveFailedMessage, duration = event.duration)
+            }
+        }
+    }
 
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {

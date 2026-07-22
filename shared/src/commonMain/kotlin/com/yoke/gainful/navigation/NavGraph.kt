@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
@@ -27,6 +28,8 @@ import com.yoke.gainful.designsystem.components.platformNavigationBarsPadding
 import com.yoke.gainful.designsystem.theme.Background
 import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.TextMuted
+import com.yoke.gainful.ui.GainfulSnackbar
+import com.yoke.gainful.ui.LocalSnackbarHostState
 
 @Composable
 fun GainfulNavGraph(
@@ -106,6 +109,17 @@ fun GainfulNavGraph(
                     )
                 }
             }
+
+            val snackbarHostState = LocalSnackbarHostState.current
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 80.dp),
+                snackbar = { GainfulSnackbar(it) },
+            )
         }
     }
 }
