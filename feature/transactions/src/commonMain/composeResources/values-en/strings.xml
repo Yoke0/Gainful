@@ -56,4 +56,7 @@
         <item>This month</item>
         <item>Older</item>
     </string-array>
+
+    <!-- Error/Success Messages -->
+    <string name="save_failed">Save failed</string>
 </resources>

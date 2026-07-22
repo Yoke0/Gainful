@@ -5,7 +5,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,6 +42,7 @@ import com.yoke.gainful.network.exception.RefreshProfileResult
 import com.yoke.gainful.sync.KLineFetchService
 import com.yoke.gainful.sync.StockPriceFetchService
 import com.yoke.gainful.sync.TransactionSyncService
+import com.yoke.gainful.ui.LocalSnackbarHostState
 import com.yoke.gainful.ui.ProvideGainLossColors
 import gainful.shared.generated.resources.Res
 import gainful.shared.generated.resources.app_name
@@ -65,98 +68,101 @@ fun App(onTitleReady: (String) -> Unit = {}) {
     val userDataSource = koinInject<UserDataSource>()
 
     GainfulTheme {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(Background),
-        ) {
-            val repository = koinInject<AppSettingsRepository>()
-            val appSettings by repository.appSettings.collectAsState(
-                initial = AppSettings(),
-            )
+        val snackbarHostState = remember { SnackbarHostState() }
+        CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Background),
+            ) {
+                val repository = koinInject<AppSettingsRepository>()
+                val appSettings by repository.appSettings.collectAsState(
+                    initial = AppSettings(),
+                )
 
-            ProvideGainLossColors(scheme = appSettings.gainLossColorScheme) {
-                var showSplash by rememberSaveable { mutableStateOf(true) }
-                var navigateToLoginWithUsername by remember { mutableStateOf<String?>(null) }
+                ProvideGainLossColors(scheme = appSettings.gainLossColorScheme) {
+                    var showSplash by rememberSaveable { mutableStateOf(true) }
+                    var navigateToLoginWithUsername by remember { mutableStateOf<String?>(null) }
 
-                DisposableEffect(Unit) {
-                    onDispose {
-                        transactionSyncService.stopPeriodicSync()
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            transactionSyncService.stopPeriodicSync()
+                        }
                     }
-                }
 
-                Crossfade(
-                    targetState = showSplash,
-                    animationSpec = tween(durationMillis = 300),
-                    label = "splash",
-                ) { isSplash ->
-                    if (isSplash) {
-                        SplashScreen(
-                            onInit = {
-                                fetchService.fetchAllHoldings()
-                                kLineFetchService.fetchAll()
-                                // Validate token and sync transactions on startup
-                                CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-                                    val isLoggedIn = userDataSource.userState.first().isLoggedIn
-                                    if (!isLoggedIn) return@launch
+                    Crossfade(
+                        targetState = showSplash,
+                        animationSpec = tween(durationMillis = 300),
+                        label = "splash",
+                    ) { isSplash ->
+                        if (isSplash) {
+                            SplashScreen(
+                                onInit = {
+                                    fetchService.fetchAllHoldings()
+                                    kLineFetchService.fetchAll()
+                                    // Validate token and sync transactions on startup
+                                    CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+                                        val isLoggedIn = userDataSource.userState.first().isLoggedIn
+                                        if (!isLoggedIn) return@launch
 
-                                    val result = authRepository.refreshProfile()
-                                    when (result) {
-                                        is RefreshProfileResult.Unauthorized -> {
-                                            val username = userDataSource.userState.first().username
-                                            if (username != null) {
-                                                navigateToLoginWithUsername = username
+                                        val result = authRepository.refreshProfile()
+                                        when (result) {
+                                            is RefreshProfileResult.Unauthorized -> {
+                                                val username = userDataSource.userState.first().username
+                                                if (username != null) {
+                                                    navigateToLoginWithUsername = username
+                                                }
                                             }
-                                        }
 
-                                        is RefreshProfileResult.Success -> {
-                                            transactionSyncService.sync()
-                                        }
+                                            is RefreshProfileResult.Success -> {
+                                                transactionSyncService.sync()
+                                            }
 
-                                        is RefreshProfileResult.Error -> { /* transient, ignore */ }
+                                            is RefreshProfileResult.Error -> { /* transient, ignore */ }
+                                        }
                                     }
-                                }
-                            },
-                            onSplashFinished = {
-                                showSplash = false
-                                transactionSyncService.startPeriodicSync()
-                            },
-                        )
-                    } else {
-                        val navigationState =
-                            rememberNavigationState(
-                                startKey = DashboardNavKey,
-                                topLevelKeys = TOP_LEVEL_NAV_ITEMS.keys,
-                                configuration = serializersConfig,
+                                },
+                                onSplashFinished = {
+                                    showSplash = false
+                                    transactionSyncService.startPeriodicSync()
+                                },
                             )
-                        val navigator = remember { Navigator(navigationState) }
-
-                        val entryProvider =
-                            entryProvider {
-                                dashboardEntry()
-                                transactionsEntry(navigator)
-                                holdingsEntry(navigator)
-                                settingsEntry(
-                                    navigator,
-                                    onNavigateToLogin = { navigator.navigate(LoginNavKey) },
-                                    onNavigateToAvatar = { navigator.navigate(AvatarNavKey) },
+                        } else {
+                            val navigationState =
+                                rememberNavigationState(
+                                    startKey = DashboardNavKey,
+                                    topLevelKeys = TOP_LEVEL_NAV_ITEMS.keys,
+                                    configuration = serializersConfig,
                                 )
-                                accountEntry(navigator)
-                            }
+                            val navigator = remember { Navigator(navigationState) }
 
-                        GainfulNavGraph(
-                            navigationState = navigationState,
-                            navigator = navigator,
-                            entryProvider = entryProvider,
-                        )
+                            val entryProvider =
+                                entryProvider {
+                                    dashboardEntry()
+                                    transactionsEntry(navigator)
+                                    holdingsEntry(navigator)
+                                    settingsEntry(
+                                        navigator,
+                                        onNavigateToLogin = { navigator.navigate(LoginNavKey) },
+                                        onNavigateToAvatar = { navigator.navigate(AvatarNavKey) },
+                                    )
+                                    accountEntry(navigator)
+                                }
 
-                        // Navigate to login on token expiry
-                        navigateToLoginWithUsername?.let { username ->
-                            navigateToLoginWithUsername = null
-                            navigator.navigate(
-                                com.yoke.gainful.feature.account.navigation.LoginWithUsernameNavKey(username, sessionExpired = true),
+                            GainfulNavGraph(
+                                navigationState = navigationState,
+                                navigator = navigator,
+                                entryProvider = entryProvider,
                             )
+
+                            // Navigate to login on token expiry
+                            navigateToLoginWithUsername?.let { username ->
+                                navigateToLoginWithUsername = null
+                                navigator.navigate(
+                                    com.yoke.gainful.feature.account.navigation.LoginWithUsernameNavKey(username, sessionExpired = true),
+                                )
+                            }
                         }
                     }
                 }
