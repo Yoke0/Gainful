@@ -20,6 +20,8 @@ dependencies {
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.kotlin.datetime)
+    implementation(libs.exposed.migration.core)
+    implementation(libs.exposed.migration.jdbc)
     implementation(libs.postgresql.driver)
     implementation(libs.h2.driver)
     implementation(libs.logback.classic)

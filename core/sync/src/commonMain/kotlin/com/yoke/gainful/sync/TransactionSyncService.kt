@@ -2,6 +2,7 @@ package com.yoke.gainful.sync
 
 import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.api.TransactionResponse
+import com.yoke.gainful.common.extensions.formatLocalizedDateTime
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -23,10 +24,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Instant
 
 class TransactionSyncService(
     private val transactionApi: TransactionApi,
@@ -149,7 +148,7 @@ class TransactionSyncService(
             quantity = quantity,
             price = price,
             amount = amount,
-            tradeDate = formatDate(tradeDate),
+            tradeDate = tradeDate.formatLocalizedDateTime(),
         )
 
     private fun parseDate(dateStr: String): Long {
@@ -172,12 +171,6 @@ class TransactionSyncService(
         } catch (_: Exception) {
             0L
         }
-    }
-
-    private fun formatDate(millis: Long): String {
-        val instant = Instant.fromEpochMilliseconds(millis)
-        val ldt = instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-        return ldt.date.toString()
     }
 
     private suspend fun enrichAssets(transactions: List<Transaction>) {

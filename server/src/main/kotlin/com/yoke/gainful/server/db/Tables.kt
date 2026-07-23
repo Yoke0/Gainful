@@ -3,7 +3,6 @@ package com.yoke.gainful.server.db
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.CurrentDateTime
-import org.jetbrains.exposed.v1.datetime.date
 import org.jetbrains.exposed.v1.datetime.datetime
 
 object Users : Table("users") {
@@ -28,7 +27,7 @@ object Transactions : Table("transactions") {
     val quantity = double("quantity")
     val price = double("price")
     val amount = double("amount")
-    val tradeDate = date("trade_date")
+    val tradeDate = datetime("trade_date")
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
     val deletedAt = datetime("deleted_at").nullable()

@@ -6,6 +6,7 @@ package com.yoke.gainful.feature.settings.`import`
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.api.CreateTransactionRequest
+import com.yoke.gainful.common.extensions.formatLocalizedDateTime
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -30,9 +31,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 
 class ImportViewModel(
     private val transactionRepository: TransactionRepository,
@@ -236,15 +234,8 @@ private fun Transaction.toCreateRequest() =
         quantity = quantity,
         price = price,
         amount = amount,
-        tradeDate = formatDate(tradeDate),
+        tradeDate = tradeDate.formatLocalizedDateTime(),
     )
-
-private fun formatDate(millis: Long): String {
-    val ldt =
-        Instant.fromEpochMilliseconds(millis)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-    return ldt.date.toString()
-}
 
 data class DeleteDialogState(
     val index: Int = -1,

@@ -4,8 +4,8 @@ import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.db.UserSessions
 import com.yoke.gainful.server.db.Users
 import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.migration.jdbc.MigrationUtils
 import java.io.File
 
 object DatabaseFactory {
@@ -23,7 +23,7 @@ object DatabaseFactory {
         )
 
         transaction {
-            SchemaUtils.createMissingTablesAndColumns(Users, Transactions, UserSessions)
+            MigrationUtils.statementsRequiredForDatabaseMigration(Users, Transactions, UserSessions, withLogs = true)
         }
     }
 }
