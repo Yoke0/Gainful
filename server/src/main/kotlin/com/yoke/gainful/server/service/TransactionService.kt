@@ -6,7 +6,7 @@ import com.yoke.gainful.api.UpdateTransactionRequest
 import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.plugins.NotFoundException
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -24,7 +24,7 @@ import kotlin.uuid.Uuid
 
 class TransactionService {
     fun createTransaction(userId: Uuid, request: CreateTransactionRequest): TransactionResponse {
-        val tradeDate = LocalDate.parse(request.tradeDate)
+        val tradeDate = LocalDateTime.parse(request.tradeDate)
 
         // Check for duplicate by business key
         val existing =
@@ -117,7 +117,7 @@ class TransactionService {
                 if (quantity != null) it[this.quantity] = quantity
                 if (price != null) it[this.price] = price
                 if (amount != null) it[this.amount] = amount
-                if (tradeDate != null) it[this.tradeDate] = LocalDate.parse(tradeDate)
+                if (tradeDate != null) it[this.tradeDate] = LocalDateTime.parse(tradeDate)
                 it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             }
         }

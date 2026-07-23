@@ -70,7 +70,7 @@ class TransactionServiceTest {
                 quantity = 100.0,
                 price = 1800.0,
                 amount = 180000.0,
-                tradeDate = "2025-01-15",
+                tradeDate = "2025-01-15T10:30:00",
             )
 
         val response = transactionService.createTransaction(testUserId, request)
@@ -88,7 +88,7 @@ class TransactionServiceTest {
                 quantity = 100.0,
                 price = 1800.0,
                 amount = 180000.0,
-                tradeDate = "2025-01-15",
+                tradeDate = "2025-01-15T10:30:00",
             )
         transactionService.createTransaction(testUserId, request)
 
@@ -105,7 +105,7 @@ class TransactionServiceTest {
                 quantity = 100.0,
                 price = 1800.0,
                 amount = 180000.0,
-                tradeDate = "2025-01-15",
+                tradeDate = "2025-01-15T10:30:00",
             )
         val created = transactionService.createTransaction(testUserId, request)
 
@@ -129,7 +129,7 @@ class TransactionServiceTest {
                 quantity = 100.0,
                 price = 1800.0,
                 amount = 180000.0,
-                tradeDate = "2025-01-15",
+                tradeDate = "2025-01-15T10:30:00",
             )
         val created = transactionService.createTransaction(testUserId, request)
 
@@ -146,7 +146,7 @@ class TransactionServiceTest {
                 quantity = 100.0,
                 price = 1800.0,
                 amount = 180000.0,
-                tradeDate = "2025-01-15",
+                tradeDate = "2025-01-15T10:30:00",
             )
         val created = transactionService.createTransaction(testUserId, request)
 
@@ -173,7 +173,7 @@ class TransactionServiceTest {
                 quantity = 100.0,
                 price = 1800.0,
                 amount = 180000.0,
-                tradeDate = "2025-01-15",
+                tradeDate = "2025-01-15T10:30:00",
             )
         val created = transactionService.createTransaction(testUserId, request)
 

@@ -1,6 +1,7 @@
 package com.yoke.gainful.domain.usecase.transaction
 
 import com.yoke.gainful.api.CreateTransactionRequest
+import com.yoke.gainful.common.extensions.formatLocalizedDateTime
 import com.yoke.gainful.data.repository.PnlCacheRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -8,7 +9,6 @@ import com.yoke.gainful.data.repository.TransactionSyncRepository
 import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.model.Transaction
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.toLocalDateTime
 
 class AddTransactionUseCase(
     private val transactionRepository: TransactionRepository,
@@ -41,12 +41,5 @@ private fun Transaction.toCreateRequest() =
         quantity = quantity,
         price = price,
         amount = amount,
-        tradeDate = formatDate(tradeDate),
+        tradeDate = tradeDate.formatLocalizedDateTime(),
     )
-
-private fun formatDate(millis: Long): String {
-    val ldt =
-        kotlinx.datetime.Instant.fromEpochMilliseconds(millis)
-            .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-    return ldt.date.toString()
-}
