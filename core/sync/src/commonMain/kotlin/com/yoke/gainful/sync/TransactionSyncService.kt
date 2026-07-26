@@ -2,7 +2,7 @@ package com.yoke.gainful.sync
 
 import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.api.TransactionResponse
-import com.yoke.gainful.common.extensions.formatLocalizedDateTime
+import com.yoke.gainful.common.extensions.toIsoDateTime
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -148,7 +148,7 @@ class TransactionSyncService(
             quantity = quantity,
             price = price,
             amount = amount,
-            tradeDate = tradeDate.formatLocalizedDateTime(),
+            tradeDate = tradeDate.toIsoDateTime(),
         )
 
     private fun parseDate(dateStr: String): Long {

@@ -23,7 +23,8 @@ object DatabaseFactory {
         )
 
         transaction {
-            MigrationUtils.statementsRequiredForDatabaseMigration(Users, Transactions, UserSessions, withLogs = true)
+            val statements = MigrationUtils.statementsRequiredForDatabaseMigration(Users, Transactions, UserSessions, withLogs = true)
+            statements.forEach { exec(it) }
         }
     }
 }

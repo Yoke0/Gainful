@@ -18,6 +18,11 @@ fun Long.formatLocalizedDateTime(): String {
     return Instant.fromEpochMilliseconds(this).toLocalDateTime(tz).toString().replace("T", " ")
 }
 
+fun Long.toIsoDateTime(): String {
+    val tz = TimeZone.currentSystemDefault()
+    return Instant.fromEpochMilliseconds(this).toLocalDateTime(tz).toString()
+}
+
 fun String.parseLocalizedDateTimeToEpochMillis(): Long {
     val tz = TimeZone.currentSystemDefault()
     val dt = LocalDateTime.parse(this.replace(" ", "T"))
