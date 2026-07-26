@@ -2,6 +2,42 @@
 
 本文件记录盈迹 (Gainful) 应用的所有重要变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [1.2.1] - 2026-07-26
+
+### 新增功能
+
+#### UI
+- 改进持仓详情和盈亏概览标签
+
+#### 网络
+- 为公共 HTTP 客户端添加平台标识 User-Agent
+
+#### Server
+- 将交易时间字段从 String 改为 Long (epoch 毫秒)
+- 将 tradeDate 从 date 改为 datetime
+
+### 修复问题
+
+- 执行数据库迁移语句并修复 tradeDate ISO 格式
+- 处理启动时 API 失败，优雅降级
+- 升级 upload-artifact 到 v5 以兼容 Node.js 24
+- 修复 release 工作流中的 heredoc 语法
+
+### 重构
+
+- 服务器使用 Long epoch 毫秒存储交易时间
+
+### 构建与依赖
+
+- 新增 macOS DMG 打包任务 (含 Applications 快捷方式)
+- 新增 update-docs skill 用于文档更新
+
+### 文档
+
+- 更新 README 和 AGENTS 文档
+- 添加交易时间字段格式说明
+- 添加平台标识 User-Agent 说明
+
 ## [1.2.0] - 2026-07-21
 
 ### 新增功能

@@ -2,6 +2,42 @@
 
 All notable changes to the Gainful application are documented in this file. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.1] - 2026-07-26
+
+### Added
+
+#### UI
+- Improved holdings detail and P&L overview labels
+
+#### Network
+- Added platform-specific User-Agent to public HTTP client
+
+#### Server
+- Changed transaction time fields from String to Long (epoch millis)
+- Changed tradeDate from date to datetime
+
+### Fixed
+
+- Execute database migration statements and fix tradeDate ISO format
+- Handle startup API failures gracefully
+- Upgrade upload-artifact to v5 for Node.js 24 compatibility
+- Fix heredoc syntax in release workflow
+
+### Refactored
+
+- Server uses Long epoch millis for transaction time storage
+
+### Build & Dependencies
+
+- Added macOS DMG build task with Applications symlink
+- Added update-docs skill for documentation updates
+
+### Documentation
+
+- Updated README and AGENTS documentation
+- Added transaction time fields format documentation
+- Added platform-specific User-Agent documentation
+
 ## [1.2.0] - 2026-07-21
 
 ### Added
