@@ -38,8 +38,6 @@ class GetStockDetailUseCase(
             }
 
         var quantity = 0.0
-        var totalCost = 0.0
-        var avgCost = 0.0
         var totalBuys = 0.0
         var totalSells = 0.0
         var totalDividends = 0.0
@@ -48,27 +46,21 @@ class GetStockDetailUseCase(
             when (tx.type) {
                 TransactionType.BUY -> {
                     totalBuys += tx.amount
-                    totalCost += tx.amount
                     quantity += tx.quantity
                 }
 
                 TransactionType.SELL -> {
                     totalSells += tx.amount
-                    avgCost = if (quantity > 0) totalCost / quantity else 0.0
-                    totalCost -= avgCost * tx.quantity
                     quantity -= tx.quantity
                 }
 
                 TransactionType.DIVIDEND -> {
                     totalDividends += tx.amount
-                    totalCost -= tx.amount
                 }
             }
         }
 
-        if (quantity > 0) {
-            avgCost = totalCost / quantity
-        }
+        val avgCost = if (quantity > 0) (totalBuys - totalDividends - totalSells) / quantity else 0.0
 
         val kLines =
             if (asset?.quoteId != null) {

@@ -46,31 +46,31 @@ DIVIDEND: fee = 0.0
 Grouped by `assetId`, sorted by `timestamp`, processed chronologically:
 
 ```
-BUY:      totalCost += amount;  quantity += quantity
-SELL:     avgCost = totalCost / quantity;
-          totalCost -= avgCost × sellQuantity;  quantity -= quantity
-DIVIDEND: totalCost -= amount
+BUY:      totalBuys += amount;  quantity += quantity
+SELL:     totalSells += amount;  quantity -= quantity
+DIVIDEND: totalDividends += amount
 ```
 
-Result: returns `Holding(quantity, averageCost = totalCost / quantity)` when `quantity > 0`.
+Result: returns `Holding(quantity, averageCost = (totalBuys - totalDividends - totalSells) / quantity)` when `quantity > 0`.
 
 ### 2.2 Display Holdings (GetHoldingsDisplayUseCase)
 
 Same cost-basis logic, additionally accumulates `totalBuys`, `totalSells`, `totalDividends`:
 
 ```
-BUY:      totalBuys += amount;  totalCost += amount;  quantity += quantity
-SELL:     totalSells += amount;  avgCost = totalCost / quantity;
-          totalCost -= avgCost × quantity;  quantity -= quantity
-DIVIDEND: totalDividends += amount;  totalCost -= amount
+BUY:      totalBuys += amount;  quantity += quantity
+SELL:     totalSells += amount;  quantity -= quantity
+DIVIDEND: totalDividends += amount
 ```
+
+Average cost: `averageCost = (totalBuys - totalDividends - totalSells) / quantity`
 
 ### 2.3 HoldingDisplay Computed Properties (`HoldingDisplay.kt:19-26`)
 
 ```
 totalMarketValue = currentPrice × quantity
-totalCost        = averageCost × quantity
-totalGain        = -totalBuys + totalSells + totalDividends + totalMarketValue
+totalCost        = averageCost × quantity = totalBuys - totalDividends - totalSells
+totalGain        = totalMarketValue - totalCost = -totalBuys + totalSells + totalDividends + totalMarketValue
 ```
 
 ### 2.4 Closed Positions (GetClosedPositionsUseCase)
