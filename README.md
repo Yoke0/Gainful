@@ -66,7 +66,7 @@ Gainful/
 
 | 类别 | 技术 | 用途 |
 |------|------|------|
-| 网络请求 | Ktor | HTTP 客户端，支持多平台 |
+| 网络请求 | Ktor | HTTP 客户端，支持多平台，平台标识 User-Agent |
 | 本地存储 | Room | 跨平台数据库，类型安全 ORM |
 | 依赖注入 | Koin | 轻量级 DI 框架 |
 | 导航 | Navigation3 | Compose 跨平台导航 |
@@ -112,6 +112,9 @@ Gainful/
 
 # 热重载（开发推荐）
 ./gradlew :desktopApp:hotRun --auto
+
+# macOS DMG 打包（含 Applications 快捷方式）
+./gradlew :desktopApp:createDmg
 ```
 
 ### iOS
@@ -156,6 +159,8 @@ Gainful/
 | `POST /api/transactions` | 创建交易 |
 | `DELETE /api/transactions/{id}` | 删除交易 |
 
+> **时间字段**: 交易时间字段（`tradeDate`, `createdAt`, `updatedAt`, `deletedAt`）使用 **Long（epoch 毫秒）**，客户端负责转换显示格式。
+
 **项目结构**:
 
 ```
@@ -187,6 +192,7 @@ server/
 - **生成的资源 ID**: `gainful.<module>.generated.resources.*`（如 `gainful.feature.dashboard.generated.resources.*`）
 - **格式化字符串**: 使用位置参数 `%1$d`、`%2$s`（CMP 要求）
 - **测试命令**: `./gradlew allTests` 运行所有平台测试
+- **网络请求**: `publicHttpClient` 添加平台标识 User-Agent（Android/iOS/Desktop），其他客户端不添加
 
 ### 通用 UI 组件 (`core/ui`)
 

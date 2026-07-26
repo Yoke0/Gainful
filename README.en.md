@@ -66,7 +66,7 @@ Gainful/
 
 | Category | Technology | Purpose |
 |----------|------------|---------|
-| Network | Ktor | HTTP client, multi-platform support |
+| Network | Ktor | HTTP client, multi-platform with platform-specific User-Agent |
 | Storage | Room | Cross-platform database, type-safe ORM |
 | DI | Koin | Lightweight dependency injection |
 | Navigation | Navigation3 | Compose cross-platform navigation |
@@ -112,6 +112,9 @@ Gainful/
 
 # Hot reload (recommended for development)
 ./gradlew :desktopApp:hotRun --auto
+
+# macOS DMG build (with Applications symlink)
+./gradlew :desktopApp:createDmg
 ```
 
 ### iOS
@@ -156,6 +159,8 @@ Backend server providing RESTful API, JWT authentication, and data management.
 | `POST /api/transactions` | Create transaction |
 | `DELETE /api/transactions/{id}` | Delete transaction |
 
+> **Time Fields**: Transaction time fields (`tradeDate`, `createdAt`, `updatedAt`, `deletedAt`) use **Long (epoch millis)**. Client handles display format conversion.
+
 **Project Structure**:
 
 ```
@@ -186,6 +191,7 @@ server/
 - **Compose resources**: Each module maintains its own `src/commonMain/composeResources/values/strings.xml` (Chinese) and `values-en/strings.xml` (English)
 - **Generated resource IDs**: `gainful.<module>.generated.resources.*` (e.g., `gainful.feature.dashboard.generated.resources.*`)
 - **Format strings**: Use positional args: `%1$d`, `%2$s` (CMP requirement)
+- **Network**: `publicHttpClient` includes platform-specific User-Agent (Android/iOS/Desktop), other clients don't
 
 ### Shared UI Components (`core/ui`)
 
