@@ -5,12 +5,14 @@ import com.yoke.gainful.ksafe.SecureTokenStorage
 import com.yoke.gainful.network.createPlatformHttpClient
 import com.yoke.gainful.network.eastmoney.EastMoneyApi
 import com.yoke.gainful.network.eastmoney.EastMoneyApiImpl
+import com.yoke.gainful.network.platformUserAgent
 import com.yoke.gainful.network.server.AuthenticatedApi
 import com.yoke.gainful.network.server.AuthenticatedApiImpl
 import com.yoke.gainful.network.server.PublicApi
 import com.yoke.gainful.network.server.PublicApiImpl
 import com.yoke.gainful.network.server.TransactionApi
 import com.yoke.gainful.network.server.TransactionApiImpl
+import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -41,6 +43,9 @@ val networkModule =
         // Public client — no auth, for login/register/refresh
         single(named("publicHttpClient")) {
             createPlatformHttpClient().config {
+                install(UserAgent) {
+                    agent = platformUserAgent()
+                }
                 install(ContentNegotiation) {
                     json(get<Json>())
                 }

@@ -1,9 +1,16 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.androidMultiplatformLibrary)
 }
 
 kotlin {
+    android {
+        namespace = "com.yoke.gainful.core.network"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+
     listOf(
         iosArm64(),
         iosSimulatorArm64(),
@@ -25,6 +32,9 @@ kotlin {
             implementation(projects.core.ksafe)
         }
         jvmMain.dependencies {
+            implementation(libs.ktor.client.okhttp)
+        }
+        androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
         }
         iosMain.dependencies {
