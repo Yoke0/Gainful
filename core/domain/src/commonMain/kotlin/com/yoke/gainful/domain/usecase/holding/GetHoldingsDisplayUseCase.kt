@@ -142,7 +142,6 @@ class GetHoldingsDisplayUseCase(
         assetMap: Map<String, Asset>,
     ): HoldingDisplay? {
         var quantity = 0.0
-        var totalCost = 0.0
         var totalBuys = 0.0
         var totalSells = 0.0
         var totalDividends = 0.0
@@ -151,26 +150,23 @@ class GetHoldingsDisplayUseCase(
             when (tx.type) {
                 TransactionType.BUY -> {
                     totalBuys += tx.amount
-                    totalCost += tx.amount
                     quantity += tx.quantity
                 }
 
                 TransactionType.SELL -> {
                     totalSells += tx.amount
-                    val avgCost = if (quantity > 0) totalCost / quantity else 0.0
-                    totalCost -= avgCost * tx.quantity
                     quantity -= tx.quantity
                 }
 
                 TransactionType.DIVIDEND -> {
                     totalDividends += tx.amount
-                    totalCost -= tx.amount
                 }
             }
         }
 
         if (quantity <= 0) return null
 
+        val averageCost = if (quantity > 0) (totalBuys - totalDividends - totalSells) / quantity else 0.0
         val asset = assetMap[assetId]
         return HoldingDisplay(
             id = assetId,
@@ -179,7 +175,7 @@ class GetHoldingsDisplayUseCase(
             name = asset?.name ?: assetId,
             pinYin = asset?.pinYin ?: "",
             quantity = quantity,
-            averageCost = if (quantity > 0) totalCost / quantity else 0.0,
+            averageCost = averageCost,
             currentPrice = 0.0,
             preClose = 0.0,
             changePercent = 0.0,

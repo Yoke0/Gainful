@@ -15,29 +15,30 @@ class GetHoldingsUseCase(
                 .groupBy { it.assetId }
                 .mapNotNull { (assetId, assetTransactions) ->
                     var quantity = 0.0
-                    var totalCost = 0.0
+                    var totalBuys = 0.0
+                    var totalSells = 0.0
+                    var totalDividends = 0.0
 
                     assetTransactions.sortedBy { it.timestamp }.forEach { tx ->
                         when (tx.type) {
                             TransactionType.BUY -> {
-                                totalCost += tx.amount
+                                totalBuys += tx.amount
                                 quantity += tx.quantity
                             }
 
                             TransactionType.SELL -> {
-                                val avgCost = if (quantity > 0) totalCost / quantity else 0.0
-                                totalCost -= avgCost * tx.quantity
+                                totalSells += tx.amount
                                 quantity -= tx.quantity
                             }
 
                             TransactionType.DIVIDEND -> {
-                                totalCost -= tx.amount
+                                totalDividends += tx.amount
                             }
                         }
                     }
 
                     if (quantity > 0) {
-                        val avgCost = if (quantity > 0) totalCost / quantity else 0.0
+                        val avgCost = (totalBuys - totalDividends - totalSells) / quantity
                         Holding(
                             id = assetId,
                             assetId = assetId,
