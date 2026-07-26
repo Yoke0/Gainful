@@ -102,10 +102,10 @@ import gainful.feature.dashboard.generated.resources.no_trend_data
 import gainful.feature.dashboard.generated.resources.pnl_day_label
 import gainful.feature.dashboard.generated.resources.pnl_detail_buy_fee
 import gainful.feature.dashboard.generated.resources.pnl_detail_buy_fee_total
-import gainful.feature.dashboard.generated.resources.pnl_detail_daily_gain
-import gainful.feature.dashboard.generated.resources.pnl_detail_daily_gain_total
 import gainful.feature.dashboard.generated.resources.pnl_detail_dividend
 import gainful.feature.dashboard.generated.resources.pnl_detail_dividend_total
+import gainful.feature.dashboard.generated.resources.pnl_detail_gain
+import gainful.feature.dashboard.generated.resources.pnl_detail_gain_total
 import gainful.feature.dashboard.generated.resources.pnl_detail_no_records
 import gainful.feature.dashboard.generated.resources.pnl_detail_non_trading_day
 import gainful.feature.dashboard.generated.resources.pnl_detail_sell_fee
@@ -1232,7 +1232,7 @@ private fun StockPnlDetailItem(detail: StockPnlDetail) {
                     if (detail.dividend > 0) gainColor else null,
                 ),
                 Triple(
-                    stringResource(Res.string.pnl_detail_daily_gain),
+                    stringResource(Res.string.pnl_detail_gain),
                     detail.dailyPnl.formatSigned(),
                     if (detail.dailyPnl > 0) {
                         gainColor
@@ -1336,7 +1336,7 @@ private fun StockPnlDetailSummary(details: List<StockPnlDetail>) {
             )
         }
         SummaryRow(
-            label = stringResource(Res.string.pnl_detail_daily_gain_total),
+            label = stringResource(Res.string.pnl_detail_gain_total),
             value = totalDailyGain.formatSigned(),
             color = if (totalDailyGain >= 0) gainColor else lossColor,
         )

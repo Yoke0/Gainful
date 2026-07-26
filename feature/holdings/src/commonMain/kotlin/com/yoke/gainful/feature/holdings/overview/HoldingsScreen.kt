@@ -57,6 +57,7 @@ import gainful.feature.holdings.generated.resources.liquidation_price
 import gainful.feature.holdings.generated.resources.load_failed
 import gainful.feature.holdings.generated.resources.market_value
 import gainful.feature.holdings.generated.resources.profit_loss
+import gainful.feature.holdings.generated.resources.profit_loss_rate
 import gainful.feature.holdings.generated.resources.shares
 import gainful.feature.holdings.generated.resources.total_assets
 import org.jetbrains.compose.resources.stringResource
@@ -298,15 +299,20 @@ private fun HoldingCard(
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatLocalized(), Modifier.weight(1f))
-                MetaText(stringResource(Res.string.cost), holding.averageCost.formatLocalized(), Modifier.weight(1f))
-                MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}", Modifier.weight(1f))
+                MetaText(stringResource(Res.string.market_value), holding.totalMarketValue.formatLocalized())
+                MetaText(stringResource(Res.string.cost), holding.averageCost.formatLocalized())
+                MetaText(stringResource(Res.string.shares), "${holding.quantity.toInt()}")
                 MetaText(
                     stringResource(Res.string.profit_loss),
                     holding.totalGain.formatLocalized(),
-                    Modifier.weight(1f),
                     valueColor = if (holding.totalGain > 0) gainColor else lossColor,
+                )
+                MetaText(
+                    stringResource(Res.string.profit_loss_rate),
+                    holding.totalGainPercent.formatLocalized() + "%",
+                    valueColor = if (holding.totalGainPercent > 0) gainColor else lossColor,
                 )
             }
         }
@@ -390,7 +396,7 @@ private fun ClosedPositionItem(position: ClosedPosition, onStockClick: (String, 
                     position.lastSellPrice.formatLocalized(),
                 )
                 MetaText(
-                    stringResource(Res.string.profit_loss),
+                    stringResource(Res.string.profit_loss_rate),
                     position.realizedGainPercent.formatLocalized() + "%",
                     valueColor = if (isPositive) gainColor else lossColor,
                 )

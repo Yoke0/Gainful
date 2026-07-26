@@ -25,4 +25,7 @@ data class HoldingDisplay(
 
     val totalGain: Double
         get() = -totalBuys + totalSells + totalDividends + totalMarketValue
+
+    val totalGainPercent: Double
+        get() = if (totalCost > 0) (totalGain / totalCost) * 100 else 0.0
 }

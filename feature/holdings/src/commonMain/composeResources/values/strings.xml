@@ -18,6 +18,7 @@
     <string name="cost">成本</string>
     <string name="shares">股数</string>
     <string name="profit_loss">盈亏</string>
+    <string name="profit_loss_rate">盈亏率</string>
     <string name="holding_badge">持仓</string>
 
     <!-- Stock Detail -->
