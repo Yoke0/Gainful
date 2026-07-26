@@ -11,10 +11,10 @@ data class TransactionResponse(
     val quantity: Double,
     val price: Double,
     val amount: Double,
-    val tradeDate: String,
-    val createdAt: String,
-    val updatedAt: String,
-    val deletedAt: String? = null,
+    val tradeDate: Long,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val deletedAt: Long? = null,
 )
 
 @Serializable
@@ -25,7 +25,7 @@ data class CreateTransactionRequest(
     val quantity: Double,
     val price: Double,
     val amount: Double,
-    val tradeDate: String,
+    val tradeDate: Long,
 )
 
 @Serializable
@@ -36,5 +36,5 @@ data class UpdateTransactionRequest(
     val quantity: Double? = null,
     val price: Double? = null,
     val amount: Double? = null,
-    val tradeDate: String? = null,
+    val tradeDate: Long? = null,
 )

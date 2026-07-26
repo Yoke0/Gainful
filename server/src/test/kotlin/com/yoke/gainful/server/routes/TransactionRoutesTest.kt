@@ -133,7 +133,7 @@ class TransactionRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                     contentType(ContentType.Application.Json)
                     setBody(
-                        """{"assetCode":"600519","assetName":"贵州茅台","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":"2025-01-15T10:30:00"}""",
+                        """{"assetCode":"600519","assetName":"贵州茅台","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":1736955000000}""",
                     )
                 }
 
@@ -151,7 +151,7 @@ class TransactionRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $testToken")
                 contentType(ContentType.Application.Json)
                 setBody(
-                    """{"assetCode":"600519","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":"2025-01-15T10:30:00"}""",
+                    """{"assetCode":"600519","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":1736955000000}""",
                 )
             }
 
@@ -184,7 +184,7 @@ class TransactionRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $testToken")
                     contentType(ContentType.Application.Json)
                     setBody(
-                        """{"assetCode":"600519","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":"2025-01-15T10:30:00"}""",
+                        """{"assetCode":"600519","type":0,"quantity":100,"price":1800.0,"amount":180000.0,"tradeDate":1736955000000}""",
                     )
                 }
 
