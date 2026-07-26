@@ -21,7 +21,7 @@ UI is in Chinese. Dark-only theme (`GainfulTheme` uses `darkColorScheme` only).
   - `data/` — Repository interfaces + offline implementations
   - `database/` — Room with BundledSQLiteDriver (cross-platform)
   - `datastore/` — Preferences DataStore (settings)
-  - `network/` — Ktor HTTP client (expect/actual per platform)
+  - `network/` — Ktor HTTP client (expect/actual per platform, platform-specific User-Agent)
   - `domain/` — UseCases (see [Domain UseCases](#domain-usecases) below)
   - `sync/` — Background data sync (stock price fetching, KLine caching)
   - `file/` — File I/O utilities
@@ -274,6 +274,7 @@ GainfulScaffold(
 - Room schemas stored in `core/database/schemas/` — checked in for migration tracking
 - Ktor HTTP client uses `expect`/`actual` — platform engines: OkHttp (Android), Darwin (iOS), Java (JVM)
 - `initKoin()` is called in both `App.kt` (Compose) and `MainActivity.kt` (Android) — don't double-init
+- `publicHttpClient` includes platform-specific User-Agent; other HTTP clients do not
 
 ## Server
 
@@ -305,6 +306,9 @@ Ktor backend server for API, authentication, and data management.
 - `POST /api/transactions` — Create transaction
 - `DELETE /api/transactions/{id}` — Delete transaction
 - `GET /avatars/{filename}` — Static file serving for avatars
+
+### Transaction Time Fields
+All transaction time fields (`tradeDate`, `createdAt`, `updatedAt`, `deletedAt`) use **Long (epoch millis)** instead of ISO datetime strings. The client handles conversion to/from display format.
 
 ### Project Structure
 ```
