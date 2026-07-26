@@ -18,6 +18,7 @@
     <string name="cost">Cost</string>
     <string name="shares">Shares</string>
     <string name="profit_loss">P&amp;L</string>
+    <string name="profit_loss_rate">P&amp;L %</string>
     <string name="holding_badge">Holding</string>
 
     <!-- Stock Detail -->
