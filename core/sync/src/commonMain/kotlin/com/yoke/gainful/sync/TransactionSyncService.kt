@@ -2,7 +2,6 @@ package com.yoke.gainful.sync
 
 import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.api.TransactionResponse
-import com.yoke.gainful.common.extensions.toIsoDateTime
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -23,7 +22,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toInstant
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -136,9 +134,9 @@ class TransactionSyncService(
             quantity = quantity,
             price = price,
             amount = amount,
-            tradeDate = parseDate(tradeDate),
-            timestamp = parseDateTime(createdAt),
-            updatedAt = parseDateTime(updatedAt),
+            tradeDate = tradeDate,
+            timestamp = createdAt,
+            updatedAt = updatedAt,
         )
 
     private fun Transaction.toCreateRequest() =
@@ -148,30 +146,8 @@ class TransactionSyncService(
             quantity = quantity,
             price = price,
             amount = amount,
-            tradeDate = tradeDate.toIsoDateTime(),
+            tradeDate = tradeDate,
         )
-
-    private fun parseDate(dateStr: String): Long {
-        return try {
-            val parts = dateStr.split("-")
-            val year = parts[0].toInt()
-            val month = parts[1].toInt() - 1
-            val day = parts[2].toInt()
-            val ldt = kotlinx.datetime.LocalDateTime(year, month + 1, day, 0, 0, 0)
-            ldt.toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
-        } catch (_: Exception) {
-            0L
-        }
-    }
-
-    private fun parseDateTime(dateTimeStr: String): Long {
-        return try {
-            val ldt = kotlinx.datetime.LocalDateTime.parse(dateTimeStr)
-            ldt.toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
-        } catch (_: Exception) {
-            0L
-        }
-    }
 
     private suspend fun enrichAssets(transactions: List<Transaction>) {
         val codes = transactions.map { it.assetId }.distinct()

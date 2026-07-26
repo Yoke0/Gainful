@@ -33,6 +33,7 @@ import com.yoke.gainful.feature.holdings.navigation.holdingsEntry
 import com.yoke.gainful.feature.settings.navigation.settingsEntry
 import com.yoke.gainful.feature.transactions.navigation.transactionsEntry
 import com.yoke.gainful.model.AppSettings
+import com.yoke.gainful.model.UserState
 import com.yoke.gainful.navigation.GainfulNavGraph
 import com.yoke.gainful.navigation.Navigator
 import com.yoke.gainful.navigation.TOP_LEVEL_NAV_ITEMS
@@ -84,6 +85,14 @@ fun App(onTitleReady: (String) -> Unit = {}) {
                 ProvideGainLossColors(scheme = appSettings.gainLossColorScheme) {
                     var showSplash by rememberSaveable { mutableStateOf(true) }
                     var navigateToLoginWithUsername by remember { mutableStateOf<String?>(null) }
+
+                    val userState by userDataSource.userState.collectAsState(initial = UserState())
+
+                    LaunchedEffect(userState.isLoggedIn) {
+                        if (!userState.isLoggedIn) {
+                            transactionSyncService.stopPeriodicSync()
+                        }
+                    }
 
                     DisposableEffect(Unit) {
                         onDispose {

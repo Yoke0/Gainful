@@ -5,9 +5,8 @@ import com.yoke.gainful.api.TransactionResponse
 import com.yoke.gainful.api.UpdateTransactionRequest
 import com.yoke.gainful.server.db.Transactions
 import com.yoke.gainful.server.plugins.NotFoundException
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
@@ -20,11 +19,13 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class TransactionService {
     fun createTransaction(userId: Uuid, request: CreateTransactionRequest): TransactionResponse {
-        val tradeDate = LocalDateTime.parse(request.tradeDate)
+        val tz = TimeZone.currentSystemDefault()
+        val tradeDate = Instant.fromEpochMilliseconds(request.tradeDate).toLocalDateTime(tz)
 
         // Check for duplicate by business key
         val existing =
@@ -117,7 +118,10 @@ class TransactionService {
                 if (quantity != null) it[this.quantity] = quantity
                 if (price != null) it[this.price] = price
                 if (amount != null) it[this.amount] = amount
-                if (tradeDate != null) it[this.tradeDate] = LocalDateTime.parse(tradeDate)
+                if (tradeDate != null) {
+                    val tz = TimeZone.currentSystemDefault()
+                    it[this.tradeDate] = Instant.fromEpochMilliseconds(tradeDate).toLocalDateTime(tz)
+                }
                 it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             }
         }
@@ -142,8 +146,9 @@ class TransactionService {
         }
     }
 
-    private fun ResultRow.toResponse(): TransactionResponse =
-        TransactionResponse(
+    private fun ResultRow.toResponse(): TransactionResponse {
+        val tz = TimeZone.currentSystemDefault()
+        return TransactionResponse(
             id = this[Transactions.id].toString(),
             assetCode = this[Transactions.assetCode],
             assetName = this[Transactions.assetName],
@@ -151,9 +156,10 @@ class TransactionService {
             quantity = this[Transactions.quantity],
             price = this[Transactions.price],
             amount = this[Transactions.amount],
-            tradeDate = this[Transactions.tradeDate].toString(),
-            createdAt = this[Transactions.createdAt].toString(),
-            updatedAt = this[Transactions.updatedAt].toString(),
-            deletedAt = this[Transactions.deletedAt]?.toString(),
+            tradeDate = this[Transactions.tradeDate].toInstant(tz).toEpochMilliseconds(),
+            createdAt = this[Transactions.createdAt].toInstant(tz).toEpochMilliseconds(),
+            updatedAt = this[Transactions.updatedAt].toInstant(tz).toEpochMilliseconds(),
+            deletedAt = this[Transactions.deletedAt]?.toInstant(tz)?.toEpochMilliseconds(),
         )
+    }
 }

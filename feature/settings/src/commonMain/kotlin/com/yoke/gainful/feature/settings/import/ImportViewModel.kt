@@ -6,7 +6,6 @@ package com.yoke.gainful.feature.settings.`import`
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yoke.gainful.api.CreateTransactionRequest
-import com.yoke.gainful.common.extensions.toIsoDateTime
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
@@ -234,7 +233,7 @@ private fun Transaction.toCreateRequest() =
         quantity = quantity,
         price = price,
         amount = amount,
-        tradeDate = tradeDate.toIsoDateTime(),
+        tradeDate = tradeDate,
     )
 
 data class DeleteDialogState(

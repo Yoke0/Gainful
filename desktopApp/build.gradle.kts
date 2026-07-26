@@ -31,3 +31,16 @@ compose.desktop {
         }
     }
 }
+
+tasks.register<Exec>("createDmg") {
+    description = "Create DMG with Applications symlink for macOS distribution"
+    group = "distribution"
+    dependsOn("packageDmg")
+
+    val buildDir = layout.buildDirectory.get().asFile
+    val appPath = File(buildDir, "compose/binaries/main/app/Gainful.app").absolutePath
+    val dmgPath = File(buildDir, "compose/binaries/main/dmg/Gainful.dmg").absolutePath
+    val scriptPath = rootProject.file("scripts/create-dmg.sh").absolutePath
+
+    commandLine("bash", scriptPath, appPath, dmgPath)
+}
