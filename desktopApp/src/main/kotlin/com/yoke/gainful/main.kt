@@ -7,6 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -24,7 +26,12 @@ fun main() =
         ) {
             SideEffect {
                 window.minimumSize = java.awt.Dimension(420, 860)
+
+                val awtColor = java.awt.Color(Color.Transparent.toArgb())
+                window.background = awtColor // for macOS
+                window.contentPane.background = awtColor // for Windows
             }
+
             App(onTitleReady = { title = it })
         }
     }

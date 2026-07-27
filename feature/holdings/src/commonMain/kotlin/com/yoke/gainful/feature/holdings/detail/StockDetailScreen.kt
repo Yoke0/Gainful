@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -493,7 +492,7 @@ private fun ChartCard(
         ChartArea(
             period = selectedPeriod,
             kLines = kLines,
-            modifier = Modifier.fillMaxWidth().aspectRatio(4 / 3f).clip(RoundedCornerShape(6.dp)).background(Surface),
+            modifier = Modifier.fillMaxWidth().height(320.dp).clip(RoundedCornerShape(6.dp)).background(Surface),
         )
     }
 }

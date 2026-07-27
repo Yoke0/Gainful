@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -212,29 +214,42 @@ private fun DashboardScreen(
             )
         },
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Adaptive(440.dp),
+            modifier = Modifier.fillMaxSize(),
+            verticalItemSpacing = 14.dp,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            DailyPnlCard(uiState.holdings)
+            item {
+                DailyPnlCard(uiState.holdings)
+            }
 
-            SummaryCard(uiState)
+            item {
+                SummaryCard(uiState)
+            }
 
-            ChartCard(uiState.holdings)
+            item {
+                ChartCard(uiState.holdings)
+            }
 
-            MetricsSection(uiState)
+            item {
+                MetricsSection(uiState)
+            }
 
-            PnlOverviewCard(
-                uiState = uiState,
-                onIntent = onIntent,
-            )
+            item {
+                PnlOverviewCard(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                )
+            }
 
-            HoldingsOverviewCard(holdings = uiState.holdings)
+            item {
+                HoldingsOverviewCard(holdings = uiState.holdings)
+            }
 
-            Spacer(modifier = Modifier.bottomBarPadding())
+            item {
+                Spacer(modifier = Modifier.bottomBarPadding())
+            }
         }
     }
 
@@ -902,6 +917,7 @@ private fun MetricsSection(state: DashboardUiState) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
+            maxItemsInEachRow = 2,
         ) {
             MetricCard(
                 modifier = Modifier.weight(1f),
