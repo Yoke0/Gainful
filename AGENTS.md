@@ -164,7 +164,7 @@ After making changes, verify on Android device using this workflow:
 > **Prerequisites**: `android` CLI installed (`curl -fsSL https://dl.google.com/android/cli/latest/darwin_arm64/install.sh | bash`), `adb` at `~/Library/Android/sdk/platform-tools/adb`, wireless ADB connected.
 
 ```bash
-# 1. Delete old APK, build and install
+# 1. Delete stale build artifact, then build and install (overwrite-install on device — no uninstall needed)
 rm -f androidApp/build/outputs/apk/debug/*.apk
 ./gradlew :androidApp:installDebug
 
