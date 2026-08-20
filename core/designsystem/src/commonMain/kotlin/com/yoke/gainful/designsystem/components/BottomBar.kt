@@ -1,10 +1,16 @@
 package com.yoke.gainful.designsystem.components
 
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,14 +27,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -53,19 +57,6 @@ fun BottomBar(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val slideOffset = remember { Animatable(0f) }
-    val alpha = remember { Animatable(1f) }
-
-    LaunchedEffect(visible) {
-        if (visible) {
-            alpha.animateTo(1f, tween(150))
-            slideOffset.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
-        } else {
-            slideOffset.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
-            alpha.animateTo(0f, tween(150))
-        }
-    }
-
     var rowSize by remember { mutableStateOf(IntSize.Zero) }
     val density = LocalDensity.current
 
@@ -76,37 +67,55 @@ fun BottomBar(
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
     )
 
-    Box(
-        modifier =
-            modifier
-                .offset(y = (slideOffset.value * BottomBarHeight.value).dp)
-                .alpha(alpha.value)
-                .fillMaxWidth()
-                .height(BottomBarHeight)
-                .clip(RoundedCornerShape(22.dp))
-                .background(Surface.copy(alpha = 0.88f))
-                .padding(8.dp),
-    ) {
-        if (rowSize.width > 0) {
-            Box(
-                modifier =
-                    Modifier
-                        .offset(x = animatedIndicatorOffset)
-                        .width(tabWidthDp)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(GoldDim),
+    val enterTransition: EnterTransition =
+        fadeIn(animationSpec = tween(150)) +
+            slideInVertically(
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                initialOffsetY = { it },
             )
-        }
 
-        Row(
+    val exitTransition: ExitTransition =
+        slideOutVertically(
+            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+            targetOffsetY = { it },
+        ) + fadeOut(animationSpec = tween(150))
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = enterTransition,
+        exit = exitTransition,
+        modifier = modifier,
+    ) {
+        Box(
             modifier =
                 Modifier
-                    .fillMaxSize()
-                    .onGloballyPositioned { rowSize = it.size },
-            verticalAlignment = Alignment.CenterVertically,
-            content = content,
-        )
+                    .fillMaxWidth()
+                    .height(BottomBarHeight)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Surface.copy(alpha = 0.88f))
+                    .padding(8.dp),
+        ) {
+            if (rowSize.width > 0) {
+                Box(
+                    modifier =
+                        Modifier
+                            .offset(x = animatedIndicatorOffset)
+                            .width(tabWidthDp)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(GoldDim),
+                )
+            }
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .onGloballyPositioned { rowSize = it.size },
+                verticalAlignment = Alignment.CenterVertically,
+                content = content,
+            )
+        }
     }
 }
 
