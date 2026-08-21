@@ -12,7 +12,6 @@ import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.domain.usecase.transaction.GetTransactionsWithAssetsOnceUseCase
-import com.yoke.gainful.feature.settings.model.CsvConfig
 import com.yoke.gainful.feature.settings.model.CsvPreviewData
 import com.yoke.gainful.feature.settings.model.toDisplayItems
 import com.yoke.gainful.feature.settings.util.CsvUtil
@@ -52,7 +51,7 @@ class ImportViewModel(
         when (intent) {
             is ImportIntent.ParseCsv -> parseCsv(intent)
             is ImportIntent.DeleteItem -> deleteItem(intent.index)
-            is ImportIntent.ConfirmImport -> confirmImport(intent.csvConfig)
+            ImportIntent.ConfirmImport -> confirmImport()
             is ImportIntent.Reset -> resetState()
             is ImportIntent.ShowDeleteDialog -> showDeleteDialog(intent.index, intent.item)
             is ImportIntent.DismissDeleteDialog -> dismissDeleteDialog()
@@ -63,41 +62,43 @@ class ImportViewModel(
 
     private fun parseCsv(intent: ImportIntent.ParseCsv) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, hasParseError = false) }
+            _uiState.update { it.copy(isLoading = true, hasParseError = false, hasMissingColumnsError = false) }
 
             val txsWithAssets = getTransactionsWithAssetsOnceUseCase()
-            val existingIds =
-                txsWithAssets.map { tx ->
-                    "${tx.transaction.assetId}_${tx.transaction.tradeDate}_${tx.transaction.type.value}"
-                }.toSet()
-
-            val result = CsvUtil.parseCsv(intent.csvContent, intent.csvConfig, existingIds)
-            if (result != null) {
-                _uiState.update {
-                    it.copy(preview = result.copy(fileName = intent.fileName))
-                }
-                enrichAssets(result, intent.csvConfig)
-            } else {
+            val result = CsvUtil.parseCsv(intent.csvContent, intent.csvConfig, txsWithAssets)
+            if (result == null) {
                 _uiState.update {
                     it.copy(hasParseError = true, isLoading = false)
                 }
+                return@launch
             }
+            if (result.missingColumns.isNotEmpty()) {
+                _uiState.update {
+                    it.copy(
+                        hasMissingColumnsError = true,
+                        missingColumns = result.missingColumns,
+                        isLoading = false,
+                    )
+                }
+                return@launch
+            }
+
+            val preview = CsvPreviewData(fileName = intent.fileName, parseResult = result)
+            _uiState.update {
+                it.copy(preview = preview)
+            }
+            enrichAssets(preview)
         }
     }
 
-    private suspend fun enrichAssets(preview: CsvPreviewData, csvConfig: CsvConfig) {
-        val codeIndex = preview.headers.indexOf(csvConfig.assetCodeHeader)
-        if (codeIndex < 0) {
-            _uiState.update { it.copy(isLoading = false) }
-            return
-        }
-
-        val displayItems = preview.toDisplayItems(csvConfig).toMutableList()
+    private suspend fun enrichAssets(preview: CsvPreviewData) {
+        val displayItems = preview.toDisplayItems().toMutableList()
 
         val codesToEnrich =
             displayItems
                 .filter { it.name.isBlank() || it.pinYin.isBlank() }
                 .map { it.code }
+                .filter { it.isNotBlank() }
                 .distinct()
 
         val dbAssets =
@@ -140,30 +141,20 @@ class ImportViewModel(
     private fun deleteItem(index: Int) {
         _uiState.update {
             val preview = it.preview ?: return@update it
+            if (index !in preview.rows.indices) return@update it
             val deletedIndices = preview.deletedIndices.toMutableSet()
-            deletedIndices.add(index)
-            val wasDuplicate = index in preview.duplicateIndices
-            val newDuplicateCount = if (wasDuplicate) preview.duplicateCount - 1 else preview.duplicateCount
-            it.copy(
-                preview =
-                    preview.copy(
-                        deletedIndices = deletedIndices,
-                        duplicateCount = newDuplicateCount.coerceAtLeast(0),
-                    ),
-                displayItems = it.displayItems.toMutableList().apply { removeAt(index) },
-            )
+            if (!deletedIndices.add(index)) return@update it
+
+            // Only track deleted row indices — displayItems stays row-index aligned
+            // (enriched names survive deletions; the UI hides deleted rows).
+            it.copy(preview = preview.copy(deletedIndices = deletedIndices))
         }
     }
 
-    private fun confirmImport(csvConfig: CsvConfig) {
+    private fun confirmImport() {
         viewModelScope.launch {
             val preview = _uiState.value.preview ?: return@launch
-            val transactions =
-                CsvUtil.parseToTransactions(
-                    csvContent = preview.rawCsv,
-                    config = csvConfig,
-                    deletedIndices = preview.deletedIndices,
-                )
+            val transactions = CsvUtil.toTransactions(preview.parseResult, preview.deletedIndices)
             // Save locally first (fast)
             if (transactions.isNotEmpty()) {
                 transactionRepository.insertTransactions(transactions)
@@ -245,6 +236,8 @@ data class ImportUiState(
     val preview: CsvPreviewData? = null,
     val displayItems: List<TransactionDisplayItem> = emptyList(),
     val hasParseError: Boolean = false,
+    val hasMissingColumnsError: Boolean = false,
+    val missingColumns: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val importSuccess: Boolean = false,
     val importedCount: Int = 0,

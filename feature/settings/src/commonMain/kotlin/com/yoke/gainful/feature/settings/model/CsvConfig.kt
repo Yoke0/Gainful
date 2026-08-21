@@ -4,6 +4,11 @@ data class CsvConfig(
     val headers: List<String>,
     val typeValues: List<String>,
 ) {
+    init {
+        require(headers.size >= 7) { "CsvConfig requires at least 7 headers, got ${headers.size}" }
+        require(typeValues.size >= 3) { "CsvConfig requires at least 3 type values, got ${typeValues.size}" }
+    }
+
     val dateHeader: String get() = headers[0]
     val assetCodeHeader: String get() = headers[1]
     val assetNameHeader: String get() = headers[2]

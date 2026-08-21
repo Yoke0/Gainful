@@ -77,6 +77,7 @@ fun TransactionCard(
     item: TransactionDisplayItem,
     onDelete: (() -> Unit)? = null,
     isDuplicate: Boolean = false,
+    isInvalid: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -97,6 +98,7 @@ fun TransactionCard(
 
     val borderColor =
         when {
+            isInvalid -> Gold
             isDuplicate -> GainRed
             isPressed.value -> GainRed.copy(alpha = 0.5f)
             else -> Border

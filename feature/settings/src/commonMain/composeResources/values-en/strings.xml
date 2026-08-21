@@ -42,11 +42,13 @@
     <string name="import_stat_total">Total</string>
     <string name="import_stat_valid">Valid</string>
     <string name="import_stat_duplicate">Duplicate</string>
+    <string name="import_stat_invalid">Invalid</string>
     <string name="import_confirm">Import</string>
     <string name="import_success">Import Successful</string>
     <string name="import_success_msg">Successfully imported %1$d transactions</string>
     <string name="import_done">Done</string>
     <string name="import_error_format">Invalid CSV format\n\nExpected format: Date,Asset Code,Stock Name,Type,Shares,Price,Amount\n\nExample:\n2024-01-15 09:30,SH600000,SPDBank,Buy,100,10.50,1060.00</string>
+    <string name="import_error_headers">Missing required columns: %1$s\nPlease check the CSV header</string>
     <string name="import_summary_total">%1$d trades</string>
     <string name="import_summary_buy">Buy</string>
     <string name="import_summary_sell">Sell</string>

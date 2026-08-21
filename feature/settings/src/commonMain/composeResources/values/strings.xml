@@ -42,11 +42,13 @@
     <string name="import_stat_total">总行数</string>
     <string name="import_stat_valid">有效</string>
     <string name="import_stat_duplicate">重复</string>
+    <string name="import_stat_invalid">无效</string>
     <string name="import_confirm">导入</string>
     <string name="import_success">导入成功</string>
     <string name="import_success_msg">成功导入 %1$d 条交易记录</string>
     <string name="import_done">完成</string>
     <string name="import_error_format">CSV 格式不正确\n\n正确格式: 日期,资产代码,股票名称,交易类型,股数,成交价格,成交金额\n\n示例:\n2024-01-15 09:30,SH600000,浦发银行,买入,100,10.50,1060.00</string>
+    <string name="import_error_headers">缺少必需列：%1$s\n请检查 CSV 表头</string>
     <string name="import_summary_total">共 %1$d 笔</string>
     <string name="import_summary_buy">买入</string>
     <string name="import_summary_sell">卖出</string>
