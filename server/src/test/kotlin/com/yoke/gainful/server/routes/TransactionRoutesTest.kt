@@ -101,7 +101,7 @@ class TransactionRoutesTest {
 
     private fun Application.testModule() {
         val testTokenConfig = TokenConfig("test-issuer", "test-audience", "test-realm", "test-secret", 86400000, 2592000000)
-        val sessionService = SessionService()
+        val sessionService = SessionService(testTokenConfig)
 
         install(ContentNegotiation) { json() }
         configureStatusPages()

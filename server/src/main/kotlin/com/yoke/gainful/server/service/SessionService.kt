@@ -1,11 +1,14 @@
 package com.yoke.gainful.server.service
 
 import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.exceptions.TokenExpiredException
 import com.yoke.gainful.api.SessionResponse
 import com.yoke.gainful.server.db.UserSessions
 import com.yoke.gainful.server.plugins.ForbiddenException
 import com.yoke.gainful.server.plugins.NotFoundException
 import com.yoke.gainful.server.plugins.UnauthorizedException
+import com.yoke.gainful.server.security.token.TokenConfig
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -16,11 +19,16 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import org.slf4j.LoggerFactory
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
-class SessionService {
+class SessionService(
+    private val tokenConfig: TokenConfig,
+) {
+    private val log = LoggerFactory.getLogger(SessionService::class.java)
+
     data class SessionInfo(
         val id: Uuid,
         val userId: Uuid,
@@ -48,6 +56,13 @@ class SessionService {
             }
         }
 
+        log.info(
+            "Session created (sessionId={}, userId={}, device={}, ip={})",
+            sessionId,
+            userId,
+            deviceInfo,
+            ipAddress,
+        )
         return SessionInfo(id = sessionId, userId = userId)
     }
 
@@ -83,22 +98,43 @@ class SessionService {
                 it[isRevoked] = true
             }
         }
+        log.info("Session revoked (sessionId={}, userId={})", sessionId, userId)
     }
 
     fun validateRefreshToken(refreshToken: String): SessionInfo {
-        val jti =
+        val decoded =
             try {
-                JWT.decode(refreshToken).getClaim("jti").asString()
-            } catch (_: Exception) {
+                // Verify signature, expiry, issuer and audience — a forged/expired token is rejected here.
+                JWT
+                    .require(Algorithm.HMAC256(tokenConfig.secret))
+                    .withAudience(tokenConfig.audience)
+                    .withIssuer(tokenConfig.issuer)
+                    .build()
+                    .verify(refreshToken)
+            } catch (e: TokenExpiredException) {
+                log.warn("Token refresh rejected: refresh token expired")
+                throw UnauthorizedException("Invalid refresh token")
+            } catch (e: Exception) {
+                log.warn("Token refresh rejected: invalid refresh token signature/claims")
                 throw UnauthorizedException("Invalid refresh token")
             }
 
-        if (jti.isNullOrBlank()) throw UnauthorizedException("Invalid refresh token")
+        if (decoded.getClaim("type").asString() != "refresh") {
+            log.warn("Token refresh rejected: missing or invalid token type claim")
+            throw UnauthorizedException("Invalid refresh token")
+        }
+
+        val jti = decoded.getClaim("jti").asString()
+        if (jti.isNullOrBlank()) {
+            log.warn("Token refresh rejected: missing jti claim")
+            throw UnauthorizedException("Invalid refresh token")
+        }
 
         val sessionId =
             try {
                 Uuid.parse(jti)
             } catch (_: Exception) {
+                log.warn("Token refresh rejected: jti is not a valid session id (jti={})", jti)
                 throw UnauthorizedException("Invalid refresh token")
             }
 
@@ -111,14 +147,22 @@ class SessionService {
                 }.singleOrNull()
             }
 
-        if (session == null) throw UnauthorizedException("Invalid refresh token")
-        if (session[UserSessions.isRevoked]) throw UnauthorizedException("Refresh token has been revoked")
+        if (session == null) {
+            log.warn("Token refresh rejected: session not found (sessionId={})", sessionId)
+            throw UnauthorizedException("Invalid refresh token")
+        }
+        if (session[UserSessions.isRevoked]) {
+            log.warn("Token refresh rejected: session revoked (sessionId={}, userId={})", sessionId, session[UserSessions.userId])
+            throw UnauthorizedException("Refresh token has been revoked")
+        }
 
         val sessionExpiresAt = session[UserSessions.expiresAt]
         if (sessionExpiresAt == null || sessionExpiresAt < now) {
+            log.warn("Token refresh rejected: session expired (sessionId={}, userId={})", sessionId, session[UserSessions.userId])
             throw UnauthorizedException("Refresh token has expired")
         }
 
+        log.debug("Token refresh accepted (sessionId={}, userId={})", sessionId, session[UserSessions.userId])
         return SessionInfo(
             id = session[UserSessions.id],
             userId = session[UserSessions.userId],

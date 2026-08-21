@@ -7,6 +7,8 @@ import com.yoke.gainful.server.db.UserSessions
 import com.yoke.gainful.server.db.Users
 import com.yoke.gainful.server.plugins.ForbiddenException
 import com.yoke.gainful.server.plugins.NotFoundException
+import com.yoke.gainful.server.plugins.UnauthorizedException
+import com.yoke.gainful.server.security.token.TokenConfig
 import com.yoke.gainful.server.util.PasswordUtils
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -33,7 +35,17 @@ class SessionServiceTest {
             SchemaUtils.create(Users, Transactions, UserSessions)
         }
 
-        sessionService = SessionService()
+        sessionService =
+            SessionService(
+                TokenConfig(
+                    issuer = "test-issuer",
+                    audience = "test-audience",
+                    realm = "test-realm",
+                    secret = "test-secret",
+                    expiresIn = 86400000,
+                    refreshExpiresIn = 2592000000,
+                ),
+            )
 
         testUserId = Uuid.random()
         transaction(database) {
@@ -53,13 +65,17 @@ class SessionServiceTest {
         }
     }
 
-    private fun generateRefreshToken(jti: String): String {
-        return JWT.create()
-            .withAudience("test-audience")
-            .withIssuer("test-issuer")
-            .withExpiresAt(Date(System.currentTimeMillis() + 2592000000))
-            .withClaim("jti", jti)
-            .sign(Algorithm.HMAC256("test-secret"))
+    private fun generateRefreshToken(jti: String, secret: String = "test-secret", type: String? = "refresh"): String {
+        val builder =
+            JWT.create()
+                .withAudience("test-audience")
+                .withIssuer("test-issuer")
+                .withExpiresAt(Date(System.currentTimeMillis() + 2592000000))
+                .withClaim("jti", jti)
+        if (type != null) {
+            builder.withClaim("type", type)
+        }
+        return builder.sign(Algorithm.HMAC256(secret))
     }
 
     @Test
@@ -115,5 +131,45 @@ class SessionServiceTest {
 
         assertEquals(sessionId, validated.id)
         assertEquals(testUserId, validated.userId)
+    }
+
+    @Test
+    fun `validateRefreshToken rejects forged token with wrong signature`() {
+        val sessionId = Uuid.random()
+        sessionService.createSession(sessionId, testUserId, 2592000000, "Device1", "127.0.0.1")
+        val forgedToken = generateRefreshToken(sessionId.toString(), secret = "attacker-secret")
+
+        assertFailsWith<UnauthorizedException> {
+            sessionService.validateRefreshToken(forgedToken)
+        }
+    }
+
+    @Test
+    fun `validateRefreshToken rejects token without refresh type claim`() {
+        val sessionId = Uuid.random()
+        sessionService.createSession(sessionId, testUserId, 2592000000, "Device1", "127.0.0.1")
+        val token = generateRefreshToken(sessionId.toString(), type = null)
+
+        assertFailsWith<UnauthorizedException> {
+            sessionService.validateRefreshToken(token)
+        }
+    }
+
+    @Test
+    fun `validateRefreshToken rejects expired token`() {
+        val sessionId = Uuid.random()
+        sessionService.createSession(sessionId, testUserId, 2592000000, "Device1", "127.0.0.1")
+        val expired =
+            JWT.create()
+                .withAudience("test-audience")
+                .withIssuer("test-issuer")
+                .withExpiresAt(Date(System.currentTimeMillis() - 1000))
+                .withClaim("type", "refresh")
+                .withClaim("jti", sessionId.toString())
+                .sign(Algorithm.HMAC256("test-secret"))
+
+        assertFailsWith<UnauthorizedException> {
+            sessionService.validateRefreshToken(expired)
+        }
     }
 }
