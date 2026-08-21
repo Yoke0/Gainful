@@ -15,6 +15,7 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.slf4j.LoggerFactory
 import kotlin.uuid.Uuid
 
 class AuthService(
@@ -22,6 +23,8 @@ class AuthService(
     private val sessionService: SessionService,
     private val tokenService: TokenService,
 ) {
+    private val log = LoggerFactory.getLogger(AuthService::class.java)
+
     fun register(username: String, email: String, password: String, deviceInfo: String? = null, ipAddress: String? = null): AuthResponse {
         if (password.length < 6) throw ValidationException("Password must be at least 6 characters")
 
@@ -30,9 +33,14 @@ class AuthService(
                 Users.selectAll().where { (Users.username eq username) or (Users.email eq email) }.toList()
             }
 
-        if (existing.any { it[Users.username] == username }) throw ConflictException("Username already exists")
-        if (existing.any { it[Users.email] == email }) throw ConflictException("Email already exists")
-
+        if (existing.any { it[Users.username] == username }) {
+            log.warn("Registration failed: username already exists (username={})", username)
+            throw ConflictException("Username already exists")
+        }
+        if (existing.any { it[Users.email] == email }) {
+            log.warn("Registration failed: email already exists (email={})", email)
+            throw ConflictException("Email already exists")
+        }
         val userId = Uuid.random()
         transaction {
             Users.insert {
@@ -67,6 +75,13 @@ class AuthService(
                 TokenClaim("username", username),
             )
 
+        log.info(
+            "Registration success (userId={}, sessionId={}, username={}, ip={})",
+            userId,
+            sessionId,
+            username,
+            ipAddress,
+        )
         return AuthResponse(
             accessToken = accessToken,
             refreshToken = refreshToken,
@@ -79,9 +94,13 @@ class AuthService(
         val user =
             transaction {
                 Users.selectAll().where { Users.username eq username }.singleOrNull()
-            } ?: throw UnauthorizedException("Invalid username or password")
+            } ?: run {
+                log.warn("Login failed: user not found (username={}, ip={})", username, ipAddress)
+                throw UnauthorizedException("Invalid username or password")
+            }
 
         if (!PasswordUtils.verifyPassword(password, user[Users.passwordHash])) {
+            log.warn("Login failed: wrong password (userId={}, ip={})", user[Users.id], ipAddress)
             throw UnauthorizedException("Invalid username or password")
         }
 
@@ -110,6 +129,13 @@ class AuthService(
                 TokenClaim("username", user[Users.username]),
             )
 
+        log.info(
+            "Login success (userId={}, sessionId={}, device={}, ip={})",
+            user[Users.id],
+            session.id,
+            deviceInfo,
+            ipAddress,
+        )
         return AuthResponse(
             accessToken = accessToken,
             refreshToken = refreshToken,
@@ -124,7 +150,10 @@ class AuthService(
         val user =
             transaction {
                 Users.selectAll().where { Users.id eq session.userId }.singleOrNull()
-            } ?: throw UnauthorizedException("User not found")
+            } ?: run {
+                log.warn("Token refresh failed: user not found (userId={})", session.userId)
+                throw UnauthorizedException("User not found")
+            }
 
         val accessToken =
             tokenService.generateAccessToken(

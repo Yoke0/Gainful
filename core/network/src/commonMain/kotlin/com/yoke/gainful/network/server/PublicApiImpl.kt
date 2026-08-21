@@ -8,14 +8,14 @@ import com.yoke.gainful.api.LoginRequest
 import com.yoke.gainful.api.RefreshTokenRequest
 import com.yoke.gainful.api.RefreshTokenResponse
 import com.yoke.gainful.api.RegisterRequest
-import com.yoke.gainful.api.USERS_SESSIONS
 import com.yoke.gainful.ksafe.SecureTokenStorage
+import com.yoke.gainful.network.exception.RefreshTokenExpiredException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 
 internal class PublicApiImpl(
@@ -43,17 +43,23 @@ internal class PublicApiImpl(
     }
 
     override suspend fun refreshToken(refreshToken: String): RefreshTokenResponse {
-        val resp: RefreshTokenResponse =
+        val resp =
             client.post(AUTH_REFRESH) {
                 contentType(ContentType.Application.Json)
                 setBody(RefreshTokenRequest(refreshToken))
-            }.body()
-        secureTokenStorage.saveTokens(resp.accessToken, refreshToken)
-        return resp
+            }
+        if (resp.status == HttpStatusCode.Unauthorized) {
+            // Refresh token is expired/revoked/invalid — session cannot be renewed.
+            secureTokenStorage.clearTokens()
+            throw RefreshTokenExpiredException()
+        }
+        val body: RefreshTokenResponse = resp.body()
+        secureTokenStorage.saveTokens(body.accessToken, refreshToken)
+        return body
     }
 
     override suspend fun logout() {
-        runCatching { client.delete(USERS_SESSIONS) }
+        // Local logout only — server-side session revocation happens via the authenticated client.
         secureTokenStorage.clearTokens()
     }
 }

@@ -3,6 +3,7 @@ package com.yoke.gainful.sync
 import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.api.TransactionResponse
 import com.yoke.gainful.data.repository.AssetRepository
+import com.yoke.gainful.data.repository.AuthRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
 import com.yoke.gainful.data.repository.TransactionRepository
 import com.yoke.gainful.datastore.SyncDataSource
@@ -10,6 +11,7 @@ import com.yoke.gainful.datastore.UserDataSource
 import com.yoke.gainful.domain.usecase.asset.SearchAssetsUseCase
 import com.yoke.gainful.model.Transaction
 import com.yoke.gainful.model.TransactionType
+import com.yoke.gainful.network.exception.RefreshTokenExpiredException
 import com.yoke.gainful.network.server.TransactionApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +35,7 @@ class TransactionSyncService(
     private val syncDataSource: SyncDataSource,
     private val assetRepository: AssetRepository,
     private val searchAssetsUseCase: SearchAssetsUseCase,
+    private val authRepository: AuthRepository,
 ) {
     private var syncJob: Job? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -93,6 +96,10 @@ class TransactionSyncService(
             processSyncQueue()
 
             println("TransactionSync: Sync completed successfully")
+        } catch (e: RefreshTokenExpiredException) {
+            // Session can no longer be renewed — surface it so the app redirects to login.
+            println("TransactionSync: Session expired, requesting re-login: ${e.message}")
+            authRepository.notifySessionExpired()
         } catch (e: Exception) {
             println("TransactionSync: Sync failed: ${e.message}")
         }

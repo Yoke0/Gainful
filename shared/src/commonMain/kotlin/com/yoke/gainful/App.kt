@@ -86,6 +86,14 @@ fun App(onTitleReady: (String) -> Unit = {}) {
                     var showSplash by rememberSaveable { mutableStateOf(true) }
                     var navigateToLoginWithUsername by remember { mutableStateOf<String?>(null) }
 
+                    // Redirect to login whenever the session can no longer be renewed
+                    // (refresh token expired/revoked), including mid-session detection.
+                    LaunchedEffect(Unit) {
+                        authRepository.sessionExpired.collect { username ->
+                            navigateToLoginWithUsername = username
+                        }
+                    }
+
                     val userState by userDataSource.userState.collectAsState(initial = UserState())
 
                     LaunchedEffect(userState.isLoggedIn) {

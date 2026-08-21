@@ -52,6 +52,7 @@ fun Application.configureStatusPages() {
             call.respond(HttpStatusCode.PayloadTooLarge, ErrorResponse("PAYLOAD_TOO_LARGE", cause.message ?: "File too large"))
         }
         exception<Throwable> { call, cause ->
+            call.application.environment.log.error("Unhandled exception: {}", cause.message, cause)
             call.respond(HttpStatusCode.InternalServerError, ErrorResponse("INTERNAL_ERROR", cause.message ?: "Internal server error"))
         }
     }

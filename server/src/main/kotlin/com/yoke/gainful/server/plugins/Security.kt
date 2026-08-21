@@ -30,10 +30,18 @@ fun Application.configureSecurity(config: TokenConfig) {
                 if (!credential.payload.audience.contains(config.audience)) {
                     null
                 } else {
-                    val userId = Uuid.parse(credential.payload.subject)
-                    val sessionId = Uuid.parse(credential.payload.getClaim("sessionId").asString())
+                    val subject = credential.payload.subject
+                    val sessionId = credential.payload.getClaim("sessionId").asString()
                     val username = credential.payload.getClaim("username").asString()
-                    UserPrincipal(userId, sessionId, username)
+                    if (subject == null || sessionId == null || username == null) {
+                        null
+                    } else {
+                        try {
+                            UserPrincipal(Uuid.parse(subject), Uuid.parse(sessionId), username)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
                 }
             }
 

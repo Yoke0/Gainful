@@ -18,7 +18,7 @@ fun serverModule(config: AppConfig) =
 
         single { AuthService(get(), get(), get()) }
         single { UserService() }
-        single { SessionService() }
+        single { SessionService(get()) }
         single { TransactionService() }
         single { AvatarService(get()) }
     }

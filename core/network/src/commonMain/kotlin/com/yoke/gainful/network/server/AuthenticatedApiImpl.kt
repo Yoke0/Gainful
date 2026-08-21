@@ -3,10 +3,13 @@ package com.yoke.gainful.network.server
 import com.yoke.gainful.api.AvatarResponse
 import com.yoke.gainful.api.USERS_AVATAR
 import com.yoke.gainful.api.USERS_ME
+import com.yoke.gainful.api.USERS_SESSIONS
 import com.yoke.gainful.api.UpdateProfileRequest
 import com.yoke.gainful.api.UserResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.clearAuthTokens
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.FormPart
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -51,5 +54,15 @@ internal class AuthenticatedApiImpl(
                 formData = formParts,
             ).body()
         return resp.avatarUrl
+    }
+
+    override suspend fun logout() {
+        // Revokes the current server session. The Auth plugin attaches (and refreshes if needed)
+        // the bearer token, so this works even when the access token has already expired.
+        client.delete(USERS_SESSIONS)
+    }
+
+    override suspend fun clearCachedTokens() {
+        client.clearAuthTokens()
     }
 }

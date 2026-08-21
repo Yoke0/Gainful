@@ -23,4 +23,10 @@ interface AuthenticatedApi {
     suspend fun updateProfile(request: UpdateProfileRequest): UserResponse
 
     suspend fun uploadAvatar(imageBytes: ByteArray, fileName: String): String
+
+    /** Revokes the current session on the server (requires valid bearer credentials). */
+    suspend fun logout()
+
+    /** Clears tokens cached in-memory by the auth client, forcing a fresh read from storage. */
+    suspend fun clearCachedTokens()
 }

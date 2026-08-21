@@ -75,6 +75,7 @@ val networkModule =
                             BearerTokens(newAuth.accessToken, refreshToken)
                         }
                         sendWithoutRequest { true }
+                        nonCancellableRefresh = true
                     }
                 }
                 defaultRequest {
