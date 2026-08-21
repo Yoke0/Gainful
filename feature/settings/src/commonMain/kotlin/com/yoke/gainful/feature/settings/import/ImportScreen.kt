@@ -65,9 +65,11 @@ import gainful.feature.settings.generated.resources.import_confirm_duplicate_mes
 import gainful.feature.settings.generated.resources.import_confirm_title
 import gainful.feature.settings.generated.resources.import_dialog_title
 import gainful.feature.settings.generated.resources.import_error_format
+import gainful.feature.settings.generated.resources.import_error_headers
 import gainful.feature.settings.generated.resources.import_file_types
 import gainful.feature.settings.generated.resources.import_loading
 import gainful.feature.settings.generated.resources.import_stat_duplicate
+import gainful.feature.settings.generated.resources.import_stat_invalid
 import gainful.feature.settings.generated.resources.import_stat_total
 import gainful.feature.settings.generated.resources.import_stat_valid
 import gainful.feature.settings.generated.resources.import_upload_hint
@@ -103,12 +105,12 @@ fun ImportScreen(
             if ((uiState.preview?.duplicateCount ?: 0) > 0) {
                 viewModel.onIntent(ImportIntent.ShowDuplicateConfirm)
             } else {
-                viewModel.onIntent(ImportIntent.ConfirmImport(csvConfig))
+                viewModel.onIntent(ImportIntent.ConfirmImport)
                 onBack()
             }
         },
         onConfirmDuplicate = {
-            viewModel.onIntent(ImportIntent.ConfirmImport(csvConfig))
+            viewModel.onIntent(ImportIntent.ConfirmImport)
             onBack()
         },
         onDeleteItem = { index ->
@@ -184,6 +186,15 @@ private fun ImportScreen(
                 )
             }
 
+            if (uiState.hasMissingColumnsError) {
+                Text(
+                    text = stringResource(Res.string.import_error_headers, uiState.missingColumns.joinToString("、")),
+                    fontSize = 12.sp,
+                    color = GainRed,
+                    lineHeight = 16.sp,
+                )
+            }
+
             uiState.preview?.let { preview ->
                 ImportPreviewContent(
                     preview = preview,
@@ -236,6 +247,11 @@ private fun ImportPreviewContent(
                 label = stringResource(Res.string.import_stat_duplicate),
                 modifier = Modifier.weight(1f),
             )
+            StatBox(
+                value = "${preview.invalidCount}",
+                label = stringResource(Res.string.import_stat_invalid),
+                modifier = Modifier.weight(1f),
+            )
         }
 
         Column(
@@ -255,10 +271,13 @@ private fun ImportPreviewContent(
                     items = displayItems,
                     key = { index, _ -> index },
                 ) { index, item ->
+                    if (index in preview.deletedIndices) return@itemsIndexed
                     val isDuplicate = index in preview.duplicateIndices
+                    val isInvalid = index in preview.invalidIndices
                     TransactionCard(
                         item = item,
                         isDuplicate = isDuplicate,
+                        isInvalid = isInvalid,
                         onDelete = { onDeleteItem(index) },
                         modifier = Modifier.padding(horizontal = 0.dp),
                     )

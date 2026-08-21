@@ -15,7 +15,7 @@ sealed interface ImportIntent {
 
     data class DeleteItem(val index: Int) : ImportIntent
 
-    data class ConfirmImport(val csvConfig: CsvConfig) : ImportIntent
+    data object ConfirmImport : ImportIntent
 
     data object Reset : ImportIntent
 
