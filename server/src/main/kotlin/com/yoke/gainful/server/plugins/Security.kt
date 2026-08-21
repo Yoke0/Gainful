@@ -3,12 +3,14 @@ package com.yoke.gainful.server.plugins
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.yoke.gainful.server.security.token.TokenConfig
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.Principal
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import kotlin.uuid.Uuid
 
@@ -46,6 +48,12 @@ fun Application.configureSecurity(config: TokenConfig) {
             }
 
             challenge { _, _ ->
+                // The WWW-Authenticate: Bearer header is required by Ktor client's Auth plugin
+                // to trigger automatic token refresh on 401. Without it, clients never refresh.
+                call.response.header(
+                    HttpHeaders.WWWAuthenticate,
+                    "Bearer realm=\"${config.realm}\"",
+                )
                 call.respond(HttpStatusCode.Unauthorized, ErrorResponse("UNAUTHORIZED", "Invalid or expired token"))
             }
         }

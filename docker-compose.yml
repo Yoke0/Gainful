@@ -14,6 +14,9 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
+      args:
+        VERSION: ${APP_VERSION:-latest}
+    image: gainful-server:${APP_VERSION:-latest}
     ports:
       - "8081:8080"
     environment:

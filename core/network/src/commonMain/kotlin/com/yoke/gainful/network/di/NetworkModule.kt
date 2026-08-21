@@ -70,7 +70,14 @@ val networkModule =
                             BearerTokens(accessToken, secureTokenStorage.refreshToken ?: "")
                         }
                         refreshTokens {
-                            val refreshToken = oldTokens?.refreshToken ?: secureTokenStorage.refreshToken ?: return@refreshTokens null
+                            // Never bail out silently: even when the stored refresh token is
+                            // missing (defaults to ""), keep flowing so the refresh call fails
+                            // server-side and RefreshTokenExpiredException propagates to the
+                            // caller, which can then surface an explicit session-expired state
+                            // (e.g. login screen). Returning null here would pass the bare 401
+                            // back and the app would silently keep retrying instead of telling
+                            // the user to log in again.
+                            val refreshToken = oldTokens?.refreshToken ?: secureTokenStorage.refreshToken ?: ""
                             val newAuth = publicApi.refreshToken(refreshToken)
                             BearerTokens(newAuth.accessToken, refreshToken)
                         }
