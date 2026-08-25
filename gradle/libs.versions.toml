@@ -133,6 +133,13 @@ wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire"
 ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor" }
 ktor-server-openapi = { module = "io.ktor:ktor-server-openapi", version.ref = "ktor" }
 
+# Build-logic plugins (used by build-logic only)
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composeMultiplatform" }
+compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin", version.ref = "kotlin" }
+kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
@@ -146,3 +153,9 @@ androidx-room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+
+# Convention plugins (build-logic)
+gainful-kmp-library = { id = "gainful.kmp.library", version = "unspecified" }
+gainful-kmp-android-library = { id = "gainful.kmp.android.library", version = "unspecified" }
+gainful-kmp-compose-library = { id = "gainful.kmp.compose.library", version = "unspecified" }
+gainful-feature-library = { id = "gainful.feature.library", version = "unspecified" }

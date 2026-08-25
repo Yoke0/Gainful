@@ -1,6 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidMultiplatformLibrary)
+    alias(libs.plugins.gainful.kmp.android.library)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
@@ -13,14 +12,7 @@ room {
 kotlin {
     android {
         namespace = "com.yoke.gainful.database"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
     }
-    jvm()
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    )
 
     sourceSets {
         commonMain.dependencies {
