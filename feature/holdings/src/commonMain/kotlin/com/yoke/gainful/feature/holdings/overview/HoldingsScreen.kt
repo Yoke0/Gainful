@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -44,6 +43,7 @@ import com.yoke.gainful.model.StockTrend
 import com.yoke.gainful.ui.LineChart
 import com.yoke.gainful.ui.LocalSnackbarHostState
 import com.yoke.gainful.ui.MarketCapTreemap
+import com.yoke.gainful.ui.ObserveSnackbarEvents
 import com.yoke.gainful.ui.TreemapItem
 import com.yoke.gainful.ui.gainColor
 import com.yoke.gainful.ui.lossColor
@@ -71,14 +71,11 @@ fun HoldingsScreen(
     val snackbarHostState = LocalSnackbarHostState.current
 
     val loadFailedMessage = stringResource(Res.string.load_failed)
-
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            if (snackbarHostState.currentSnackbarData == null) {
-                snackbarHostState.showSnackbar(event.message ?: loadFailedMessage, duration = event.duration)
-            }
-        }
-    }
+    ObserveSnackbarEvents(
+        events = viewModel.events,
+        snackbarHostState = snackbarHostState,
+        fallbackMessage = loadFailedMessage,
+    )
 
     HoldingsScreen(
         holdings = uiState.holdings,
