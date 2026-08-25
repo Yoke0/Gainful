@@ -21,6 +21,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -39,6 +42,9 @@ class TransactionSyncService(
 ) {
     private var syncJob: Job? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    private val _syncErrors = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val syncErrors: SharedFlow<String> = _syncErrors.asSharedFlow()
 
     fun startPeriodicSync() {
         syncJob?.cancel()
@@ -98,10 +104,10 @@ class TransactionSyncService(
             println("TransactionSync: Sync completed successfully")
         } catch (e: RefreshTokenExpiredException) {
             // Session can no longer be renewed — surface it so the app redirects to login.
-            println("TransactionSync: Session expired, requesting re-login: ${e.message}")
+            _syncErrors.tryEmit("Session expired")
             authRepository.notifySessionExpired()
         } catch (e: Exception) {
-            println("TransactionSync: Sync failed: ${e.message}")
+            _syncErrors.tryEmit(e.message ?: "Sync failed")
         }
     }
 

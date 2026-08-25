@@ -173,8 +173,8 @@ class DashboardViewModel(
                     _uiState.value = state
                     syncWidgetDataIfNeeded()
                 }
-            } catch (_: Exception) {
-                _events.send(SnackbarEvent.Error())
+            } catch (e: Exception) {
+                _events.send(SnackbarEvent.Error(message = e.message))
             }
         }
     }

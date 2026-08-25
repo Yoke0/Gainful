@@ -55,7 +55,7 @@ class HoldingsViewModel(
                 }
             }.onFailure {
                 _uiState.update { it.copy(isLoading = false) }
-                _events.send(SnackbarEvent.Error())
+                _events.send(SnackbarEvent.Error(message = it.message))
             }
         }
         viewModelScope.launch {

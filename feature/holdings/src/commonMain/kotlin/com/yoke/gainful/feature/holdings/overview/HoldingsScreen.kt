@@ -75,7 +75,7 @@ fun HoldingsScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             if (snackbarHostState.currentSnackbarData == null) {
-                snackbarHostState.showSnackbar(loadFailedMessage, duration = event.duration)
+                snackbarHostState.showSnackbar(event.message ?: loadFailedMessage, duration = event.duration)
             }
         }
     }

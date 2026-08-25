@@ -312,7 +312,7 @@ class AddTransactionViewModel(
                 addTransactionUseCase(transaction)
                 _uiState.update { it.copy(saveSuccess = true) }
             }.onFailure {
-                _events.send(SnackbarEvent.Error())
+                _events.send(SnackbarEvent.Error(message = it.message))
             }
         }
     }
