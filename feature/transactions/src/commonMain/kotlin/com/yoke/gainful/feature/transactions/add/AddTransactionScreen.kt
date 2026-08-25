@@ -128,7 +128,7 @@ fun AddTransactionScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             if (snackbarHostState.currentSnackbarData == null) {
-                snackbarHostState.showSnackbar(saveFailedMessage, duration = event.duration)
+                snackbarHostState.showSnackbar(event.message ?: saveFailedMessage, duration = event.duration)
             }
         }
     }

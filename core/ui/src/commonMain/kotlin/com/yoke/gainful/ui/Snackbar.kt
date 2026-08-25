@@ -22,8 +22,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 
 sealed interface SnackbarEvent {
     val duration: SnackbarDuration
+    val message: String? get() = null
 
     data class Error(
+        override val message: String? = null,
         override val duration: SnackbarDuration = SnackbarDuration.Short,
     ) : SnackbarEvent
 
