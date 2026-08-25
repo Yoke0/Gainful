@@ -74,7 +74,7 @@ class KLineFetchService(
             result[assetId] =
                 AssetInfo(
                     assetId = assetId,
-                    firstBuyDate = firstBuyDates[assetId]!!,
+                    firstBuyDate = firstBuyDates.getValue(assetId),
                     endDate = endDate,
                 )
         }

@@ -34,8 +34,11 @@ fun Application.configureRouting() {
         staticFiles("/avatars", File(uploadConfig.dir))
 
         get("/openapi/documentation.yaml") {
+            val resourceText =
+                this::class.java.classLoader.getResource("openapi/documentation.yaml")?.readText()
+                    ?: error("openapi/documentation.yaml not found in classpath")
             call.respondText(
-                this::class.java.classLoader.getResource("openapi/documentation.yaml")!!.readText(),
+                resourceText,
                 ContentType("text", "yaml"),
             )
         }

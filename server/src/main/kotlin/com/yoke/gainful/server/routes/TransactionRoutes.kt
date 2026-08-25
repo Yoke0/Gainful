@@ -3,6 +3,7 @@ package com.yoke.gainful.server.routes
 import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.api.TRANSACTIONS
 import com.yoke.gainful.api.UpdateTransactionRequest
+import com.yoke.gainful.server.plugins.UnauthorizedException
 import com.yoke.gainful.server.plugins.UserPrincipal
 import com.yoke.gainful.server.plugins.ValidationException
 import com.yoke.gainful.server.service.TransactionService
@@ -24,7 +25,7 @@ fun Route.transactionRoutes() {
 
     authenticate("auth-jwt") {
         get(TRANSACTIONS) {
-            val principal = call.principal<UserPrincipal>()!!
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
             val since = call.request.queryParameters["since"]?.toLongOrNull()
             val transactions =
                 if (since != null) {
@@ -36,8 +37,8 @@ fun Route.transactionRoutes() {
         }
 
         get("$TRANSACTIONS/{id}") {
-            val principal = call.principal<UserPrincipal>()!!
-            val id = Uuid.parse(call.parameters["id"]!!)
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
+            val id = Uuid.parse(call.parameters["id"] ?: throw ValidationException("Missing transaction id"))
             val transaction = transactionService.getTransactionById(principal.userId, id)
             if (transaction != null) {
                 call.respond(transaction)
@@ -47,7 +48,7 @@ fun Route.transactionRoutes() {
         }
 
         post(TRANSACTIONS) {
-            val principal = call.principal<UserPrincipal>()!!
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
             val request = call.receive<CreateTransactionRequest>()
 
             if (request.assetCode.isBlank()) throw ValidationException("Asset code is required")
@@ -58,16 +59,16 @@ fun Route.transactionRoutes() {
         }
 
         put("$TRANSACTIONS/{id}") {
-            val principal = call.principal<UserPrincipal>()!!
-            val id = Uuid.parse(call.parameters["id"]!!)
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
+            val id = Uuid.parse(call.parameters["id"] ?: throw ValidationException("Missing transaction id"))
             val request = call.receive<UpdateTransactionRequest>()
             val transaction = transactionService.updateTransaction(principal.userId, id, request)
             call.respond(transaction)
         }
 
         delete("$TRANSACTIONS/{id}") {
-            val principal = call.principal<UserPrincipal>()!!
-            val id = Uuid.parse(call.parameters["id"]!!)
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
+            val id = Uuid.parse(call.parameters["id"] ?: throw ValidationException("Missing transaction id"))
             transactionService.deleteTransaction(principal.userId, id)
             call.respond(mapOf("message" to "Transaction deleted"))
         }
