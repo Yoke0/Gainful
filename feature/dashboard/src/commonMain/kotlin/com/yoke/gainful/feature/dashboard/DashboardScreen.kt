@@ -119,6 +119,7 @@ import gainful.feature.dashboard.generated.resources.pnl_period_day
 import gainful.feature.dashboard.generated.resources.pnl_period_month
 import gainful.feature.dashboard.generated.resources.pnl_period_week
 import gainful.feature.dashboard.generated.resources.pnl_period_year
+import gainful.feature.dashboard.generated.resources.pnl_total_period_label
 import gainful.feature.dashboard.generated.resources.pnl_week_cell_label
 import gainful.feature.dashboard.generated.resources.pnl_year_cell_first_label
 import gainful.feature.dashboard.generated.resources.pnl_year_cell_label
@@ -323,7 +324,12 @@ private fun PnlOverviewCard(
         Spacer(modifier = Modifier.height(12.dp))
         if (uiState.selectedPnlPeriod == PnlPeriodType.YEAR) {
             PnlPeriodNavigation(
-                periodLabel = "${uiState.firstTransactionYear}.${uiState.firstTransactionMonth.toString().padStart(2, '0')}至今",
+                periodLabel =
+                    stringResource(
+                        Res.string.pnl_total_period_label,
+                        uiState.firstTransactionYear,
+                        uiState.firstTransactionMonth,
+                    ),
                 showNavigation = false,
                 onNavigate = { },
             )

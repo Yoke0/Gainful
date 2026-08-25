@@ -40,7 +40,7 @@
     <string name="pnl_year_cell_label">%1$d</string>
     <string name="pnl_year_cell_first_label">%1$d\nFrom %2$d</string>
     <string name="pnl_total_label">All</string>
-    <string name="pnl_total_period_label">%1$d.%2$d - Now</string>
+    <string name="pnl_total_period_label">%1$d.%2$02d - Now</string>
     <string name="weekday_sun">Sun</string>
     <string name="weekday_mon">Mon</string>
     <string name="weekday_tue">Tue</string>

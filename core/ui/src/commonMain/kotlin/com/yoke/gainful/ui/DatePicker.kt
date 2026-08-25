@@ -71,6 +71,7 @@ import gainful.core.ui.generated.resources.month_6
 import gainful.core.ui.generated.resources.month_7
 import gainful.core.ui.generated.resources.month_8
 import gainful.core.ui.generated.resources.month_9
+import gainful.core.ui.generated.resources.not_selected
 import gainful.core.ui.generated.resources.select_date
 import gainful.core.ui.generated.resources.today
 import gainful.core.ui.generated.resources.weekday_friday
@@ -396,7 +397,7 @@ fun DatePickerPreview() {
                     val d = Instant.fromEpochMilliseconds(dateMillis).toLocalDateTime(TimeZone.currentSystemDefault()).date
                     "${d.year}-${d.month.number.pad2()}-${d.day.pad2()}"
                 } else {
-                    "未选择"
+                    stringResource(Res.string.not_selected)
                 }
             Text(
                 text = "Selected: $dateStr",

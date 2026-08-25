@@ -194,12 +194,13 @@ fun SettingsScreen(
         )
     }
 
-    if (uiState.showExportResult && uiState.exportResult != null) {
-        val exportResult = uiState.exportResult
-        ExportResultDialog(
-            fileName = exportResult.fileName,
-            onDone = { viewModel.onIntent(SettingsIntent.DismissExportResult) },
-        )
+    if (uiState.showExportResult) {
+        uiState.exportResult?.let { exportResult ->
+            ExportResultDialog(
+                fileName = exportResult.fileName,
+                onDone = { viewModel.onIntent(SettingsIntent.DismissExportResult) },
+            )
+        }
     }
 }
 

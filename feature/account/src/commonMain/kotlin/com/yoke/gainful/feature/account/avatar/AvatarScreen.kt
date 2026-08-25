@@ -262,8 +262,7 @@ fun AvatarScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Error message
-            if (uiState.error != null) {
-                val error = uiState.error
+            uiState.error?.let { error ->
                 Text(
                     text =
                         when (error) {
