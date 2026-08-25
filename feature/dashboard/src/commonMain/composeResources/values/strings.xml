@@ -40,7 +40,7 @@
     <string name="pnl_year_cell_label">%1$d</string>
     <string name="pnl_year_cell_first_label">%1$d\n%2$d月起</string>
     <string name="pnl_total_label">全部</string>
-    <string name="pnl_total_period_label">%1$d.%2$d至今</string>
+    <string name="pnl_total_period_label">%1$d.%2$02d至今</string>
     <string name="weekday_sun">日</string>
     <string name="weekday_mon">一</string>
     <string name="weekday_tue">二</string>

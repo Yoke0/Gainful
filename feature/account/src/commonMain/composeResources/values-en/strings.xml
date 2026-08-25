@@ -13,6 +13,7 @@
     <string name="login_register_link">Sign up</string>
     <string name="login_error_empty">Please enter username and password</string>
     <string name="login_error_invalid">Invalid username or password</string>
+    <string name="login_error_session_expired">Session expired, please login again</string>
 
     <!-- Register -->
     <string name="register_title">Register</string>

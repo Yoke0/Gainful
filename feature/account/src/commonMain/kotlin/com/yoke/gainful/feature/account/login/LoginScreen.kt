@@ -42,6 +42,7 @@ import gainful.core.designsystem.generated.resources.ic_user
 import gainful.feature.account.generated.resources.Res
 import gainful.feature.account.generated.resources.login_error_empty
 import gainful.feature.account.generated.resources.login_error_invalid
+import gainful.feature.account.generated.resources.login_error_session_expired
 import gainful.feature.account.generated.resources.login_hero_subtitle
 import gainful.feature.account.generated.resources.login_hero_title
 import gainful.feature.account.generated.resources.login_loading
@@ -166,7 +167,7 @@ private fun LoginScreen(
                         when (uiState.error) {
                             LoginError.EMPTY_FIELDS -> stringResource(Res.string.login_error_empty)
                             LoginError.INVALID_CREDENTIALS -> stringResource(Res.string.login_error_invalid)
-                            LoginError.SESSION_EXPIRED -> "登录已过期，请重新登录"
+                            LoginError.SESSION_EXPIRED -> stringResource(Res.string.login_error_session_expired)
                         },
                     fontSize = 13.sp,
                     color = Color(0xFFE74C3C),
