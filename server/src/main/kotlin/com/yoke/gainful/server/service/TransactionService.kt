@@ -18,6 +18,7 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import java.lang.IllegalStateException
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -41,7 +42,8 @@ class TransactionService {
                 }.firstOrNull()
             }
         if (existing != null) {
-            return getTransactionById(userId, existing[Transactions.id])!!
+            return getTransactionById(userId, existing[Transactions.id])
+                ?: throw IllegalStateException("Duplicate transaction found but cannot be retrieved")
         }
 
         val id = Uuid.random()
@@ -59,7 +61,8 @@ class TransactionService {
             }
         }
 
-        return getTransactionById(userId, id)!!
+        return getTransactionById(userId, id)
+            ?: throw IllegalStateException("Transaction not found after insert: id=$id")
     }
 
     fun getTransactions(userId: Uuid): List<TransactionResponse> {
@@ -126,7 +129,8 @@ class TransactionService {
             }
         }
 
-        return getTransactionById(userId, transactionId)!!
+        return getTransactionById(userId, transactionId)
+            ?: throw IllegalStateException("Transaction not found after update: id=$transactionId")
     }
 
     fun deleteTransaction(userId: Uuid, transactionId: Uuid) {

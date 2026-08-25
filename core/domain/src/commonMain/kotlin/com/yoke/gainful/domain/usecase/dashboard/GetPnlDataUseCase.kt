@@ -402,7 +402,7 @@ class GetPnlDataUseCase(
         var currentDateIter = firstDate
         while (currentDateIter <= today) {
             if (startOfDayPositions.containsKey(currentDateIter)) {
-                lastPosition = startOfDayPositions[currentDateIter]!!.toMutableMap()
+                lastPosition = startOfDayPositions.getValue(currentDateIter).toMutableMap()
                 sortedTransactions
                     .filter { it.tradeDate.toLocalDate() == currentDateIter }
                     .forEach { tx ->

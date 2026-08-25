@@ -125,7 +125,7 @@ class ImportViewModel(
             }
         }
 
-        val assetMap = dbAssets + searchResults.filterValues { it != null }.mapValues { it.value!! }
+        val assetMap = dbAssets + searchResults.mapNotNull { (code, asset) -> asset?.let { code to it } }.toMap()
 
         for ((index, item) in displayItems.withIndex()) {
             if (item.name.isNotBlank() && item.pinYin.isNotBlank()) continue

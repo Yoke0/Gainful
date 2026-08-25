@@ -263,9 +263,10 @@ fun AvatarScreen(
 
             // Error message
             if (uiState.error != null) {
+                val error = uiState.error
                 Text(
                     text =
-                        when (uiState.error!!) {
+                        when (error) {
                             AvatarError.IMAGE_PROCESS -> stringResource(Res.string.avatar_error_image_process)
                             AvatarError.SAVE -> stringResource(Res.string.avatar_error_save)
                             AvatarError.UPLOAD -> stringResource(Res.string.avatar_error_upload)

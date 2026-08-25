@@ -4,7 +4,9 @@ import com.yoke.gainful.api.USERS_AVATAR
 import com.yoke.gainful.api.USERS_ME
 import com.yoke.gainful.api.USERS_SESSIONS
 import com.yoke.gainful.api.UpdateProfileRequest
+import com.yoke.gainful.server.plugins.UnauthorizedException
 import com.yoke.gainful.server.plugins.UserPrincipal
+import com.yoke.gainful.server.plugins.ValidationException
 import com.yoke.gainful.server.service.AvatarService
 import com.yoke.gainful.server.service.SessionService
 import com.yoke.gainful.server.service.UserService
@@ -28,40 +30,40 @@ fun Route.userRoutes() {
 
     authenticate("auth-jwt") {
         get(USERS_ME) {
-            val principal = call.principal<UserPrincipal>()!!
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
             val user = userService.getProfile(principal.userId)
             call.respond(user)
         }
 
         put(USERS_ME) {
-            val principal = call.principal<UserPrincipal>()!!
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
             val request = call.receive<UpdateProfileRequest>()
             val user = userService.updateProfile(principal.userId, request)
             call.respond(user)
         }
 
         post(USERS_AVATAR) {
-            val principal = call.principal<UserPrincipal>()!!
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
             val multipart = call.receiveMultipart()
             val avatarUrl = avatarService.uploadAvatar(principal.userId, multipart)
             call.respond(mapOf("avatarUrl" to avatarUrl))
         }
 
         get(USERS_SESSIONS) {
-            val principal = call.principal<UserPrincipal>()!!
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
             val sessions = sessionService.getSessions(principal.userId)
             call.respond(sessions)
         }
 
         delete("$USERS_SESSIONS/{sessionId}") {
-            val principal = call.principal<UserPrincipal>()!!
-            val sessionId = Uuid.parse(call.parameters["sessionId"]!!)
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
+            val sessionId = Uuid.parse(call.parameters["sessionId"] ?: throw ValidationException("Missing session id"))
             sessionService.revokeSession(principal.userId, sessionId)
             call.respond(mapOf("message" to "Session revoked"))
         }
 
         delete(USERS_SESSIONS) {
-            val principal = call.principal<UserPrincipal>()!!
+            val principal = call.principal<UserPrincipal>() ?: throw UnauthorizedException("Not authenticated")
             sessionService.revokeSession(principal.userId, principal.sessionId)
             call.respond(mapOf("message" to "Session revoked"))
         }
