@@ -9,6 +9,7 @@ import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,6 +19,7 @@ import com.yoke.gainful.designsystem.theme.Card
 import com.yoke.gainful.designsystem.theme.GainRed
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 
 sealed interface SnackbarEvent {
@@ -63,4 +65,22 @@ fun GainfulSnackbar(snackbarData: SnackbarData) {
         contentColor = TextPrimary,
         actionColor = GainRed,
     )
+}
+
+@Composable
+fun ObserveSnackbarEvents(
+    events: Flow<SnackbarEvent>,
+    snackbarHostState: SnackbarHostState,
+    fallbackMessage: String,
+) {
+    LaunchedEffect(Unit) {
+        events.collect { event ->
+            if (snackbarHostState.currentSnackbarData == null) {
+                snackbarHostState.showSnackbar(
+                    message = event.message ?: fallbackMessage,
+                    duration = event.duration,
+                )
+            }
+        }
+    }
 }

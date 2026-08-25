@@ -272,42 +272,21 @@ class AddTransactionViewModel(
 
         viewModelScope.launch {
             runCatching {
-                if (state.type == TransactionType.DIVIDEND) {
-                    val amount = state.amount.toDoubleOrNull() ?: return@runCatching
-                    val timestamp = Clock.System.now().toEpochMilliseconds()
-                    val id = Uuid.random().toString()
-                    val transaction =
-                        Transaction(
-                            id = id,
-                            assetId = asset.unifiedCode.ifBlank { asset.code },
-                            type = TransactionType.DIVIDEND,
-                            quantity = 0.0,
-                            price = 0.0,
-                            amount = amount,
-                            tradeDate = tradeDateMs,
-                            timestamp = timestamp,
-                        )
-                    addTransactionUseCase(transaction)
-                    _uiState.update { it.copy(saveSuccess = true) }
-                    return@runCatching
-                }
-
+                val isDividend = state.type == TransactionType.DIVIDEND
                 val amount = state.amount.toDoubleOrNull() ?: return@runCatching
-                val price = state.price.toDoubleOrNull() ?: return@runCatching
-                val qty = state.quantity.toDoubleOrNull() ?: return@runCatching
+                val price = if (isDividend) 0.0 else state.price.toDoubleOrNull() ?: return@runCatching
+                val qty = if (isDividend) 0.0 else state.quantity.toDoubleOrNull() ?: return@runCatching
 
-                val timestamp = Clock.System.now().toEpochMilliseconds()
-                val id = Uuid.random().toString()
                 val transaction =
                     Transaction(
-                        id = id,
+                        id = Uuid.random().toString(),
                         assetId = asset.unifiedCode.ifBlank { asset.code },
                         type = state.type,
                         quantity = qty,
                         price = price,
                         amount = amount,
                         tradeDate = tradeDateMs,
-                        timestamp = timestamp,
+                        timestamp = Clock.System.now().toEpochMilliseconds(),
                     )
                 addTransactionUseCase(transaction)
                 _uiState.update { it.copy(saveSuccess = true) }
