@@ -2,6 +2,7 @@ package com.yoke.gainful.sync
 
 import com.yoke.gainful.api.CreateTransactionRequest
 import com.yoke.gainful.api.TransactionResponse
+import com.yoke.gainful.common.Logger
 import com.yoke.gainful.data.repository.AssetRepository
 import com.yoke.gainful.data.repository.AuthRepository
 import com.yoke.gainful.data.repository.SyncQueueRepository
@@ -66,7 +67,7 @@ class TransactionSyncService(
         val state = userDataSource.userState.first()
         if (!state.isLoggedIn) return
 
-        println("TransactionSync: Starting sync...")
+        Logger.info(TAG, "Starting sync")
         try {
             // 1. PULL — fetch from server and merge into local DB
             val lastSyncTime = syncDataSource.getLastTransactionSyncTime()
@@ -76,7 +77,7 @@ class TransactionSyncService(
                 } else {
                     transactionApi.getTransactions()
                 }
-            println("TransactionSync: Got ${serverTransactions.size} transactions from server, since=$lastSyncTime")
+            Logger.info(TAG, "Got ${serverTransactions.size} transactions from server, since=$lastSyncTime")
 
             val toMerge =
                 serverTransactions
@@ -101,7 +102,7 @@ class TransactionSyncService(
             // 2. PUSH — upload pending local operations
             processSyncQueue()
 
-            println("TransactionSync: Sync completed successfully")
+            Logger.info(TAG, "Sync completed")
         } catch (e: RefreshTokenExpiredException) {
             // Session can no longer be renewed — surface it so the app redirects to login.
             _syncErrors.tryEmit("Session expired")
@@ -184,10 +185,11 @@ class TransactionSyncService(
         searchResults.values.filterNotNull().forEach { asset ->
             assetRepository.insertAsset(asset)
         }
-        println("TransactionSync: Enriched ${searchResults.values.count { it != null }} assets")
+        Logger.info(TAG, "Enriched ${searchResults.values.count { it != null }} assets")
     }
 
     companion object {
+        private const val TAG = "TransactionSync"
         private const val PERIODIC_SYNC_INTERVAL_MS = 5 * 60 * 1000L // 5 minutes
     }
 }
