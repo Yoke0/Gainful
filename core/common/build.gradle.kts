@@ -43,6 +43,9 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.icu4j)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
     }
 }
 
