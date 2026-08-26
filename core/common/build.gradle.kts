@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidMultiplatformLibrary)
+    alias(libs.plugins.gainful.kmp.android.library)
 }
 
 val versionNameValue = property("VERSION_NAME").toString()
@@ -18,23 +16,6 @@ val localProps =
 val serverBaseUrlValue = localProps.getProperty("SERVER_BASE_URL", "")
 
 kotlin {
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    )
-
-    jvm()
-
-    android {
-        namespace = "com.yoke.gainful.core.common"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
-
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)

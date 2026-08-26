@@ -1,23 +1,9 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.gainful.kmp.android.library)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.androidMultiplatformLibrary)
 }
 
 kotlin {
-    android {
-        namespace = "com.yoke.gainful.core.network"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    )
-
-    jvm()
-
     sourceSets {
         commonMain.dependencies {
             api(projects.api.contract)

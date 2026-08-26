@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.gainful.kmp.library)
     alias(libs.plugins.wire)
 }
 
@@ -8,13 +8,6 @@ wire {
 }
 
 kotlin {
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    )
-
-    jvm()
-
     sourceSets {
         commonMain.dependencies {
             implementation(libs.wire.runtime)

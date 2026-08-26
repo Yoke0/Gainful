@@ -1,15 +1,8 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.gainful.kmp.library)
 }
 
 kotlin {
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64(),
-    )
-
-    jvm()
-
     sourceSets {
         commonMain.dependencies {
             api(projects.api.contract)
