@@ -18,7 +18,6 @@ val serverBaseUrlValue = localProps.getProperty("SERVER_BASE_URL", "")
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
         }
         jvmMain.dependencies {
