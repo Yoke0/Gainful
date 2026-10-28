@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yoke.gainful.common.extensions.formatCompact
 import com.yoke.gainful.common.extensions.formatLocalized
-import com.yoke.gainful.common.extensions.formatLocalizedDate
+import com.yoke.gainful.common.extensions.formatLocalizedDateTime
 import com.yoke.gainful.common.extensions.formatSigned
 import com.yoke.gainful.designsystem.components.BackNavigationIcon
 import com.yoke.gainful.designsystem.components.GainfulScaffold
@@ -58,6 +60,7 @@ import com.yoke.gainful.designsystem.theme.Card
 import com.yoke.gainful.designsystem.theme.Gold
 import com.yoke.gainful.designsystem.theme.GoldDim
 import com.yoke.gainful.designsystem.theme.Surface
+import com.yoke.gainful.designsystem.theme.Surface2
 import com.yoke.gainful.designsystem.theme.TextMuted
 import com.yoke.gainful.designsystem.theme.TextPrimary
 import com.yoke.gainful.designsystem.theme.TextSecondary
@@ -69,12 +72,17 @@ import com.yoke.gainful.ui.GainfulErrorPage
 import com.yoke.gainful.ui.KLineChart
 import com.yoke.gainful.ui.LineChart
 import com.yoke.gainful.ui.gainColor
+import com.yoke.gainful.ui.gainDimColor
 import com.yoke.gainful.ui.lossColor
+import com.yoke.gainful.ui.lossDimColor
 import gainful.core.designsystem.generated.resources.ic_check
 import gainful.feature.holdings.generated.resources.Res
 import gainful.feature.holdings.generated.resources.amplitude
+import gainful.feature.holdings.generated.resources.avoided_loss_per_share
 import gainful.feature.holdings.generated.resources.back_to_holdings
-import gainful.feature.holdings.generated.resources.buy
+import gainful.feature.holdings.generated.resources.buy_badge
+import gainful.feature.holdings.generated.resources.buy_quantity
+import gainful.feature.holdings.generated.resources.cash_dividend
 import gainful.feature.holdings.generated.resources.chart_daily
 import gainful.feature.holdings.generated.resources.chart_min_1
 import gainful.feature.holdings.generated.resources.chart_min_15
@@ -86,12 +94,17 @@ import gainful.feature.holdings.generated.resources.chart_trends
 import gainful.feature.holdings.generated.resources.chart_trends_5d
 import gainful.feature.holdings.generated.resources.chart_weekly
 import gainful.feature.holdings.generated.resources.cost
-import gainful.feature.holdings.generated.resources.dividend
+import gainful.feature.holdings.generated.resources.current_price
+import gainful.feature.holdings.generated.resources.current_price_pnl
+import gainful.feature.holdings.generated.resources.dividend_badge
+import gainful.feature.holdings.generated.resources.dividend_income
 import gainful.feature.holdings.generated.resources.error_desc
 import gainful.feature.holdings.generated.resources.error_title
+import gainful.feature.holdings.generated.resources.execution_price
 import gainful.feature.holdings.generated.resources.high_price
 import gainful.feature.holdings.generated.resources.holding_badge
 import gainful.feature.holdings.generated.resources.holding_quantity
+import gainful.feature.holdings.generated.resources.income_total
 import gainful.feature.holdings.generated.resources.loading_hint
 import gainful.feature.holdings.generated.resources.loading_quote
 import gainful.feature.holdings.generated.resources.low_price
@@ -100,12 +113,13 @@ import gainful.feature.holdings.generated.resources.minutes_suffix
 import gainful.feature.holdings.generated.resources.no_data
 import gainful.feature.holdings.generated.resources.no_trade_records
 import gainful.feature.holdings.generated.resources.open_price
+import gainful.feature.holdings.generated.resources.price_difference_per_share
 import gainful.feature.holdings.generated.resources.profit_loss
 import gainful.feature.holdings.generated.resources.recent_trades
 import gainful.feature.holdings.generated.resources.retry
-import gainful.feature.holdings.generated.resources.sell
+import gainful.feature.holdings.generated.resources.sell_badge
+import gainful.feature.holdings.generated.resources.sell_quantity
 import gainful.feature.holdings.generated.resources.trade_count
-import gainful.feature.holdings.generated.resources.trade_detail
 import gainful.feature.holdings.generated.resources.trend
 import gainful.feature.holdings.generated.resources.turnover
 import gainful.feature.holdings.generated.resources.turnover_rate
@@ -600,12 +614,25 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = stringResource(Res.string.recent_trades),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(3.dp)
+                            .height(14.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Gold),
+                )
+                Text(
+                    text = stringResource(Res.string.recent_trades),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                )
+            }
             Text(
                 text = stringResource(Res.string.trade_count, trades.size),
                 fontSize = 11.sp,
@@ -615,11 +642,11 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
                     Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(GoldDim)
-                        .padding(horizontal = 10.dp, vertical = 2.dp),
+                        .padding(horizontal = 10.dp, vertical = 3.dp),
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         if (trades.isEmpty()) {
             Text(
@@ -632,15 +659,181 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
                         .padding(16.dp),
             )
         } else {
-            trades.forEach { trade ->
-                TradeRow(trade)
-                if (trade != trades.last()) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                trades.forEach { trade ->
+                    TradeItem(trade = trade, currentPrice = uiState.price)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TradeItem(
+    trade: Transaction,
+    currentPrice: Double,
+) {
+    val accentColor =
+        when (trade.type) {
+            TransactionType.BUY -> gainColor
+            TransactionType.SELL -> lossColor
+            TransactionType.DIVIDEND -> Gold
+        }
+    val accentBackground =
+        when (trade.type) {
+            TransactionType.BUY -> gainDimColor
+            TransactionType.SELL -> lossDimColor
+            TransactionType.DIVIDEND -> GoldDim
+        }
+    val badge =
+        when (trade.type) {
+            TransactionType.BUY -> stringResource(Res.string.buy_badge)
+            TransactionType.SELL -> stringResource(Res.string.sell_badge)
+            TransactionType.DIVIDEND -> stringResource(Res.string.dividend_badge)
+        }
+    val title =
+        when (trade.type) {
+            TransactionType.BUY -> stringResource(Res.string.buy_quantity, trade.quantity.toInt())
+            TransactionType.SELL -> stringResource(Res.string.sell_quantity, trade.quantity.toInt())
+            TransactionType.DIVIDEND -> stringResource(Res.string.cash_dividend)
+        }
+    val isDividend = trade.type == TransactionType.DIVIDEND
+    val pnl =
+        when (trade.type) {
+            TransactionType.BUY -> (currentPrice - trade.price) * trade.quantity - trade.fee
+            TransactionType.SELL -> (trade.price - currentPrice) * trade.quantity - trade.fee
+            TransactionType.DIVIDEND -> trade.amount
+        }
+    val pnlColor =
+        when {
+            isDividend -> Gold
+            pnl >= 0 -> gainColor
+            else -> lossColor
+        }
+    val priceDifference =
+        when (trade.type) {
+            TransactionType.BUY -> currentPrice - trade.price
+            TransactionType.SELL -> trade.price - currentPrice
+            TransactionType.DIVIDEND -> 0.0
+        }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .clip(RoundedCornerShape(13.dp))
+                .background(Surface2)
+                .border(1.dp, TextMuted.copy(alpha = 0.55f), RoundedCornerShape(13.dp)),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .align(Alignment.CenterStart)
+                    .fillMaxHeight()
+                    .padding(top = 13.dp, bottom = 12.dp)
+                    .width(3.dp)
+                    .clip(RoundedCornerShape(topEnd = 3.dp, bottomEnd = 3.dp))
+                    .background(accentColor),
+        )
+        Column(modifier = Modifier.padding(start = 16.dp, top = 13.dp, end = 13.dp, bottom = 12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top,
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Box(
                         modifier =
                             Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(Border.copy(alpha = 0.06f)),
+                                .size(35.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(accentBackground),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = badge,
+                            color = accentColor,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                        )
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(
+                            text = title,
+                            color = TextPrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = trade.tradeDate.formatLocalizedDateTime(),
+                            color = TextMuted,
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.Monospace,
+                        )
+                    }
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text =
+                            stringResource(
+                                if (isDividend) Res.string.dividend_income else Res.string.current_price_pnl,
+                            ),
+                        color = TextMuted,
+                        fontSize = 9.sp,
+                    )
+                    Text(
+                        text = pnl.formatSigned(),
+                        color = pnlColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(TextSecondary.copy(alpha = 0.12f)))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (isDividend) {
+                TradeDatum(
+                    label = stringResource(Res.string.income_total),
+                    value = trade.amount.formatSigned(),
+                    valueColor = Gold,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    TradeDatum(
+                        label = stringResource(Res.string.execution_price),
+                        value = "¥${trade.price.formatLocalized()}",
+                        modifier = Modifier.weight(1f),
+                    )
+                    TradeDatumDivider()
+                    TradeDatum(
+                        label = stringResource(Res.string.current_price),
+                        value = "¥${currentPrice.formatLocalized()}",
+                        modifier = Modifier.weight(1f).padding(start = 9.dp),
+                    )
+                    TradeDatumDivider()
+                    TradeDatum(
+                        label =
+                            stringResource(
+                                if (trade.type == TransactionType.SELL) {
+                                    Res.string.avoided_loss_per_share
+                                } else {
+                                    Res.string.price_difference_per_share
+                                },
+                            ),
+                        value = priceDifference.formatSigned(),
+                        valueColor = if (priceDifference >= 0) gainColor else lossColor,
+                        modifier = Modifier.weight(1.05f).padding(start = 9.dp),
                     )
                 }
             }
@@ -649,57 +842,32 @@ private fun TradesCard(uiState: StockDetailUiState.Success) {
 }
 
 @Composable
-private fun TradeRow(trade: Transaction) {
-    val typeLabel =
-        when (trade.type) {
-            TransactionType.BUY -> stringResource(Res.string.buy)
-            TransactionType.SELL -> stringResource(Res.string.sell)
-            TransactionType.DIVIDEND -> stringResource(Res.string.dividend)
-        }
-    val typeColor =
-        when (trade.type) {
-            TransactionType.BUY -> gainColor
-            TransactionType.SELL -> lossColor
-            TransactionType.DIVIDEND -> Gold
-        }
+private fun TradeDatum(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    valueColor: Color = TextSecondary,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(text = label, color = TextMuted, fontSize = 9.sp, maxLines = 1)
+        Text(
+            text = value,
+            color = valueColor,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = FontFamily.Monospace,
+            maxLines = 1,
+        )
+    }
+}
 
-    Row(
+@Composable
+private fun TradeDatumDivider() {
+    Box(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column {
-            Text(
-                text = typeLabel,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = typeColor,
-            )
-            Text(
-                text = trade.tradeDate.formatLocalizedDate(),
-                fontSize = 11.sp,
-                color = TextMuted,
-            )
-        }
-        if (trade.type == TransactionType.DIVIDEND) {
-            Text(
-                text = "+${trade.amount.formatLocalized()}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Monospace,
-                color = Gold,
-            )
-        } else {
-            Text(
-                text = stringResource(Res.string.trade_detail, trade.quantity.toInt(), trade.price.formatLocalized()),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Monospace,
-                color = TextPrimary,
-            )
-        }
-    }
+                .width(1.dp)
+                .height(28.dp)
+                .background(TextSecondary.copy(alpha = 0.1f)),
+    )
 }
