@@ -94,7 +94,6 @@ import gainful.feature.holdings.generated.resources.chart_trends
 import gainful.feature.holdings.generated.resources.chart_trends_5d
 import gainful.feature.holdings.generated.resources.chart_weekly
 import gainful.feature.holdings.generated.resources.cost
-import gainful.feature.holdings.generated.resources.current_price
 import gainful.feature.holdings.generated.resources.current_price_pnl
 import gainful.feature.holdings.generated.resources.dividend_badge
 import gainful.feature.holdings.generated.resources.dividend_income
@@ -104,7 +103,6 @@ import gainful.feature.holdings.generated.resources.execution_price
 import gainful.feature.holdings.generated.resources.high_price
 import gainful.feature.holdings.generated.resources.holding_badge
 import gainful.feature.holdings.generated.resources.holding_quantity
-import gainful.feature.holdings.generated.resources.income_total
 import gainful.feature.holdings.generated.resources.loading_hint
 import gainful.feature.holdings.generated.resources.loading_quote
 import gainful.feature.holdings.generated.resources.low_price
@@ -113,6 +111,7 @@ import gainful.feature.holdings.generated.resources.minutes_suffix
 import gainful.feature.holdings.generated.resources.no_data
 import gainful.feature.holdings.generated.resources.no_trade_records
 import gainful.feature.holdings.generated.resources.open_price
+import gainful.feature.holdings.generated.resources.price_change_percent
 import gainful.feature.holdings.generated.resources.price_difference_per_share
 import gainful.feature.holdings.generated.resources.profit_loss
 import gainful.feature.holdings.generated.resources.recent_trades
@@ -716,6 +715,12 @@ private fun TradeItem(
             TransactionType.SELL -> trade.price - currentPrice
             TransactionType.DIVIDEND -> 0.0
         }
+    val priceChangePercent =
+        if (trade.price > 0) {
+            (currentPrice - trade.price) / trade.price * 100
+        } else {
+            0.0
+        }
 
     Box(
         modifier =
@@ -797,18 +802,11 @@ private fun TradeItem(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(TextSecondary.copy(alpha = 0.12f)))
-            Spacer(modifier = Modifier.height(10.dp))
+            if (!isDividend) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(TextSecondary.copy(alpha = 0.12f)))
+                Spacer(modifier = Modifier.height(10.dp))
 
-            if (isDividend) {
-                TradeDatum(
-                    label = stringResource(Res.string.income_total),
-                    value = trade.amount.formatSigned(),
-                    valueColor = Gold,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            } else {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     TradeDatum(
                         label = stringResource(Res.string.execution_price),
@@ -817,8 +815,9 @@ private fun TradeItem(
                     )
                     TradeDatumDivider()
                     TradeDatum(
-                        label = stringResource(Res.string.current_price),
-                        value = "¥${currentPrice.formatLocalized()}",
+                        label = stringResource(Res.string.price_change_percent),
+                        value = "${priceChangePercent.formatSigned()}%",
+                        valueColor = if (priceChangePercent >= 0) gainColor else lossColor,
                         modifier = Modifier.weight(1f).padding(start = 9.dp),
                     )
                     TradeDatumDivider()
