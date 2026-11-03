@@ -49,10 +49,9 @@
     <string name="current_price_pnl">Current-price P&amp;L</string>
     <string name="dividend_income">Dividend income</string>
     <string name="execution_price">Execution price</string>
-    <string name="current_price">Current price</string>
+    <string name="price_change_percent">Price change</string>
     <string name="price_difference_per_share">Difference / share</string>
     <string name="avoided_loss_per_share">Avoided loss / share</string>
-    <string name="income_total">Income total</string>
     <string name="quantity_unit">shares</string>
     <string name="closed_positions">Closed</string>
     <string name="liquidation_price">Close Price</string>
