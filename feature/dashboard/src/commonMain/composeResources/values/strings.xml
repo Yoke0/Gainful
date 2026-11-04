@@ -9,11 +9,6 @@
     <string name="holdings_trend">持仓走势</string>
     <string name="today_badge">今日</string>
     <string name="no_trend_data">暂无走势数据</string>
-    <string name="key_metrics">关键指标</string>
-    <string name="total_assets">总市值</string>
-    <string name="total_cost">总成本</string>
-    <string name="total_profit">总收益</string>
-    <string name="profit_rate">收益率</string>
     <string name="holdings_overview">持仓概览</string>
     <string name="holdings_count">%1$d 个标的</string>
     <string name="holdings_overflow">还有 %1$d 个标的…</string>

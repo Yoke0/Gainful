@@ -162,8 +162,8 @@ pnl      = tradePnl - fee
 
 ```
 totalMarketValue = SUM(holding.totalMarketValue)
-totalCost        = SUM(holding.totalCost)
-totalGain        = -totalBuys + totalSells + totalDividends + totalMarketValue
+totalCost        = totalBuys - totalSells - totalDividends
+totalGain        = totalMarketValue - totalCost
 totalGainPercent = (totalGain / totalBuys) × 100              // when totalBuys > 0
 ```
 

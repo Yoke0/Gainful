@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -88,7 +87,6 @@ import gainful.feature.dashboard.generated.resources.holdings_overflow
 import gainful.feature.dashboard.generated.resources.holdings_overview
 import gainful.feature.dashboard.generated.resources.holdings_quantity_label
 import gainful.feature.dashboard.generated.resources.holdings_trend
-import gainful.feature.dashboard.generated.resources.key_metrics
 import gainful.feature.dashboard.generated.resources.load_failed
 import gainful.feature.dashboard.generated.resources.no_transactions
 import gainful.feature.dashboard.generated.resources.no_trend_data
@@ -105,16 +103,12 @@ import gainful.feature.dashboard.generated.resources.pnl_year_cell_first_label
 import gainful.feature.dashboard.generated.resources.pnl_year_cell_label
 import gainful.feature.dashboard.generated.resources.pnl_year_label
 import gainful.feature.dashboard.generated.resources.pnl_year_month_label
-import gainful.feature.dashboard.generated.resources.profit_rate
 import gainful.feature.dashboard.generated.resources.syncing_badge
 import gainful.feature.dashboard.generated.resources.today_badge
-import gainful.feature.dashboard.generated.resources.total_assets
-import gainful.feature.dashboard.generated.resources.total_cost
 import gainful.feature.dashboard.generated.resources.total_cost_label
 import gainful.feature.dashboard.generated.resources.total_market_value_label
 import gainful.feature.dashboard.generated.resources.total_pnl
 import gainful.feature.dashboard.generated.resources.total_pnl_label
-import gainful.feature.dashboard.generated.resources.total_profit
 import gainful.feature.dashboard.generated.resources.weekday_fri
 import gainful.feature.dashboard.generated.resources.weekday_mon
 import gainful.feature.dashboard.generated.resources.weekday_sat
@@ -208,10 +202,6 @@ private fun DashboardScreen(
 
             item {
                 ChartCard(uiState.holdings)
-            }
-
-            item {
-                MetricsSection(uiState)
             }
 
             item {
@@ -885,77 +875,6 @@ private fun ChartCard(holdings: List<HoldingDisplay>) {
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun MetricsSection(state: DashboardUiState) {
-    val totalValue = state.totalMarketValue
-    val totalCost = state.totalCost
-    val totalGain = state.totalGain
-    val totalGainPercent = state.totalGainPercent
-
-    SectionCard(title = stringResource(Res.string.key_metrics)) {
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            maxItemsInEachRow = 2,
-        ) {
-            MetricCard(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.total_assets),
-                value = totalValue.formatLocalized(),
-            )
-            MetricCard(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.total_cost),
-                value = totalCost.formatLocalized(),
-            )
-            MetricCard(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.total_profit),
-                value = totalGain.formatSigned(),
-                valueColor = if (totalGain >= 0) gainColor else lossColor,
-            )
-            MetricCard(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.profit_rate),
-                value = totalGainPercent.formatSigned() + "%",
-                valueColor = if (totalGainPercent >= 0) gainColor else lossColor,
-            )
-        }
-    }
-}
-
-@Composable
-private fun MetricCard(
-    modifier: Modifier = Modifier,
-    label: String,
-    value: String,
-    valueColor: Color = TextPrimary,
-) {
-    Column(
-        modifier =
-            modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(Surface)
-                .padding(16.dp),
-    ) {
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextMuted,
-            letterSpacing = 0.4.sp,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = valueColor,
-        )
     }
 }
 
