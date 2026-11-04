@@ -16,5 +16,8 @@ kotlin {
             implementation(projects.core.sync)
             implementation(projects.core.widget)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

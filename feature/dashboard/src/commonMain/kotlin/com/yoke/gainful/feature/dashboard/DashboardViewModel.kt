@@ -382,8 +382,8 @@ data class DashboardUiState(
     val isNonTradingDay: Boolean = false,
 ) {
     val totalMarketValue: Double get() = holdings.sumOf { it.totalMarketValue }
-    val totalCost: Double get() = holdings.sumOf { it.totalCost }
-    val totalGain: Double get() = -totalBuys + totalSells + totalDividends + totalMarketValue
+    val totalCost: Double get() = totalBuys - totalSells - totalDividends
+    val totalGain: Double get() = totalMarketValue - totalCost
     val totalGainPercent: Double
         get() = if (totalBuys > 0) (totalGain / totalBuys) * 100 else 0.0
 
