@@ -289,6 +289,13 @@ private fun HoldingCard(
                     fontFamily = FontFamily.Monospace,
                     color = if (isPositive) gainColor else lossColor,
                 )
+                Text(
+                    text = holding.changePercent.formatSigned() + "%",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = FontFamily.Monospace,
+                    color = if (isPositive) gainColor else lossColor,
+                )
             }
 
             Spacer(modifier = Modifier.height(6.dp))
